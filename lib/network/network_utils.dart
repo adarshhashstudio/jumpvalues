@@ -9,20 +9,20 @@ import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/utils.dart';
 import 'package:nb_utils/nb_utils.dart'; // Add a prefix for dio
 
-enum HttpMethodType { GET, POST, PUT, PATCH, DELETE }
+enum HttpMethodType { get, post, put, patch, delete }
 
 extension HttpMethodTypeExtension on HttpMethodType {
   String get name {
     switch (this) {
-      case HttpMethodType.GET:
+      case HttpMethodType.get:
         return 'GET';
-      case HttpMethodType.POST:
+      case HttpMethodType.post:
         return 'POST';
-      case HttpMethodType.PUT:
+      case HttpMethodType.put:
         return 'PUT';
-      case HttpMethodType.PATCH:
+      case HttpMethodType.patch:
         return 'PATCH';
-      case HttpMethodType.DELETE:
+      case HttpMethodType.delete:
         return 'DELETE';
       default:
         return '';
@@ -31,24 +31,24 @@ extension HttpMethodTypeExtension on HttpMethodType {
 }
 
 Uri buildBaseUrl(String endPoint) {
-  Uri url = Uri.parse(endPoint);
-  if (!endPoint.startsWith('http')) url = Uri.parse('$BASE_URL$endPoint');
+  var url = Uri.parse(endPoint);
+  if (!endPoint.startsWith('http')) url = Uri.parse('$baseUrl$endPoint');
 
-  print('URL: ${url.toString()}');
+  debugPrint('URL: ${url.toString()}');
 
   return url;
 }
 
 Future<dio.Response<dynamic>> buildHttpResponse(
   String endPoint, {
-  HttpMethodType method = HttpMethodType.GET,
+  HttpMethodType method = HttpMethodType.get,
   Map<String, dynamic>? request,
   Map<String, dynamic>? extraKeys,
   bool isAuth = false,
   bool isJsonEncode = false,
 }) async {
   if (await isNetworkAvailable()) {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('token');
     Map<String, dynamic>? headerReq;
     if (token != null) {
@@ -57,12 +57,12 @@ Future<dio.Response<dynamic>> buildHttpResponse(
       headerReq = null;
     }
     var headers = buildHeaderTokens(extraKeys: isAuth ? headerReq : {});
-    Uri url = buildBaseUrl(endPoint);
+    var url = buildBaseUrl(endPoint);
 
     late Response response;
 
     try {
-      Dio dio = Dio();
+      var dio = Dio();
       response = await dio.request(
         url.toString(),
         data: request,
@@ -94,11 +94,11 @@ Future<dio.Response<dynamic>> buildHttpResponse(
       }
     }
 
-    apiPrint(
+    apidebugPrint(
       url: url.toString(),
       endPoint: endPoint,
       headers: jsonEncode(headers),
-      hasRequest: method == HttpMethodType.POST || method == HttpMethodType.PUT,
+      hasRequest: method == HttpMethodType.post || method == HttpMethodType.put,
       request: jsonEncode(request),
       statusCode: response.statusCode!,
       responseBody: jsonEncode(response.data),
@@ -139,33 +139,33 @@ Future handleResponse(dio.Response response,
   }
 }
 
-void apiPrint({
-  String url = "",
-  String endPoint = "",
-  String headers = "",
-  String request = "",
+void apidebugPrint({
+  String url = '',
+  String endPoint = '',
+  String headers = '',
+  String request = '',
   int statusCode = 0,
-  String responseBody = "",
-  String methodtype = "",
+  String responseBody = '',
+  String methodtype = '',
   bool hasRequest = false,
 }) {
   debugPrint(
-      "┌───────────────────────────────────────────────────────────────────────────────────────────────────────");
-  debugPrint("\u001b[93m Url: \u001B[39m $url");
-  debugPrint("\u001b[93m endPoint: \u001B[39m \u001B[1m$endPoint\u001B[22m");
-  debugPrint("\u001b[93m header: \u001B[39m \u001b[96m$headers\u001B[39m");
-  debugPrint("\u001b[93m Request: \u001B[39m \u001b[96m$request\u001B[39m");
-  debugPrint(statusCode == 200 ? "\u001b[32m" : "\u001b[31m");
+      '┌───────────────────────────────────────────────────────────────────────────────────────────────────────');
+  debugPrint('\u001b[93m Url: \u001B[39m $url');
+  debugPrint('\u001b[93m endPoint: \u001B[39m \u001B[1m$endPoint\u001B[22m');
+  debugPrint('\u001b[93m header: \u001B[39m \u001b[96m$headers\u001B[39m');
+  debugPrint('\u001b[93m Request: \u001B[39m \u001b[96m$request\u001B[39m');
+  debugPrint(statusCode == 200 ? '\u001b[32m' : '\u001b[31m');
   debugPrint('Response ($methodtype) $statusCode: $responseBody');
-  debugPrint("\u001B[0m");
+  debugPrint('\u001B[0m');
   debugPrint(
-      "└───────────────────────────────────────────────────────────────────────────────────────────────────────");
+      '└───────────────────────────────────────────────────────────────────────────────────────────────────────');
 }
 
 Map<String, String> buildHeaderTokens({
   Map<String, dynamic>? extraKeys,
 }) {
-  Map<String, String> header = {};
+  var header = <String, String>{};
   header.putIfAbsent(HttpHeaders.cacheControlHeader, () => 'no-cache');
   header.putIfAbsent('Access-Control-Allow-Headers', () => '');
   header.putIfAbsent('Access-Control-Allow-Origin', () => '');
@@ -176,7 +176,7 @@ Map<String, String> buildHeaderTokens({
     });
   }
 
-  print(jsonEncode(header));
+  debugPrint(jsonEncode(header));
   return header;
 }
 
@@ -185,15 +185,15 @@ Future<dio.Response<dynamic>> uploadImage(Uri url, File imageFile,
   late dio.Response<dynamic> response;
 
   try {
-    Dio dio = Dio();
-    FormData formData = FormData.fromMap({
+    var dio = Dio();
+    var formData = FormData.fromMap({
       'profile_pic': await MultipartFile.fromFile(
         imageFile.path,
         filename: imageFile.path.split('/').last,
       ),
     });
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('token');
     if (isAuth && token != null) {
       dio.options.headers['Authorization'] = 'Bearer $token';
@@ -213,7 +213,7 @@ Future<dio.Response<dynamic>> uploadImage(Uri url, File imageFile,
     );
   }
 
-  apiPrint(
+  apidebugPrint(
     url: url.toString(),
     hasRequest: true,
     headers: response.requestOptions.headers.toString(),

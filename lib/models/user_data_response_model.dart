@@ -1,10 +1,6 @@
 class UserDataResponseModel {
-  int? statusCode;
-  String? responseCode;
-  String? message;
-  UserData? data;
-
-  UserDataResponseModel({this.statusCode, this.responseCode, this.message, this.data});
+  UserDataResponseModel(
+      {this.statusCode, this.responseCode, this.message, this.data});
 
   UserDataResponseModel.fromJson(Map<String, dynamic> json) {
     statusCode = json['statusCode'];
@@ -12,25 +8,13 @@ class UserDataResponseModel {
     message = json['message'];
     data = json['data'] != null ? UserData.fromJson(json['data']) : null;
   }
+  int? statusCode;
+  String? responseCode;
+  String? message;
+  UserData? data;
 }
 
 class UserData {
-  int? id;
-  String? firstName;
-  String? lastName;
-  String? email;
-  String? company;
-  String? profilePic;
-  String? positions;
-  String? aboutMe;
-  bool? termsAndConditions;
-  String? status;
-  String? otp;
-  String? createdAt;
-  String? updatedAt;
-  List<UserRole>? roles;
-  List<ComprensiveListing>? comprensiveListings;
-
   UserData({
     this.id,
     this.firstName,
@@ -76,16 +60,26 @@ class UserData {
       });
     }
   }
+  int? id;
+  String? firstName;
+  String? lastName;
+  String? email;
+  String? company;
+  String? profilePic;
+  String? positions;
+  String? aboutMe;
+  bool? termsAndConditions;
+  String? status;
+  String? otp;
+  String? createdAt;
+  String? updatedAt;
+  List<UserRole>? roles;
+  List<ComprensiveListing>? comprensiveListings;
 }
 
 class UserRole {
-  int? id;
-  String? name;
-  String? description;
-  String? createdAt;
-  String? updatedAt;
-
-  UserRole({this.id, this.name, this.description, this.createdAt, this.updatedAt});
+  UserRole(
+      {this.id, this.name, this.description, this.createdAt, this.updatedAt});
 
   UserRole.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -94,14 +88,14 @@ class UserRole {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
   }
+  int? id;
+  String? name;
+  String? description;
+  String? createdAt;
+  String? updatedAt;
 }
 
 class ComprensiveListing {
-  int? id;
-  String? name;
-  String? createdAt;
-  String? updatedAt;
-
   ComprensiveListing({this.id, this.name, this.createdAt, this.updatedAt});
 
   ComprensiveListing.fromJson(Map<String, dynamic> json) {
@@ -110,4 +104,8 @@ class ComprensiveListing {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
   }
+  int? id;
+  String? name;
+  String? createdAt;
+  String? updatedAt;
 }

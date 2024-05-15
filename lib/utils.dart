@@ -5,13 +5,17 @@ import 'package:nb_utils/nb_utils.dart';
 enum StatusIndicator { warning, error, success }
 
 Color successColor = const Color(0xFF73C322);
-
 Color errorColor = const Color(0xFFD4111B);
-
 Color warningColor = const Color(0xFFFFAB1A);
-// deployed 'http://65.1.131.75:3333';
-const DOMAIN_URL = 'http://192.168.1.166:8080';
-const BASE_URL = "$DOMAIN_URL/";
+
+const domainUrl = 'http://18.209.192.96:8080'; // 'http://13.234.173.125:6060';
+const baseUrl = '$domainUrl/';
+const webViewUrl = 'http://18.209.192.96/pages/';
+
+const aboutUsUrl = '${webViewUrl}about-us.html';
+const contactUsUrl = '${webViewUrl}contact-us.html';
+const termsAndPrivacyUrl = '${webViewUrl}privacy.html';
+const learnSectionUrl = '${webViewUrl}our-values.html';
 
 String? validateEmail(String email) {
   if (RegExp(
@@ -26,22 +30,22 @@ String? validateEmail(String email) {
 String? passwordValidate(String password) {
   // Check if password length is more than 6 characters
   if (password.length <= 8) {
-    return "Password should be atleast of 8 characters";
+    return 'Password should be atleast of 8 characters';
   }
 
   // Check if password contains at least one capital letter
   if (!password.contains(RegExp(r'[A-Z]'))) {
-    return "Password must contain at least one capital letter";
+    return 'Password must contain at least one capital letter';
   }
 
   // Check if password contains at least one digit
   if (!password.contains(RegExp(r'[0-9]'))) {
-    return "Password must contain at least one digit";
+    return 'Password must contain at least one digit';
   }
 
   // Check if password contains at least one special character
   if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
-    return "Password must contain at least one special character";
+    return 'Password must contain at least one special character';
   }
 
   // Password meets all criteria
@@ -82,17 +86,17 @@ class SnackBarHelper {
 }
 
 void isTokenAvailable(BuildContext context) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var prefs = await SharedPreferences.getInstance();
   var token = prefs.getString('token');
   if (token == null) {
-    Navigator.of(context).pushAndRemoveUntil(
+    await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const WelcomeScreen()),
         (Route<dynamic> route) => false);
   }
 }
 
 void tokenExpired(BuildContext context) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  prefs.clear();
+  var prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
   isTokenAvailable(context);
 }

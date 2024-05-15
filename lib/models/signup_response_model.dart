@@ -1,14 +1,10 @@
 class SignupResponseModel {
-  int? statusCode;
-  String? responseCode;
-  String? message;
-  SignedUserData? data;
-
   SignupResponseModel({
     this.statusCode,
     this.responseCode,
     this.message,
     this.data,
+    this.error,
   });
 
   SignupResponseModel.fromJson(Map<String, dynamic> json) {
@@ -16,26 +12,16 @@ class SignupResponseModel {
     responseCode = json['responseCode'];
     message = json['message'];
     data = json['data'] != null ? SignedUserData.fromJson(json['data']) : null;
+    error = json['error'];
   }
+  int? statusCode;
+  String? responseCode;
+  String? message;
+  SignedUserData? data;
+  List<Error>? error;
 }
 
 class SignedUserData {
-  String? profilePic;
-  String? status;
-  int? otp;
-  bool? isVerified;
-  int? id;
-  String? firstName;
-  String? lastName;
-  String? email;
-  String? password;
-  String? company;
-  String? positions;
-  String? aboutMe;
-  bool? termsAndConditions;
-  DateTime? updatedAt;
-  DateTime? createdAt;
-
   SignedUserData({
     this.profilePic,
     this.status,
@@ -68,7 +54,36 @@ class SignedUserData {
     positions = json['positions'];
     aboutMe = json['aboutMe'];
     termsAndConditions = json['termsAndConditions'];
-    updatedAt = json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null;
-    createdAt = json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null;
+    updatedAt =
+        json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null;
+    createdAt =
+        json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null;
   }
+  String? profilePic;
+  String? status;
+  int? otp;
+  bool? isVerified;
+  int? id;
+  String? firstName;
+  String? lastName;
+  String? email;
+  String? password;
+  String? company;
+  String? positions;
+  String? aboutMe;
+  bool? termsAndConditions;
+  DateTime? updatedAt;
+  DateTime? createdAt;
+}
+
+class Error {
+
+  Error({this.field, this.message});
+
+  Error.fromJson(Map<String, dynamic> json) {
+    field = json['field'];
+    message = json['message'];
+  }
+  String? field;
+  String? message;
 }

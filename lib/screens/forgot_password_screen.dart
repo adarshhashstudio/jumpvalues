@@ -57,7 +57,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (response?.statusCode == 200) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Successfully Sent to mail.');
-        Navigator.of(context).push(MaterialPageRoute(
+        await Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => OtpScreen(
                   email: emailController?.text ?? '',
                   isFrom: 'forgotPassword',
@@ -77,8 +77,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () {
@@ -177,5 +176,4 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
       ),
     );
-  }
 }

@@ -1,4 +1,4 @@
-package com.example.jumpvalues
+package com.jumpccc.jumpvalues
 
 import io.flutter.embedding.android.FlutterActivity
 

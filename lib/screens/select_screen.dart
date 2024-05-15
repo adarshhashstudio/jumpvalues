@@ -66,13 +66,13 @@ class _SelectScreenState extends State<SelectScreen> {
     setState(() {
       loader = true;
     });
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var prefs = await SharedPreferences.getInstance();
     try {
-      Map<String, dynamic> request = {
+      var request = <String, dynamic>{
         'userId': prefs.getString('userId'),
       };
 
-      List<String> comprensiveListingIds = [];
+      var comprensiveListingIds = <String>[];
 
       for (var element in selectedTones) {
         comprensiveListingIds.add('${element.id}');
@@ -104,7 +104,7 @@ class _SelectScreenState extends State<SelectScreen> {
     setState(() {
       loader = true;
     });
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var prefs = await SharedPreferences.getInstance();
     try {
       var response = await getUserDetails(prefs.getString('userId') ?? '0');
       if (response?.statusCode == 200) {
@@ -115,19 +115,18 @@ class _SelectScreenState extends State<SelectScreen> {
           // Clear selectedTones before adding new values
           selectedTones.clear();
           // Convert List<ComprensiveListing> to Set<ComprehensiveValues>
-          Set<ComprehensiveValues> convertedValues =
-              userData!.data!.comprensiveListings!
-                  .map((listing) => ComprehensiveValues(
-                        id: listing.id,
-                        name: listing.name,
-                        createdAt: listing.createdAt,
-                        updatedAt: listing.updatedAt,
-                      ))
-                  .toSet();
+          var convertedValues = userData!.data!.comprensiveListings!
+              .map((listing) => ComprehensiveValues(
+                    id: listing.id,
+                    name: listing.name,
+                    createdAt: listing.createdAt,
+                    updatedAt: listing.updatedAt,
+                  ))
+              .toSet();
           // Add converted values to selectedTones
           selectedTones.addAll(convertedValues);
         }
-        debugPrint('Selected Tones values: ${selectedTones}');
+        debugPrint('Selected Tones values: $selectedTones');
         setState(() {});
       } else {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
@@ -146,8 +145,8 @@ class _SelectScreenState extends State<SelectScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<ComprehensiveValues> selectedTonesList = [];
-    List<ComprehensiveValues> unselectedTonesList = [];
+    var selectedTonesList = <ComprehensiveValues>[];
+    var unselectedTonesList = <ComprehensiveValues>[];
 
     // Split toneList into selected and unselected tones
     for (var tone in toneList) {
@@ -202,7 +201,7 @@ class _SelectScreenState extends State<SelectScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 2),
                       decoration: BoxDecoration(
-                          color: Color(0xFF43A146),
+                          color: const Color(0xFF43A146),
                           border: Border.all(width: 0.05),
                           borderRadius: BorderRadius.circular(12)),
                       child: Text(
@@ -389,7 +388,7 @@ class _SelectScreenState extends State<SelectScreen> {
       double? spaceBelowTitle,
       List<Widget> children = const <Widget>[],
       bool isError = false}) {
-    List<Widget> displayChildren = [];
+    var displayChildren = <Widget>[];
     if (children.length <= 3) {
       displayChildren.addAll(children);
     } else {
@@ -439,48 +438,45 @@ class _SelectScreenState extends State<SelectScreen> {
   }
 
 // Function to build the button to show all selected values
-  Widget _buildShowAllButton(BuildContext context, List<Widget> children) {
-    return InkWell(
-      onTap: () {
-        _showAllSelectedValues(context, children);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-        decoration: BoxDecoration(
-          color: Color(0xFF43A146),
-          border: Border.all(width: 0.05),
-          borderRadius: BorderRadius.circular(12),
+  Widget _buildShowAllButton(BuildContext context, List<Widget> children) =>
+      InkWell(
+        onTap: () {
+          _showAllSelectedValues(context, children);
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+          decoration: BoxDecoration(
+            color: const Color(0xFF43A146),
+            border: Border.all(width: 0.05),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            '+${children.length - 3} more',
+            style: const TextStyle(color: white),
+          ),
         ),
-        child: Text(
-          "+${children.length - 3} more",
-          style: const TextStyle(color: white),
-        ),
-      ),
-    );
-  }
+      );
 
 // Function to show all selected values when the button is clicked
   void _showAllSelectedValues(BuildContext context, List<Widget> children) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Selected Values"),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: children,
-            ),
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Selected Values'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: children,
           ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Close'),
-            ),
-          ],
-        );
-      },
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Close'),
+          ),
+        ],
+      ),
     );
   }
 }

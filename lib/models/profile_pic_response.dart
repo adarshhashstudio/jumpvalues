@@ -1,9 +1,4 @@
 class ProfilePictureResponse {
-  int? statusCode;
-  String? responseCode;
-  String? message;
-  String? data;
-
   ProfilePictureResponse({
     this.statusCode,
     this.responseCode,
@@ -11,14 +6,17 @@ class ProfilePictureResponse {
     this.data,
   });
 
-  factory ProfilePictureResponse.fromJson(Map<String, dynamic> json) {
-    return ProfilePictureResponse(
-      statusCode: json['statusCode'],
-      responseCode: json['responseCode'],
-      message: json['message'],
-      data: json['data'],
-    );
-  }
+  factory ProfilePictureResponse.fromJson(Map<String, dynamic> json) =>
+      ProfilePictureResponse(
+        statusCode: json['statusCode'],
+        responseCode: json['responseCode'],
+        message: json['message'],
+        data: json['data'],
+      );
+  int? statusCode;
+  String? responseCode;
+  String? message;
+  String? data;
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};

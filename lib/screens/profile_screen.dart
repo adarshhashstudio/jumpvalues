@@ -56,9 +56,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       loader = true;
     });
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var prefs = await SharedPreferences.getInstance();
     try {
-      Map<String, dynamic> req = {
+      var req = <String, dynamic>{
         'firstName': firstNameController?.text ?? prefs.getString('firstName'),
         'lastName': lastNameController?.text ?? prefs.getString('lastName'),
         'company': companyController?.text ?? prefs.getString('company'),
@@ -69,7 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       var response = await updateUserProfile(req, userId ?? 'id');
 
       if (response?.statusCode == 200) {
-        setUserData();
+        await setUserData();
 
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Profile Updated Successfully.');
@@ -90,40 +90,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void showLogoutConfirmationDialog(BuildContext context) {
+  void showLogoutConfirmationDialog(BuildContext profileContext) {
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Are you sure?"),
-          content: const Text("You want to logout now?"),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Call the code to clear the token and navigate to WelcomeScreen
-                logoutAndNavigateToWelcomeScreen(context);
-              },
-              child: const Text("Logout"),
-            ),
-          ],
-        );
-      },
+      context: profileContext,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Are you sure?'),
+        content: const Text('You want to logout now?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              isTokenAvailable(context);
+              // Call the code to clear the token and navigate to WelcomeScreen
+              logoutAndNavigateToWelcomeScreen(profileContext);
+            },
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
     );
   }
 
-  void logoutAndNavigateToWelcomeScreen(BuildContext context) async {
+  void logoutAndNavigateToWelcomeScreen(BuildContext profileContext) async {
     setState(() {
       loader = true;
     });
     // Clear token and other data from SharedPreferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var prefs = await SharedPreferences.getInstance();
     try {
       var response = await logoutUser();
       if (response?.statusCode == 200) {
@@ -134,8 +133,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         await prefs.remove('token'); // Remove token
         await prefs.clear();
 
-        // Navigate to WelcomeScreen
-        Navigator.of(context).pushAndRemoveUntil(
+        // // Navigate to WelcomeScreen
+        await Navigator.of(profileContext).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const WelcomeScreen()),
             (Route<dynamic> route) => false);
       } else if (response?.statusCode == 403) {
@@ -153,12 +152,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         loader = false;
       });
-      throw '$e';
+      rethrow;
     }
   }
 
   Future<void> loadUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var prefs = await SharedPreferences.getInstance();
     firstNameController =
         TextEditingController(text: prefs.getString('firstName') ?? '');
     lastNameController =
@@ -178,11 +177,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       profilePic = prefs.getString('profilePic');
     });
 
-    debugPrint('Profile Pic: http://192.168.1.166:8080/$profilePic');
+    debugPrint('Profile Pic: $baseUrl$profilePic');
   }
 
   Future<void> setUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var prefs = await SharedPreferences.getInstance();
     await prefs.setString('firstName', firstNameController?.text ?? '');
     await prefs.setString('lastName', lastNameController?.text ?? '');
     await prefs.setString('company', companyController?.text ?? '');
@@ -221,50 +220,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future showOptions() async {
-    showDialog(
+    await showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Choose an option'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              InkWell(
-                onTap: () async {
-                  // close the dialog
-                  Navigator.of(context).pop();
-                  // get image from gallery
-                  await getImageFromGallery().then((value) async {
-                    if (_image != null) {
-                      await uploadProfilePic();
-                    } else {}
-                  });
-                },
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                  child: Text('Photo Gallery'),
-                ),
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Choose an option'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InkWell(
+              onTap: () async {
+                // close the dialog
+                Navigator.of(context).pop();
+                // get image from gallery
+                await getImageFromGallery().then((value) async {
+                  if (_image != null) {
+                    await uploadProfilePic();
+                  } else {}
+                });
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: Text('Photo Gallery'),
               ),
-              InkWell(
-                onTap: () async {
-                  // close the dialog
-                  Navigator.of(context).pop();
-                  // get image from camera
-                  await getImageFromCamera().then((value) async {
-                    if (_image != null) {
-                      await uploadProfilePic();
-                    } else {}
-                  });
-                },
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                  child: Text('Camera'),
-                ),
+            ),
+            InkWell(
+              onTap: () async {
+                // close the dialog
+                Navigator.of(context).pop();
+                // get image from camera
+                await getImageFromCamera().then((value) async {
+                  if (_image != null) {
+                    await uploadProfilePic();
+                  } else {}
+                });
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: Text('Camera'),
               ),
-            ],
-          ),
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -272,11 +269,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       loader = true;
     });
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var prefs = await SharedPreferences.getInstance();
     try {
       var userId = prefs.getString('userId');
       if (userId == null) {
-        throw Exception("User ID not found.");
+        throw Exception('User ID not found.');
       }
 
       var response = await updateUserProfilePic(
@@ -316,7 +313,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       loader = true;
     });
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var prefs = await SharedPreferences.getInstance();
     try {
       var response = await getUserDetails(prefs.getString('userId') ?? '0');
       if (response?.statusCode == 200) {
@@ -340,418 +337,420 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4.0),
-          child: Container(
-            color: Colors.grey,
-            height: 0.5,
-          ),
-        ),
-        leading: GestureDetector(
-          onTap: () {
-            if (loader) {
-            } else {
-              Navigator.of(context).pop();
-            }
-          },
-          child: const Padding(
-            padding: EdgeInsets.only(left: 14.0),
-            child: Icon(Icons.arrow_back_ios_new),
-          ),
-        ),
-        centerTitle: true,
-        title: Text(
-          'My Profile',
-          style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: textColor.withOpacity(0.8),
-              fontSize: 20),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: GestureDetector(
-              onTap: () {
-                if (loader) {
-                } else {
-                  showLogoutConfirmationDialog(context);
-                }
-              },
-              child: const Icon(Icons.logout),
+  Widget build(BuildContext context) => Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(4.0),
+            child: Container(
+              color: Colors.grey,
+              height: 0.5,
             ),
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: SafeArea(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(20.0),
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withOpacity(0.2),
-                            child: Row(
-                              children: [
-                                Stack(
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        showOptions();
-                                      },
-                                      child: Container(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.2,
+          leading: GestureDetector(
+            onTap: () {
+              if (loader) {
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
+            child: const Padding(
+              padding: EdgeInsets.only(left: 14.0),
+              child: Icon(Icons.arrow_back_ios_new),
+            ),
+          ),
+          centerTitle: true,
+          title: Text(
+            'My Profile',
+            style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: textColor.withOpacity(0.8),
+                fontSize: 20),
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: GestureDetector(
+                onTap: () {
+                  if (loader) {
+                  } else {
+                    showLogoutConfirmationDialog(context);
+                  }
+                },
+                child: const Icon(Icons.logout),
+              ),
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: SafeArea(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(20.0),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.2),
+                              child: Row(
+                                children: [
+                                  Stack(
+                                    children: [
+                                      GestureDetector(
+                                        onTap: showOptions,
+                                        child: Container(
+                                          width: 80,
+                                          height: 80,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.withOpacity(0.2),
+                                            border: Border.all(
+                                                width: 1,
+                                                color: Colors.grey.shade300),
+                                            borderRadius:
+                                                BorderRadius.circular(360),
+                                          ),
+                                          child: profilePic != null
+                                              ? ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          360),
+                                                  child: CachedNetworkImage(
+                                                    imageUrl:
+                                                        '$baseUrl$profilePic',
+                                                    fit: BoxFit.cover,
+                                                    placeholder: (context, _) =>
+                                                        Center(
+                                                      child: Icon(
+                                                        Icons.person,
+                                                        size: 40,
+                                                        color: Colors
+                                                            .grey.shade400,
+                                                      ),
+                                                    ),
+                                                    errorWidget:
+                                                        (context, url, error) =>
+                                                            Center(
+                                                      child: Icon(
+                                                        Icons.person,
+                                                        size: 40,
+                                                        color: Colors
+                                                            .grey.shade400,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
+                                              : _image != null
+                                                  ? ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              360),
+                                                      child: Image.file(
+                                                        _image ?? File(''),
+                                                        fit: BoxFit.cover,
+                                                      ))
+                                                  : Center(
+                                                      child: Icon(
+                                                        Icons.person,
+                                                        size: 40,
+                                                        color: Colors
+                                                            .grey.shade400,
+                                                      ),
+                                                    ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        bottom: 0,
+                                        right: 5,
+                                        child: GestureDetector(
+                                          onTap: showOptions,
+                                          child: Image.asset(
+                                            editImage,
+                                            width: 20,
+                                            height: 20,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.08,
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        userName,
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(
                                         height:
                                             MediaQuery.of(context).size.height *
-                                                0.1,
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.withOpacity(0.2),
-                                          border: Border.all(
-                                              width: 1,
-                                              color: Colors.grey.shade300),
-                                          borderRadius:
-                                              BorderRadius.circular(360),
-                                        ),
-                                        child: profilePic != null
-                                            ? ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(360),
-                                                child: CachedNetworkImage(
-                                                  imageUrl:
-                                                      'http://192.168.1.166:8080/$profilePic',
-                                                  fit: BoxFit.cover,
-                                                  placeholder: (context, _) =>
-                                                      Center(
-                                                    child: Icon(
-                                                      Icons.person,
-                                                      size: 40,
-                                                      color:
-                                                          Colors.grey.shade400,
-                                                    ),
-                                                  ),
-                                                  errorWidget:
-                                                      (context, url, error) =>
-                                                          Center(
-                                                    child: Icon(
-                                                      Icons.person,
-                                                      size: 40,
-                                                      color:
-                                                          Colors.grey.shade400,
-                                                    ),
-                                                  ),
-                                                ),
-                                              )
-                                            : _image != null
-                                                ? ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            360),
-                                                    child: Image.file(
-                                                      _image ?? File(''),
-                                                      fit: BoxFit.cover,
-                                                    ))
-                                                : Center(
-                                                    child: Icon(
-                                                      Icons.person,
-                                                      size: 40,
-                                                      color:
-                                                          Colors.grey.shade400,
-                                                    ),
-                                                  ),
+                                                0.01,
                                       ),
-                                    ),
-                                    Positioned(
-                                      bottom: 0,
-                                      right: 5,
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          showOptions();
-                                        },
-                                        child: Image.asset(
-                                          'assets/images/edit.png',
-                                          width: 20,
-                                          height: 20,
-                                        ),
+                                      Text(
+                                        email,
+                                        style: const TextStyle(fontSize: 16),
                                       ),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.08,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Form(
+                                key: _formKey,
+                                autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
+                                child: Column(
                                   children: [
-                                    Text(
-                                      userName,
-                                      style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
+                                    Row(
+                                      children: [
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.42,
+                                          child: textFormField(
+                                              controller: firstNameController,
+                                              label: 'First Name',
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter
+                                                    .allow(RegExp('[a-zA-Z]'))
+                                              ],
+                                              onChanged: (value) {},
+                                              validator: (value) {
+                                                if (value != null &&
+                                                    value.isNotEmpty) {
+                                                  return null;
+                                                } else {
+                                                  return 'Required';
+                                                }
+                                              },
+                                              keyboardType: TextInputType.name,
+                                              hintText: 'Enter First Name',
+                                              textInputAction:
+                                                  TextInputAction.next),
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.04,
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.42,
+                                          child: textFormField(
+                                              controller: lastNameController,
+                                              label: 'Last Name',
+                                              onChanged: (value) {},
+                                              validator: (value) {
+                                                if (value != null &&
+                                                    value.isNotEmpty) {
+                                                  return null;
+                                                } else {
+                                                  return 'Required';
+                                                }
+                                              },
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter
+                                                    .allow(RegExp('[a-zA-Z]'))
+                                              ],
+                                              hintText: 'Enter Last Name',
+                                              textInputAction:
+                                                  TextInputAction.next),
+                                        ),
+                                      ],
                                     ),
                                     SizedBox(
                                       height:
                                           MediaQuery.of(context).size.height *
-                                              0.01,
+                                              0.02,
                                     ),
-                                    Text(
-                                      email,
-                                      style: const TextStyle(fontSize: 16),
+                                    textFormField(
+                                      controller: companyController,
+                                      label: 'Company',
+                                      onChanged: (value) {},
+                                      validator: (value) {
+                                        if (value != null && value.isNotEmpty) {
+                                          return null;
+                                        } else {
+                                          return 'Required';
+                                        }
+                                      },
+                                      keyboardType: TextInputType.name,
+                                      hintText: 'Enter Company Name',
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Form(
-                              key: _formKey,
-                              autovalidateMode:
-                                  AutovalidateMode.onUserInteraction,
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.42,
-                                        child: textFormField(
-                                            controller: firstNameController,
-                                            label: 'First Name',
-                                            inputFormatters: [
-                                              FilteringTextInputFormatter.allow(
-                                                  RegExp('[a-zA-Z]'))
-                                            ],
-                                            onChanged: (value) {},
-                                            validator: (value) {
-                                              if (value != null &&
-                                                  value.isNotEmpty) {
-                                                return null;
-                                              } else {
-                                                return 'Required';
-                                              }
-                                            },
-                                            keyboardType: TextInputType.name,
-                                            hintText: 'Enter First Name',
-                                            textInputAction:
-                                                TextInputAction.next),
-                                      ),
-                                      SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.04,
-                                      ),
-                                      SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.42,
-                                        child: textFormField(
-                                            controller: lastNameController,
-                                            label: 'Last Name',
-                                            onChanged: (value) {},
-                                            validator: (value) {
-                                              if (value != null &&
-                                                  value.isNotEmpty) {
-                                                return null;
-                                              } else {
-                                                return 'Required';
-                                              }
-                                            },
-                                            inputFormatters: [
-                                              FilteringTextInputFormatter.allow(
-                                                  RegExp('[a-zA-Z]'))
-                                            ],
-                                            hintText: 'Enter Last Name',
-                                            textInputAction:
-                                                TextInputAction.next),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.02,
-                                  ),
-                                  textFormField(
-                                    controller: companyController,
-                                    label: 'Company',
-                                    onChanged: (value) {},
-                                    validator: (value) {
-                                      if (value != null && value.isNotEmpty) {
-                                        return null;
-                                      } else {
-                                        return 'Required';
-                                      }
-                                    },
-                                    keyboardType: TextInputType.name,
-                                    hintText: 'Enter Company Name',
-                                  ),
-                                  SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.02,
-                                  ),
-                                  textFormField(
-                                    controller: positionController,
-                                    label: 'Position',
-                                    onChanged: (value) {},
-                                    validator: (value) {
-                                      if (value != null && value.isNotEmpty) {
-                                        return null;
-                                      } else {
-                                        return 'Required';
-                                      }
-                                    },
-                                    keyboardType: TextInputType.name,
-                                    hintText: 'Enter Position',
-                                  ),
-                                  SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.02,
-                                  ),
-                                  textFormField(
-                                    controller: aboutController,
-                                    label: 'About',
-                                    onChanged: (value) {},
-                                    validator: (value) {
-                                      if (value != null && value.isNotEmpty) {
-                                        return null;
-                                      } else {
-                                        return 'Required';
-                                      }
-                                    },
-                                    keyboardType: TextInputType.name,
-                                    hintText: 'Enter your bio',
-                                    maxLines: 3,
-                                  ),
-                                  SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.02,
-                                  ),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                          width: 0.5,
-                                          color: Colors.grey.shade300,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(12)),
-                                    child: ExpansionTile(
-                                      title: const Text('My Values'),
-                                      shape: RoundedRectangleBorder(
-                                          side: BorderSide(
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.02,
+                                    ),
+                                    textFormField(
+                                      controller: positionController,
+                                      label: 'Position',
+                                      onChanged: (value) {},
+                                      validator: (value) {
+                                        if (value != null && value.isNotEmpty) {
+                                          return null;
+                                        } else {
+                                          return 'Required';
+                                        }
+                                      },
+                                      keyboardType: TextInputType.name,
+                                      hintText: 'Enter Position',
+                                    ),
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.02,
+                                    ),
+                                    textFormField(
+                                      controller: aboutController,
+                                      label: 'About',
+                                      onChanged: (value) {},
+                                      validator: (value) {
+                                        if (value != null && value.isNotEmpty) {
+                                          return null;
+                                        } else {
+                                          return 'Required';
+                                        }
+                                      },
+                                      keyboardType: TextInputType.name,
+                                      hintText: 'Enter your bio',
+                                      maxLines: 3,
+                                    ),
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.02,
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
                                             width: 0.5,
                                             color: Colors.grey.shade300,
                                           ),
                                           borderRadius:
                                               BorderRadius.circular(12)),
-                                      tilePadding: const EdgeInsets.symmetric(
-                                          horizontal: 10),
-                                      children: [
-                                        (userData?.data?.comprensiveListings !=
-                                                null)
-                                            ? ListView.builder(
-                                                physics:
-                                                    const NeverScrollableScrollPhysics(),
-                                                shrinkWrap: true,
-                                                itemCount: userData
-                                                    ?.data
-                                                    ?.comprensiveListings
-                                                    ?.length,
-                                                itemBuilder: (context, index) =>
-                                                    ListTile(
-                                                  title: Text(
-                                                      '${index + 1}. ${userData?.data?.comprensiveListings?[index].name}'),
-                                                ),
-                                              )
-                                            : Text('No Values Selected'),
-                                      ],
+                                      child: ExpansionTile(
+                                        title: const Text('My Values'),
+                                        shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                              width: 0.5,
+                                              color: Colors.grey.shade300,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(12)),
+                                        tilePadding: const EdgeInsets.symmetric(
+                                            horizontal: 10),
+                                        children: [
+                                          (userData?.data
+                                                      ?.comprensiveListings !=
+                                                  null)
+                                              ? ListView.builder(
+                                                  physics:
+                                                      const NeverScrollableScrollPhysics(),
+                                                  shrinkWrap: true,
+                                                  itemCount: userData
+                                                      ?.data
+                                                      ?.comprensiveListings
+                                                      ?.length,
+                                                  itemBuilder:
+                                                      (context, index) =>
+                                                          ListTile(
+                                                    title: Text(
+                                                        '${index + 1}. ${userData?.data?.comprensiveListings?[index].name}'),
+                                                  ),
+                                                )
+                                              : const Text(
+                                                  'No Values Selected'),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: button(context, onPressed: () async {
-                          if (loader) {
-                          } else {
-                            await updateProfile();
-                          }
-                        }, text: 'Update Profile'),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.04,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const SelectScreen()));
-                        },
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.3,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Values',
-                                style: TextStyle(
-                                  fontSize: 16,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: button(context, onPressed: () async {
+                            if (loader) {
+                            } else {
+                              await updateProfile();
+                            }
+                          }, text: 'Update Profile'),
+                        ),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.04,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const SelectScreen()));
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Values',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.arrow_right,
+                                  size: 30,
                                   color: Colors.white,
                                 ),
-                              ),
-                              Icon(
-                                Icons.arrow_right,
-                                size: 30,
-                                color: Colors.white,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            if (loader)
-              Container(
-                  color: Colors.transparent,
-                  child: const Center(child: CircularProgressIndicator()))
-          ],
+                ],
+              ),
+              if (loader)
+                Container(
+                    color: Colors.transparent,
+                    child: const Center(child: CircularProgressIndicator()))
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 }

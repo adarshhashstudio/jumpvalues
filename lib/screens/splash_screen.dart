@@ -18,8 +18,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void checkTokenAndNavigate() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
+    var prefs = await SharedPreferences.getInstance();
+    var token = prefs.getString('token');
 
     if (token != null) {
       // Token exists, navigate to Dashboard
@@ -41,17 +41,15 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Image.asset(
-            'assets/images/blue_jump.png',
-            width: MediaQuery.of(context).size.width * 0.4,
-            height: MediaQuery.of(context).size.height * 0.2,
+  Widget build(BuildContext context) => Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: Image.asset(
+              'assets/images/blue_jump.png',
+              width: MediaQuery.of(context).size.width * 0.4,
+              height: MediaQuery.of(context).size.height * 0.2,
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }

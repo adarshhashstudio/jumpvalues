@@ -7,8 +7,8 @@ import 'package:jumpvalues/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 
 class UpdatePasswordScreen extends StatefulWidget {
-  final String email;
   const UpdatePasswordScreen({super.key, required this.email});
+  final String email;
 
   @override
   State<UpdatePasswordScreen> createState() => _ForgotPasswordScreenState();
@@ -57,7 +57,7 @@ class _ForgotPasswordScreenState extends State<UpdatePasswordScreen> {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Password Reset Successfully.');
         // Navigate to WelcomeScreen
-        Navigator.of(context).pushAndRemoveUntil(
+        await Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const WelcomeScreen()),
             (Route<dynamic> route) => false);
       } else {
@@ -70,7 +70,7 @@ class _ForgotPasswordScreenState extends State<UpdatePasswordScreen> {
       });
       SnackBarHelper.showStatusSnackBar(
           context, StatusIndicator.error, e.toString());
-      throw e;
+      rethrow;
     }
   }
 
@@ -101,270 +101,269 @@ class _ForgotPasswordScreenState extends State<UpdatePasswordScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar:
-          CommonWidgets.appBar(context: context, backWidget: true, title: ''),
-      body: Form(
-        key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        'assets/images/blue_jump.png',
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        height: MediaQuery.of(context).size.height * 0.2,
-                      ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.01,
-                      ),
-                      const Text(
-                        'Update Password',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 30,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w800,
-                          height: 0,
+  Widget build(BuildContext context) => Scaffold(
+        appBar:
+            CommonWidgets.appBar(context: context, backWidget: true, title: ''),
+        body: Form(
+          key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        Image.asset(
+                          'assets/images/blue_jump.png',
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          height: MediaQuery.of(context).size.height * 0.2,
                         ),
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      const Text(
-                        'Your new password must be different from previous password.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF494949),
-                          fontSize: 16,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.01,
                         ),
-                      ),
-                      const SizedBox(
-                        height: 50,
-                      ),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'New Password',
+                        const Text(
+                          'Update Password',
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: 15,
+                            fontSize: 30,
                             fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w800,
+                            height: 0,
                           ),
                         ),
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      TextFormField(
-                        controller: newPassword,
-                        onChanged: (value) {
-                          validateConfirmPassword(confirmPassword!.text);
-                          validatePassword();
-                        },
-                        inputFormatters: [
-                          FilteringTextInputFormatter.deny(RegExp(r'\s'))
-                        ],
-                        cursorColor: Colors.grey,
-                        obscureText:
-                            _obscureText, // Use the _obscureText variable here
-                        textAlignVertical: TextAlignVertical.center,
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 15,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
+                        const SizedBox(
+                          height: 16,
                         ),
-                        decoration: InputDecoration(
-                          counterText: '',
-                          hintText: 'Enter New Password',
-                          hintStyle: TextStyle(
-                            color: hintColor,
+                        const Text(
+                          'Your new password must be different from previous password.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(0xFF494949),
+                            fontSize: 16,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 50,
+                        ),
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'New Password',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 15,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        TextFormField(
+                          controller: newPassword,
+                          onChanged: (value) {
+                            validateConfirmPassword(confirmPassword!.text);
+                            validatePassword();
+                          },
+                          inputFormatters: [
+                            FilteringTextInputFormatter.deny(RegExp(r'\s'))
+                          ],
+                          cursorColor: Colors.grey,
+                          obscureText:
+                              _obscureText, // Use the _obscureText variable here
+                          textAlignVertical: TextAlignVertical.center,
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            color: textColor,
                             fontSize: 15,
                             fontFamily: 'Roboto',
                             fontWeight: FontWeight.w400,
                           ),
-                          enabled: true,
-                          enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 0, color: secondaryColor),
-                            borderRadius: BorderRadius.circular(20),
+                          decoration: InputDecoration(
+                            counterText: '',
+                            hintText: 'Enter New Password',
+                            hintStyle: TextStyle(
+                              color: hintColor,
+                              fontSize: 15,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w400,
+                            ),
+                            enabled: true,
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(width: 0, color: secondaryColor),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            filled: true,
+                            errorStyle:
+                                const TextStyle(color: Color(0xffff3333)),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(width: 1, color: primaryColor),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  width: 1, color: Color(0xffff3333)),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  width: 1, color: Color(0xffff3333)),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(width: 0, color: secondaryColor),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            fillColor: secondaryColor,
+                            focusColor: secondaryColor,
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 0),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                // Toggle the obscureText state when the icon button is pressed
+                                setState(() {
+                                  _obscureText = !_obscureText;
+                                });
+                              },
+                              icon: Icon(_obscureText
+                                  ? Icons.visibility
+                                  : Icons.visibility_off),
+                            ),
                           ),
-                          filled: true,
-                          errorStyle: const TextStyle(color: Color(0xffff3333)),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 1, color: primaryColor),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                width: 1, color: Color(0xffff3333)),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                width: 1, color: Color(0xffff3333)),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 0, color: secondaryColor),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          fillColor: secondaryColor,
-                          focusColor: secondaryColor,
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 0),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              // Toggle the obscureText state when the icon button is pressed
-                              setState(() {
-                                _obscureText = !_obscureText;
-                              });
-                            },
-                            icon: Icon(_obscureText
-                                ? Icons.visibility
-                                : Icons.visibility_off),
+                          validator: (value) => passwordValidate(value ?? ''),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.01,
+                        ),
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Confirm Password',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 15,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
-                        validator: (value) => passwordValidate(value ?? ''),
-                      ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.01,
-                      ),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Confirm Password',
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        TextFormField(
+                          controller: confirmPassword,
+                          onChanged: validateConfirmPassword,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.deny(RegExp(r'\s'))
+                          ],
+                          cursorColor: Colors.grey,
+                          obscureText:
+                              _obscureText, // Use the _obscureText variable here
+                          textAlignVertical: TextAlignVertical.center,
+                          textAlign: TextAlign.left,
                           style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      TextFormField(
-                        controller: confirmPassword,
-                        onChanged: (value) {
-                          validateConfirmPassword(value);
-                        },
-                        inputFormatters: [
-                          FilteringTextInputFormatter.deny(RegExp(r'\s'))
-                        ],
-                        cursorColor: Colors.grey,
-                        obscureText:
-                            _obscureText, // Use the _obscureText variable here
-                        textAlignVertical: TextAlignVertical.center,
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 15,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
-                        ),
-                        decoration: InputDecoration(
-                          counterText: '',
-                          hintText: 'Enter Confirm Password',
-                          hintStyle: TextStyle(
-                            color: hintColor,
+                            color: textColor,
                             fontSize: 15,
                             fontFamily: 'Roboto',
                             fontWeight: FontWeight.w400,
                           ),
-                          enabled: true,
-                          enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 0, color: secondaryColor),
-                            borderRadius: BorderRadius.circular(20),
+                          decoration: InputDecoration(
+                            counterText: '',
+                            hintText: 'Enter Confirm Password',
+                            hintStyle: TextStyle(
+                              color: hintColor,
+                              fontSize: 15,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w400,
+                            ),
+                            enabled: true,
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(width: 0, color: secondaryColor),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            filled: true,
+                            errorStyle:
+                                const TextStyle(color: Color(0xffff3333)),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(width: 1, color: primaryColor),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  width: 1, color: Color(0xffff3333)),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  width: 1, color: Color(0xffff3333)),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(width: 0, color: secondaryColor),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            fillColor: secondaryColor,
+                            focusColor: secondaryColor,
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 0),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                // Toggle the obscureText state when the icon button is pressed
+                                setState(() {
+                                  _obscureText = !_obscureText;
+                                });
+                              },
+                              icon: Icon(_obscureText
+                                  ? Icons.visibility
+                                  : Icons.visibility_off),
+                            ),
                           ),
-                          filled: true,
-                          errorStyle: const TextStyle(color: Color(0xffff3333)),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 1, color: primaryColor),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                width: 1, color: Color(0xffff3333)),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                width: 1, color: Color(0xffff3333)),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 0, color: secondaryColor),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          fillColor: secondaryColor,
-                          focusColor: secondaryColor,
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 0),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              // Toggle the obscureText state when the icon button is pressed
-                              setState(() {
-                                _obscureText = !_obscureText;
-                              });
-                            },
-                            icon: Icon(_obscureText
-                                ? Icons.visibility
-                                : Icons.visibility_off),
-                          ),
+                          validator: (value) {
+                            if (confirmPasswordError != null) {
+                              return confirmPasswordError;
+                            }
+                            return null;
+                          },
                         ),
-                        validator: (value) {
-                          if (confirmPasswordError != null) {
-                            return confirmPasswordError;
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.1,
-                      ),
-                    ],
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.1,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: Column(
-                children: [
-                  button(context, onPressed: () async {
-                    hideAppKeyboard(context);
-                    if (loader) {
-                    } else {
-                      await reset();
-                    }
-                  },
-                      isLoading: loader,
-                      text: 'Reset Password',
-                      isEnabled: submitButtonEnabled),
-                ],
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Column(
+                  children: [
+                    button(context, onPressed: () async {
+                      hideAppKeyboard(context);
+                      if (loader) {
+                      } else {
+                        await reset();
+                      }
+                    },
+                        isLoading: loader,
+                        text: 'Reset Password',
+                        isEnabled: submitButtonEnabled),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 }

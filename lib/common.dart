@@ -8,6 +8,9 @@ Color hintColor = const Color(0xFF9BA9B1);
 Color textColor = const Color(0xff0C0C0C);
 
 String welcomeImage = 'assets/images/welcome.svg';
+String editImage = 'assets/images/edit.png';
+String learnImage = 'assets/images/learn.png';
+String selectImage = 'assets/images/select.png';
 
 void hideAppKeyboard(context) =>
     FocusScope.of(context).requestFocus(FocusNode());

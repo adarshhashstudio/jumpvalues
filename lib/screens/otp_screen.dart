@@ -11,9 +11,9 @@ import 'package:jumpvalues/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class OtpScreen extends StatefulWidget {
+  const OtpScreen({super.key, required this.email, required this.isFrom});
   final String email;
   final String isFrom;
-  const OtpScreen({super.key, required this.email, required this.isFrom});
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
@@ -87,7 +87,7 @@ class _OtpScreenState extends State<OtpScreen> {
       });
       SnackBarHelper.showStatusSnackBar(
           context, StatusIndicator.error, e.toString());
-      throw e;
+      rethrow;
     }
   }
 
@@ -134,10 +134,10 @@ class _OtpScreenState extends State<OtpScreen> {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response.message ?? 'Verified Success');
         if (widget.isFrom == 'forgotPassword') {
-          Navigator.of(context).push(MaterialPageRoute(
+          await Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => UpdatePasswordScreen(email: widget.email)));
         } else if (widget.isFrom == 'signup') {
-          Navigator.of(context).pushReplacement(
+          await Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => const LoginScreen()));
         }
       } else {
@@ -155,180 +155,182 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Center(
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.1,
-                            ),
-                            Image.asset(
-                              'assets/images/blue_jump.png',
-                              width: MediaQuery.of(context).size.width * 0.4,
-                              height: MediaQuery.of(context).size.height * 0.2,
-                            ),
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.01,
-                            ),
-                            const Text(
-                              'OTP Verification',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 25,
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w800,
+  Widget build(BuildContext context) => Scaffold(
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.1,
                               ),
-                            ),
-                            const SizedBox(
-                              height: 16,
-                            ),
-                            Text.rich(
-                              textAlign: TextAlign.center,
-                              TextSpan(
-                                children: [
-                                  const TextSpan(
-                                    text:
-                                        'Please enter the 4 digit OTP sent to \n',
-                                    style: TextStyle(
-                                      color: Color(0xFF494949),
-                                      fontSize: 16,
-                                      fontFamily: 'Roboto',
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: widget.email,
-                                    style: const TextStyle(
-                                      color: Color(0xFF494949),
-                                      fontSize: 16,
-                                      fontFamily: 'Roboto',
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                    children: [
-                                      TextSpan(
-                                        text: ' Edit',
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        style: TextStyle(
-                                          color: primaryColor,
-                                          fontSize: 16,
-                                          fontFamily: 'Roboto',
-                                          fontWeight: FontWeight.w400,
-                                        ),
+                              Image.asset(
+                                'assets/images/blue_jump.png',
+                                width: MediaQuery.of(context).size.width * 0.4,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.2,
+                              ),
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.01,
+                              ),
+                              const Text(
+                                'OTP Verification',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 25,
+                                  fontFamily: 'Roboto',
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              Text.rich(
+                                textAlign: TextAlign.center,
+                                TextSpan(
+                                  children: [
+                                    const TextSpan(
+                                      text:
+                                          'Please enter the 4 digit OTP sent to \n',
+                                      style: TextStyle(
+                                        color: Color(0xFF494949),
+                                        fontSize: 16,
+                                        fontFamily: 'Roboto',
+                                        fontWeight: FontWeight.w400,
                                       ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 50,
-                            ),
-                            textFormField(
-                              label: 'OTP',
-                              controller: otp,
-                              maxLength: 4,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              autofocus: true,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (value.isNotEmpty && value.length == 4) {
-                                    otpEnabled = true;
-                                  } else {
-                                    otpEnabled = false;
-                                  }
-                                });
-                              },
-                              keyboardType: TextInputType.number,
-                              hintText: 'Enter 4-Digit Code',
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            Text.rich(
-                              TextSpan(
-                                children: [
-                                  const TextSpan(
-                                    text: 'Did\'t received OTP ',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14,
-                                      fontFamily: 'Roboto',
-                                      fontWeight: FontWeight.w400,
                                     ),
-                                  ),
-                                  TextSpan(
-                                    text: counting ? '$count' : 'Resend OTP',
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () async {
-                                        if (!counting) {
-                                          if (widget.isFrom ==
-                                              'forgotPassword') {
-                                            await forgotPass();
-                                          } else {
-                                            await sendOtp();
+                                    TextSpan(
+                                      text: widget.email,
+                                      style: const TextStyle(
+                                        color: Color(0xFF494949),
+                                        fontSize: 16,
+                                        fontFamily: 'Roboto',
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: ' Edit',
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          style: TextStyle(
+                                            color: primaryColor,
+                                            fontSize: 16,
+                                            fontFamily: 'Roboto',
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 50,
+                              ),
+                              textFormField(
+                                label: 'OTP',
+                                controller: otp,
+                                maxLength: 4,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
+                                autofocus: true,
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value.isNotEmpty && value.length == 4) {
+                                      otpEnabled = true;
+                                    } else {
+                                      otpEnabled = false;
+                                    }
+                                  });
+                                },
+                                keyboardType: TextInputType.number,
+                                hintText: 'Enter 4-Digit Code',
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Did\'t received OTP ',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 14,
+                                        fontFamily: 'Roboto',
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: counting ? '$count' : 'Resend OTP',
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () async {
+                                          if (!counting) {
+                                            if (widget.isFrom ==
+                                                'forgotPassword') {
+                                              await forgotPass();
+                                            } else {
+                                              await sendOtp();
+                                            }
+                                            setState(() {
+                                              count = 30;
+                                            });
+                                            startTimer();
                                           }
-                                          setState(() {
-                                            count = 30;
-                                          });
-                                          startTimer();
-                                        }
-                                      },
-                                    style: TextStyle(
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                      fontSize: 14,
-                                      fontFamily: 'Roboto',
-                                      fontWeight: FontWeight.w500,
+                                        },
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        fontSize: 14,
+                                        fontFamily: 'Roboto',
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  child: Column(
-                    children: [
-                      button(context, onPressed: () async {
-                        hideKeyboard(context);
-                        if (loader) {
-                        } else {
-                          await verify();
-                        }
-                      }, text: 'Verify OTP', isEnabled: otpEnabled),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
+                    child: Column(
+                      children: [
+                        button(context, onPressed: () async {
+                          hideKeyboard(context);
+                          if (loader) {
+                          } else {
+                            await verify();
+                          }
+                        }, text: 'Verify OTP', isEnabled: otpEnabled),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            if (loader)
-              Center(
-                child: CircularProgressIndicator(),
+                ],
               ),
-          ],
+              if (loader)
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 }
