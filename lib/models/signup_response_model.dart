@@ -8,12 +8,21 @@ class SignupResponseModel {
   });
 
   SignupResponseModel.fromJson(Map<String, dynamic> json) {
-    statusCode = json['statusCode'];
+    statusCode = json['status'] ?? json['statusCode'];
     responseCode = json['responseCode'];
     message = json['message'];
-    data = json['data'] != null ? SignedUserData.fromJson(json['data']) : null;
-    error = json['error'];
+    // Check if data is not a list and is not null before parsing
+    if (json['data'] != null && json['data'] is! List) {
+      data = SignedUserData.fromJson(json['data']);
+    }
+    // Check if error is not null before parsing
+    if (json['error'] != null) {
+      error = (json['error'] as List)
+          .map((e) => Error.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
   }
+
   int? statusCode;
   String? responseCode;
   String? message;
@@ -59,6 +68,7 @@ class SignedUserData {
     createdAt =
         json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null;
   }
+
   String? profilePic;
   String? status;
   int? otp;
@@ -77,13 +87,13 @@ class SignedUserData {
 }
 
 class Error {
-
   Error({this.field, this.message});
 
   Error.fromJson(Map<String, dynamic> json) {
     field = json['field'];
     message = json['message'];
   }
+
   String? field;
   String? message;
 }

@@ -122,6 +122,8 @@ Future handleResponse(dio.Response response,
 
   if (response.statusCode == 200 || response.statusCode == 201) {
     return response.data;
+  } else if (response.statusCode == 400) {
+    return response.data;
   } else if (response.statusCode == 403) {
     SnackBarHelper.showStatusSnackBar(
         NavigationService.navigatorKey.currentContext!,
