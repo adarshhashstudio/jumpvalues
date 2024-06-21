@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 class CommonWidgets {
   static PreferredSizeWidget appBar(
@@ -48,3 +49,14 @@ class CommonWidgets {
 
   static double appBarHeight = CommonWidgets.appBar().preferredSize.height;
 }
+
+Widget placeHolderWidget(
+    {String? placeHolderImage,
+    double? height,
+    double? width,
+    BoxFit? fit,
+    AlignmentGeometry? alignment}) => PlaceHolderWidget(
+    height: height,
+    width: width,
+    alignment: alignment ?? Alignment.center,
+  );

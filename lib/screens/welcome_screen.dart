@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/common.dart';
-import 'package:jumpvalues/screens/login_screen.dart';
-import 'package:jumpvalues/screens/signup/signup_screen.dart';
+import 'package:jumpvalues/screens/auth_screens/login_screen.dart';
+import 'package:jumpvalues/screens/auth_screens/signup/signup_screen.dart';
+import 'package:jumpvalues/screens/utils/common.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});

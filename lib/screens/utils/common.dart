@@ -89,6 +89,7 @@ Widget textFormField({
   bool obscureText = false,
   Widget? prefixIcon,
   double borderRadius = 20,
+  String? errorText,
   required String label,
   bool isPassword = false, // New parameter to control password field
 }) =>
@@ -148,6 +149,7 @@ Widget textFormField({
                 borderRadius: BorderRadius.circular(borderRadius),
               ),
               filled: true,
+              errorText: errorText,
               errorStyle: const TextStyle(color: Color(0xffff3333)),
               focusedBorder: OutlineInputBorder(
                 borderSide: BorderSide(width: 1, color: primaryColor),

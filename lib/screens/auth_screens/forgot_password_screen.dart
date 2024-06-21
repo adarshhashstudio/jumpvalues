@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/common.dart';
+import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
-import 'package:jumpvalues/screens/otp_screen.dart';
-import 'package:jumpvalues/utils.dart';
+import 'package:jumpvalues/screens/auth_screens/otp_screen.dart';
+import 'package:jumpvalues/screens/utils/utils.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});

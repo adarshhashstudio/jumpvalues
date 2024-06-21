@@ -3,16 +3,16 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:jumpvalues/common.dart';
+import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/models/signup_categories.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
-import 'package:jumpvalues/screens/generate_otp_screen.dart';
-import 'package:jumpvalues/screens/otp_screen.dart';
-import 'package:jumpvalues/screens/signup/signup_widgets.dart';
+import 'package:jumpvalues/screens/auth_screens/generate_otp_screen.dart';
+import 'package:jumpvalues/screens/auth_screens/otp_screen.dart';
+import 'package:jumpvalues/screens/auth_screens/signup/signup_widgets.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
-import 'package:jumpvalues/utils.dart';
+import 'package:jumpvalues/screens/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -36,6 +36,20 @@ class _SignupScreenState extends State<SignupScreen>
   TextEditingController? positionController;
   TextEditingController? aboutController;
   TextEditingController? phoneNumberController;
+
+  // FocusNodes for each field
+  final FocusNode firstNameFocusNode = FocusNode();
+  final FocusNode lastNameFocusNode = FocusNode();
+  final FocusNode emailFocusNode = FocusNode();
+  final FocusNode companyFocusNode = FocusNode();
+  final FocusNode passwordFocusNode = FocusNode();
+  final FocusNode positionFocusNode = FocusNode();
+  final FocusNode aboutFocusNode = FocusNode();
+  final FocusNode phoneNumberFocusNode = FocusNode();
+
+  // Map to store error messages for each field
+  Map<String, String> fieldErrors = {};
+
   bool submitButtonEnabled = false;
   bool coachSubmitButtonEnabled = false;
   bool selectCategoriesError = false;
@@ -134,6 +148,7 @@ class _SignupScreenState extends State<SignupScreen>
   Future<void> signup({required bool isCoach}) async {
     setState(() {
       loader = true;
+      fieldErrors.clear(); // Clear previous errors
     });
 
     var request = <String, dynamic>{};
@@ -197,8 +212,29 @@ class _SignupScreenState extends State<SignupScreen>
           SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
               response.error?[0].message ?? 'Unexpected Error Occurred.');
         } else {
-          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-              response.error?[0].message ?? 'Unexpected Error Occurred.');
+          // Set field errors and focus on the first error field
+          response.error?.forEach((e) {
+            fieldErrors[e.field!] = e.message!;
+          });
+
+          // Focus on the first error field
+          if (fieldErrors.containsKey('firstName')) {
+            FocusScope.of(context).requestFocus(firstNameFocusNode);
+          } else if (fieldErrors.containsKey('lastName')) {
+            FocusScope.of(context).requestFocus(lastNameFocusNode);
+          } else if (fieldErrors.containsKey('email')) {
+            FocusScope.of(context).requestFocus(emailFocusNode);
+          } else if (fieldErrors.containsKey('company')) {
+            FocusScope.of(context).requestFocus(companyFocusNode);
+          } else if (fieldErrors.containsKey('password')) {
+            FocusScope.of(context).requestFocus(passwordFocusNode);
+          } else if (fieldErrors.containsKey('positions')) {
+            FocusScope.of(context).requestFocus(positionFocusNode);
+          } else if (fieldErrors.containsKey('aboutMe')) {
+            FocusScope.of(context).requestFocus(aboutFocusNode);
+          }
+
+          setState(() {});
         }
       }
     } catch (e) {
@@ -226,6 +262,8 @@ class _SignupScreenState extends State<SignupScreen>
                       label: 'First Name',
                       autofocus: true,
                       controller: firstNameController,
+                      focusNode: firstNameFocusNode,
+                      errorText: fieldErrors['firstName'],
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
                       ],
@@ -242,6 +280,8 @@ class _SignupScreenState extends State<SignupScreen>
                     textFormField(
                       label: 'Last Name',
                       controller: lastNameController,
+                      focusNode: lastNameFocusNode,
+                      errorText: fieldErrors['lastName'],
                       onChanged: (value) {
                         enableSubmitButton();
                       },
@@ -257,6 +297,8 @@ class _SignupScreenState extends State<SignupScreen>
                     textFormField(
                       label: 'Email',
                       controller: emailController,
+                      focusNode: emailFocusNode,
+                      errorText: fieldErrors['email'],
                       onChanged: (value) {
                         enableSubmitButton();
                       },
@@ -271,6 +313,8 @@ class _SignupScreenState extends State<SignupScreen>
                     textFormField(
                       label: 'Company',
                       controller: companyController,
+                      focusNode: companyFocusNode,
+                      errorText: fieldErrors['company'],
                       onChanged: (value) {
                         enableSubmitButton();
                       },
@@ -283,6 +327,8 @@ class _SignupScreenState extends State<SignupScreen>
                     textFormField(
                       label: 'Password',
                       controller: passwordController,
+                      focusNode: passwordFocusNode,
+                      errorText: fieldErrors['password'],
                       onChanged: (value) {
                         enableSubmitButton();
                       },
@@ -306,6 +352,8 @@ class _SignupScreenState extends State<SignupScreen>
                     textFormField(
                       label: 'Position',
                       controller: positionController,
+                      focusNode: positionFocusNode,
+                      errorText: fieldErrors['positions'],
                       onChanged: (value) {
                         enableSubmitButton();
                       },
@@ -318,6 +366,8 @@ class _SignupScreenState extends State<SignupScreen>
                     textFormField(
                       label: 'About Me',
                       controller: aboutController,
+                      focusNode: aboutFocusNode,
+                      errorText: fieldErrors['aboutMe'],
                       onChanged: (value) {
                         enableSubmitButton();
                       },
@@ -424,6 +474,8 @@ class _SignupScreenState extends State<SignupScreen>
                       label: 'First Name',
                       autofocus: true,
                       controller: firstNameController,
+                      focusNode: firstNameFocusNode,
+                      errorText: fieldErrors['firstName'],
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
                       ],
@@ -440,6 +492,8 @@ class _SignupScreenState extends State<SignupScreen>
                     textFormField(
                       label: 'Last Name',
                       controller: lastNameController,
+                      focusNode: lastNameFocusNode,
+                      errorText: fieldErrors['lastName'],
                       onChanged: (value) {
                         enableCoachSubmitButton();
                       },
@@ -455,6 +509,8 @@ class _SignupScreenState extends State<SignupScreen>
                     textFormField(
                       label: 'Email',
                       controller: emailController,
+                      focusNode: emailFocusNode,
+                      errorText: fieldErrors['email'],
                       onChanged: (value) {
                         enableCoachSubmitButton();
                       },
@@ -469,6 +525,8 @@ class _SignupScreenState extends State<SignupScreen>
                     textFormField(
                       label: 'Password',
                       controller: passwordController,
+                      focusNode: passwordFocusNode,
+                      errorText: fieldErrors['password'],
                       onChanged: (value) {
                         enableCoachSubmitButton();
                       },
