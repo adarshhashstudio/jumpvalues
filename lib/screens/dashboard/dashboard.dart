@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/screens/dashboard/client_fragments/client_dashbaord.dart';
+import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_add_slots.dart';
+import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_dashbaord.dart';
+import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_sessions.dart';
 import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/screens/utils/images.dart';
 import 'package:jumpvalues/screens/utils/string_extensions.dart';
@@ -34,9 +38,9 @@ class DashboardState extends State<Dashboard> {
   void initState() {
     super.initState();
     fragmentList = [
-      const ClientDashboard(),
-      Container(),
-      Container(),
+      appStore.userTypeCoach ? const CoachDashboard() : const ClientDashboard(),
+      appStore.userTypeCoach ? const CoachSessions() : Container(),
+      appStore.userTypeCoach ? const CoachAddSlots() : Container(),
       Container(),
     ];
     init();
@@ -92,7 +96,7 @@ class DashboardState extends State<Dashboard> {
               [
                 'Welcome',
                 'Session',
-                'Feedback',
+                appStore.userTypeCoach ? 'Add Slot' : 'Feedback',
                 'Profile',
               ][currentIndex],
               style: TextStyle(
@@ -185,7 +189,7 @@ class DashboardState extends State<Dashboard> {
                     icon: icFeedback.iconImage(color: textColor),
                     selectedIcon:
                         icFeedbackFilled.iconImage(color: context.primaryColor),
-                    label: 'Feedback',
+                    label: appStore.userTypeCoach ? 'Slots' : 'Feedback',
                   ),
                   NavigationDestination(
                     icon: icUser.iconImage(color: textColor),

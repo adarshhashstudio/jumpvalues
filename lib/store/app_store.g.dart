@@ -16,6 +16,13 @@ mixin _$AppStore on _AppStore, Store {
       (_$userFullNameComputed ??= Computed<String>(() => super.userFullName,
               name: '_AppStore.userFullName'))
           .value;
+  Computed<bool>? _$userTypeCoachComputed;
+
+  @override
+  bool get userTypeCoach =>
+      (_$userTypeCoachComputed ??= Computed<bool>(() => super.userTypeCoach,
+              name: '_AppStore.userTypeCoach'))
+          .value;
 
   late final _$isLoggedInAtom =
       Atom(name: '_AppStore.isLoggedIn', context: context);
@@ -346,7 +353,8 @@ userCompany: ${userCompany},
 userPosition: ${userPosition},
 userProfilePic: ${userProfilePic},
 userAboutMe: ${userAboutMe},
-userFullName: ${userFullName}
+userFullName: ${userFullName},
+userTypeCoach: ${userTypeCoach}
     ''';
   }
 }

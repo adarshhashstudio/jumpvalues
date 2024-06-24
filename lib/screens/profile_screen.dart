@@ -4,15 +4,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/user_data_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/client_screens/select_screen.dart';
-import 'package:jumpvalues/screens/welcome_screen.dart';
+import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/screens/utils/utils.dart';
-import 'package:jumpvalues/store/app_store.dart';
-import 'package:nb_utils/nb_utils.dart';
+import 'package:jumpvalues/screens/welcome_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

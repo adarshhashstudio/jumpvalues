@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/all_comprehensive_response.dart';
 import 'package:jumpvalues/models/user_data_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
-import 'package:jumpvalues/screens/widgets/widgets.dart';
+import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/screens/utils/utils.dart';
-import 'package:jumpvalues/store/app_store.dart';
+import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class SelectScreen extends StatefulWidget {

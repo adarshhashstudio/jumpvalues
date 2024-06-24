@@ -30,6 +30,8 @@ Widget labelContainer(
         BorderRadiusGeometry? borderRadius,
         EdgeInsetsGeometry? padding,
         AlignmentGeometry alignment = Alignment.center,
+        double? labelContainerSpace = 16,
+        String? text,
         Widget? child}) =>
     Column(
       children: [
@@ -47,15 +49,15 @@ Widget labelContainer(
             ),
           ),
         if (isLabel)
-          const SizedBox(
-            height: 16,
+          SizedBox(
+            height: labelContainerSpace,
           ),
         GestureDetector(
           onTap: onTap,
           child: Container(
             width: width,
             height: height,
-            padding: padding,
+            padding: padding ?? const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               borderRadius: borderRadius ?? BorderRadius.circular(20),
               color: color ?? secondaryColor,
@@ -65,7 +67,19 @@ Widget labelContainer(
                       color: color ?? secondaryColor,
                     ),
             ),
-            child: Align(alignment: alignment, child: child),
+            child: Align(
+                alignment: alignment,
+                child: (text != null)
+                    ? Text(
+                        text,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 15,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w400,
+                        ),
+                      )
+                    : child),
           ),
         ),
       ],
@@ -90,6 +104,7 @@ Widget textFormField({
   Widget? prefixIcon,
   double borderRadius = 20,
   String? errorText,
+  double labelTextBoxSpace = 16,
   required String label,
   bool isPassword = false, // New parameter to control password field
 }) =>
@@ -109,8 +124,8 @@ Widget textFormField({
             ),
           ),
         if (isLabel)
-          const SizedBox(
-            height: 16,
+          SizedBox(
+            height: labelTextBoxSpace,
           ),
         StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) =>

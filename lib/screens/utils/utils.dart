@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
-import 'package:nb_utils/nb_utils.dart';
 
 enum StatusIndicator { warning, error, success }
 

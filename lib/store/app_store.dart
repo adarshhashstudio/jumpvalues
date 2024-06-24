@@ -47,6 +47,9 @@ abstract class _AppStore with Store {
   @computed
   String get userFullName => '$userFirstName $userLastName'.trim();
 
+  @computed
+  bool get userTypeCoach => userType == USERTYPE_COACH;
+
   @action
   Future<void> setLoggedIn(bool val, {bool isInitializing = false}) async {
     isLoggedIn = val;
@@ -135,7 +138,7 @@ abstract class _AppStore with Store {
       await setUserProfilePic(response.data?.profilePic ?? '');
       await setLoggedIn(true);
       await setToken(response.token ?? '');
-      await setUserType(USERTYPE_CLIENT);
+      await setUserType(USERTYPE_COACH);
     }
   }
 
