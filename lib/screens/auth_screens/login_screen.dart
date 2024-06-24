@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/common.dart';
+import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
-import 'package:jumpvalues/screens/dashbaord.dart';
-import 'package:jumpvalues/screens/forgot_password_screen.dart';
+import 'package:jumpvalues/screens/auth_screens/forgot_password_screen.dart';
+import 'package:jumpvalues/screens/dashboard/dashboard.dart';
+import 'package:jumpvalues/screens/utils/common.dart';
+import 'package:jumpvalues/screens/utils/utils.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
-import 'package:jumpvalues/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -69,23 +70,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (response != null) {
         if (response.responseCode != null && response.responseCode == 200) {
-          // Save token in SharedPreferences
-          var prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', response.token!);
-
-          // Save user data in SharedPreferences
-          await prefs.setString('userId', '${response.data?.id}');
-          await prefs.setString('firstName', response.data?.firstName ?? '');
-          await prefs.setString('lastName', response.data?.lastName ?? '');
-          await prefs.setString('company', response.data?.company ?? '');
-          await prefs.setString('email', response.data?.email ?? '');
-          await prefs.setString('position', response.data?.positions ?? '');
-          await prefs.setString('aboutMe', response.data?.aboutMe ?? '');
-          await prefs.setString('profilePic', response.data?.profilePic ?? '');
+          // Save user data in AppStore
+          await appStore.setUserData(response);
 
           // Navigate to Dashboard
           await Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const Dashboard()));
+              MaterialPageRoute(builder: (context) => Dashboard()));
         } else {
           // Handle missing token
           SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
@@ -100,6 +90,8 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         loader = false;
       });
+
+      debugPrint('Login Error: $e');
 
       // Handle errors
       SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error, '$e');

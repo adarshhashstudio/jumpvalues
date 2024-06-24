@@ -6,7 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
-import 'package:jumpvalues/utils.dart';
+import 'package:jumpvalues/screens/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart'; // Add a prefix for dio
 
 enum HttpMethodType { get, post, put, patch, delete }
@@ -48,11 +48,9 @@ Future<dio.Response<dynamic>> buildHttpResponse(
   bool isJsonEncode = false,
 }) async {
   if (await isNetworkAvailable()) {
-    var prefs = await SharedPreferences.getInstance();
-    var token = prefs.getString('token');
     Map<String, dynamic>? headerReq;
-    if (token != null) {
-      headerReq = {'Authorization': 'Bearer $token'};
+    if (appStore.isLoggedIn) {
+      headerReq = {'Authorization': 'Bearer ${appStore.token}'};
     } else {
       headerReq = null;
     }
@@ -195,10 +193,8 @@ Future<dio.Response<dynamic>> uploadImage(Uri url, File imageFile,
       ),
     });
 
-    var prefs = await SharedPreferences.getInstance();
-    var token = prefs.getString('token');
-    if (isAuth && token != null) {
-      dio.options.headers['Authorization'] = 'Bearer $token';
+    if (isAuth && appStore.isLoggedIn) {
+      dio.options.headers['Authorization'] = 'Bearer ${appStore.token}';
     }
 
     response = await dio.patch(

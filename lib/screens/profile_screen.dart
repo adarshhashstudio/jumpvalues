@@ -4,13 +4,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:jumpvalues/common.dart';
+import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/user_data_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
-import 'package:jumpvalues/screens/select_screen.dart';
+import 'package:jumpvalues/screens/client_screens/select_screen.dart';
+import 'package:jumpvalues/screens/utils/common.dart';
+import 'package:jumpvalues/screens/utils/utils.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
-import 'package:jumpvalues/utils.dart';
-import 'package:nb_utils/nb_utils.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -56,17 +56,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       loader = true;
     });
-    var prefs = await SharedPreferences.getInstance();
+
     try {
       var req = <String, dynamic>{
-        'firstName': firstNameController?.text ?? prefs.getString('firstName'),
-        'lastName': lastNameController?.text ?? prefs.getString('lastName'),
-        'company': companyController?.text ?? prefs.getString('company'),
-        'positions': positionController?.text ?? prefs.getString('position'),
-        'aboutMe': aboutController?.text ?? prefs.getString('aboutMe')
+        'firstName': firstNameController?.text ?? appStore.userFirstName,
+        'lastName': lastNameController?.text ?? appStore.userLastName,
+        'company': companyController?.text ?? appStore.userCompany,
+        'positions': positionController?.text ?? appStore.userPosition,
+        'aboutMe': aboutController?.text ?? appStore.userAboutMe
       };
-      var userId = prefs.getString('userId');
-      var response = await updateUserProfile(req, userId ?? 'id');
+      var userId = appStore.userId;
+      var response = await updateUserProfile(req, userId.toString());
 
       if (response?.statusCode == 200) {
         await setUserData();
@@ -121,8 +121,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       loader = true;
     });
-    // Clear token and other data from SharedPreferences
-    var prefs = await SharedPreferences.getInstance();
     try {
       var response = await logoutUser();
       if (response?.statusCode == 200) {
@@ -130,8 +128,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           loader = false;
         });
 
-        await prefs.remove('token'); // Remove token
-        await prefs.clear();
+        await appStore.clearData();
 
         // // Navigate to WelcomeScreen
         await Navigator.of(profileContext).pushAndRemoveUntil(
@@ -142,8 +139,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           loader = false;
         });
 
-        await prefs.remove('token'); // Remove token
-        await prefs.clear();
+        await appStore.clearData();
         if (_isMounted) {
           isTokenAvailable(context);
         }
@@ -157,40 +153,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> loadUserData() async {
-    var prefs = await SharedPreferences.getInstance();
-    firstNameController =
-        TextEditingController(text: prefs.getString('firstName') ?? '');
-    lastNameController =
-        TextEditingController(text: prefs.getString('lastName') ?? '');
-    companyController =
-        TextEditingController(text: prefs.getString('company') ?? '');
-    emailController =
-        TextEditingController(text: prefs.getString('email') ?? '');
-    positionController =
-        TextEditingController(text: prefs.getString('position') ?? '');
-    aboutController =
-        TextEditingController(text: prefs.getString('aboutMe') ?? '');
+    firstNameController = TextEditingController(text: appStore.userFirstName);
+    lastNameController = TextEditingController(text: appStore.userLastName);
+    companyController = TextEditingController(text: appStore.userCompany);
+    emailController = TextEditingController(text: appStore.userEmail);
+    positionController = TextEditingController(text: appStore.userPosition);
+    aboutController = TextEditingController(text: appStore.userAboutMe);
     setState(() {
-      userName =
-          '${prefs.getString('firstName') ?? ''} ${prefs.getString('lastName') ?? ''}';
-      email = prefs.getString('email') ?? '';
-      profilePic = prefs.getString('profilePic');
+      userName = '${appStore.userFullName}}';
+      email = appStore.userEmail;
+      profilePic = appStore.userProfilePic;
     });
 
     debugPrint('Profile Pic: $baseUrl$profilePic');
   }
 
   Future<void> setUserData() async {
-    var prefs = await SharedPreferences.getInstance();
-    await prefs.setString('firstName', firstNameController?.text ?? '');
-    await prefs.setString('lastName', lastNameController?.text ?? '');
-    await prefs.setString('company', companyController?.text ?? '');
-    await prefs.setString('position', positionController?.text ?? '');
-    await prefs.setString('aboutMe', aboutController?.text ?? '');
+    await appStore.setFirstName(firstNameController?.text ?? '');
+    await appStore.setLastName(lastNameController?.text ?? '');
+    await appStore.setUserCompany(companyController?.text ?? '');
+    await appStore.setUserPosition(positionController?.text ?? '');
+    await appStore.setUserAboutMe(aboutController?.text ?? '');
 
     setState(() {
-      userName =
-          '${prefs.getString('firstName') ?? ''} ${prefs.getString('lastName') ?? ''}';
+      userName = '${appStore.userFullName}';
     });
   }
 
@@ -269,21 +255,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       loader = true;
     });
-    var prefs = await SharedPreferences.getInstance();
     try {
-      var userId = prefs.getString('userId');
+      var userId = appStore.userId;
       if (userId == null) {
         throw Exception('User ID not found.');
       }
 
       var response = await updateUserProfilePic(
-          userId: userId,
+          userId: userId.toString(),
           image: _image); // assuming _image is your File variable
 
       if (response?.statusCode == 200) {
-        await prefs.setString('profilePic', response?.data ?? '');
+        await appStore.setUserProfilePic(response?.data ?? '');
         setState(() {
-          profilePic = prefs.getString('profilePic');
+          profilePic = appStore.userProfilePic;
         });
         SnackBarHelper.showStatusSnackBar(
           context,
@@ -313,9 +298,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       loader = true;
     });
-    var prefs = await SharedPreferences.getInstance();
     try {
-      var response = await getUserDetails(prefs.getString('userId') ?? '0');
+      var response = await getUserDetails(appStore.userId.toString());
       if (response?.statusCode == 200) {
         setState(() {
           userData = response;

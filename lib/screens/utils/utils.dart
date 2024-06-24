@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
-import 'package:nb_utils/nb_utils.dart';
 
 enum StatusIndicator { warning, error, success }
 
@@ -86,9 +86,7 @@ class SnackBarHelper {
 }
 
 void isTokenAvailable(BuildContext context) async {
-  var prefs = await SharedPreferences.getInstance();
-  var token = prefs.getString('token');
-  if (token == null) {
+  if (!appStore.isLoggedIn) {
     await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const WelcomeScreen()),
         (Route<dynamic> route) => false);
@@ -96,7 +94,6 @@ void isTokenAvailable(BuildContext context) async {
 }
 
 void tokenExpired(BuildContext context) async {
-  var prefs = await SharedPreferences.getInstance();
-  await prefs.clear();
+  await appStore.clearData();
   isTokenAvailable(context);
 }
