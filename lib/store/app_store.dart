@@ -1,5 +1,5 @@
-import 'package:jumpvalues/screens/utils/constants.dart';
 import 'package:jumpvalues/models/login_response.dart';
+import 'package:jumpvalues/screens/utils/constants.dart';
 import 'package:mobx/mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
 

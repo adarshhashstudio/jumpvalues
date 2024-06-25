@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/auth_screens/otp_screen.dart';
+import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/screens/utils/utils.dart';
 
 class GenerateOtpScreen extends StatefulWidget {

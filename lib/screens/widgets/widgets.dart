@@ -380,26 +380,6 @@ extension WidgetExtensions on Widget {
 
 /// Default App Button
 class AppButton extends StatefulWidget {
-  final Function? onTap;
-  final String? text;
-  final double? width;
-  final Color? color;
-  final Color? textColor;
-  final Color? disabledColor;
-  final Color? focusColor;
-  final Color? hoverColor;
-  final Color? splashColor;
-  final EdgeInsetsGeometry? padding;
-  final EdgeInsetsGeometry? margin;
-  final TextStyle? textStyle;
-  final ShapeBorder? shapeBorder;
-  final Widget? child;
-  final double? elevation;
-  final double? height;
-  final bool enabled;
-  final bool? enableScaleAnimation;
-  final Color? disabledTextColor;
-
   AppButton({
     this.onTap,
     this.text,
@@ -422,6 +402,25 @@ class AppButton extends StatefulWidget {
     this.disabledTextColor,
     Key? key,
   }) : super(key: key);
+  final Function? onTap;
+  final String? text;
+  final double? width;
+  final Color? color;
+  final Color? textColor;
+  final Color? disabledColor;
+  final Color? focusColor;
+  final Color? hoverColor;
+  final Color? splashColor;
+  final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
+  final TextStyle? textStyle;
+  final ShapeBorder? shapeBorder;
+  final Widget? child;
+  final double? elevation;
+  final double? height;
+  final bool enabled;
+  final bool? enableScaleAnimation;
+  final Color? disabledTextColor;
 
   @override
   _AppButtonState createState() => _AppButtonState();

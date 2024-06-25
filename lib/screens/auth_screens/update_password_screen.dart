@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
-import 'package:jumpvalues/screens/welcome_screen.dart';
+import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/screens/utils/utils.dart';
+import 'package:jumpvalues/screens/welcome_screen.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 
 class UpdatePasswordScreen extends StatefulWidget {

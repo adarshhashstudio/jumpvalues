@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/auth_screens/login_screen.dart';
 import 'package:jumpvalues/screens/auth_screens/update_password_screen.dart';
+import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/screens/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
 
