@@ -8,11 +8,12 @@ import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/auth_screens/generate_otp_screen.dart';
 import 'package:jumpvalues/screens/auth_screens/otp_screen.dart';
 import 'package:jumpvalues/screens/auth_screens/signup/signup_widgets.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
-import 'package:jumpvalues/screens/utils/utils.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
+import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/utils.dart';
+import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class SignupScreen extends StatefulWidget {

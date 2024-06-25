@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/models/signup_categories.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
+import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/widgets/common_widgets.dart';
 
 class CategoryDialog extends StatefulWidget {
   CategoryDialog(

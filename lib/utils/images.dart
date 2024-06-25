@@ -1,3 +1,7 @@
+const welcomeImage = 'assets/images/welcome.svg';
+const editImage = 'assets/images/edit.png';
+const learnImage = 'assets/images/learn.png';
+const selectImage = 'assets/images/select.png';
 const icHome = 'assets/icons/ic_home.png';
 const icHomeFilled = 'assets/icons/ic_home_filled.png';
 const icSession = 'assets/icons/ic_session.png';

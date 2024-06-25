@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
+import 'package:jumpvalues/network/rest_apis.dart';
+import 'package:jumpvalues/screens/dashboard/client_fragments/client_add_slots.dart';
 import 'package:jumpvalues/screens/dashboard/client_fragments/client_dashbaord.dart';
+import 'package:jumpvalues/screens/dashboard/client_fragments/client_sessions.dart';
 import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_add_slots.dart';
 import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_dashbaord.dart';
 import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_sessions.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
-import 'package:jumpvalues/screens/utils/images.dart';
-import 'package:jumpvalues/screens/utils/string_extensions.dart';
-import 'package:jumpvalues/screens/utils/utils.dart';
+import 'package:jumpvalues/screens/dashboard/common_profile.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
+import 'package:jumpvalues/screens/welcome_screen.dart';
+import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/images.dart';
+import 'package:jumpvalues/utils/string_extensions.dart';
+import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class Dashboard extends StatefulWidget {
@@ -22,6 +27,7 @@ class Dashboard extends StatefulWidget {
 
 class DashboardState extends State<Dashboard> {
   int currentIndex = 0;
+  bool loader = false;
 
   DateTime? currentBackPressTime;
 
@@ -39,9 +45,9 @@ class DashboardState extends State<Dashboard> {
     super.initState();
     fragmentList = [
       appStore.userTypeCoach ? const CoachDashboard() : const ClientDashboard(),
-      appStore.userTypeCoach ? const CoachSessions() : Container(),
-      appStore.userTypeCoach ? const CoachAddSlots() : Container(),
-      Container(),
+      appStore.userTypeCoach ? const CoachSessions() : const ClientSessions(),
+      appStore.userTypeCoach ? const CoachAddSlots() : const ClientAddSlots(),
+      const CommonProfile(),
     ];
     init();
   }
@@ -60,6 +66,67 @@ class DashboardState extends State<Dashboard> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void showLogoutConfirmationDialog(BuildContext outerContext) {
+    showDialog(
+      context: outerContext,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Are you sure?'),
+        content: const Text('You want to logout now?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              isTokenAvailable(context);
+              // Call the code to clear the token and navigate to WelcomeScreen
+              logoutAndNavigateToWelcomeScreen(outerContext);
+            },
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void logoutAndNavigateToWelcomeScreen(BuildContext profileContext) async {
+    setState(() {
+      loader = true;
+    });
+    try {
+      var response = await logoutUser();
+      if (response?.statusCode == 200) {
+        setState(() {
+          loader = false;
+        });
+
+        await appStore.clearData();
+
+        // // Navigate to WelcomeScreen
+        await Navigator.of(profileContext).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+            (Route<dynamic> route) => false);
+      } else if (response?.statusCode == 403) {
+        setState(() {
+          loader = false;
+        });
+
+        await appStore.clearData();
+
+        isTokenAvailable(context);
+      }
+    } catch (e) {
+      setState(() {
+        loader = false;
+      });
+      rethrow;
+    }
   }
 
   @override
@@ -96,7 +163,7 @@ class DashboardState extends State<Dashboard> {
               [
                 'Welcome',
                 'Session',
-                appStore.userTypeCoach ? 'Add Slot' : 'Feedback',
+                'Add Slot',
                 'Profile',
               ][currentIndex],
               style: TextStyle(
@@ -105,6 +172,13 @@ class DashboardState extends State<Dashboard> {
                   fontSize: 20),
             ),
             actions: [
+              if (currentIndex == 3)
+                Text(
+                  'Logout',
+                  style: TextStyle(color: primaryColor),
+                ).onTap(() {
+                  showLogoutConfirmationDialog(context);
+                }),
               PopupMenuButton<int>(
                 itemBuilder: (context) => [
                   PopupMenuItem(
@@ -189,7 +263,7 @@ class DashboardState extends State<Dashboard> {
                     icon: icFeedback.iconImage(color: textColor),
                     selectedIcon:
                         icFeedbackFilled.iconImage(color: context.primaryColor),
-                    label: appStore.userTypeCoach ? 'Slots' : 'Feedback',
+                    label: 'Slots',
                   ),
                   NavigationDestination(
                     icon: icUser.iconImage(color: textColor),

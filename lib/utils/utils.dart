@@ -1,21 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
+import 'package:jumpvalues/utils/configs.dart';
 
 enum StatusIndicator { warning, error, success }
 
-Color successColor = const Color(0xFF73C322);
-Color errorColor = const Color(0xFFD4111B);
-Color warningColor = const Color(0xFFFFAB1A);
-
-const domainUrl = 'http://18.209.192.96:8080'; // 'http://13.234.173.125:6060';
-const baseUrl = '$domainUrl/';
-const webViewUrl = 'http://18.209.192.96/pages/';
-
-const aboutUsUrl = '${webViewUrl}about-us.html';
-const contactUsUrl = '${webViewUrl}contact-us.html';
-const termsAndPrivacyUrl = '${webViewUrl}privacy.html';
-const learnSectionUrl = '${webViewUrl}our-values.html';
+void hideAppKeyboard(context) =>
+    FocusScope.of(context).requestFocus(FocusNode());
 
 String? validateEmail(String email) {
   if (RegExp(

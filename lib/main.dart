@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:jumpvalues/screens/splash_screen.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
-import 'package:jumpvalues/screens/utils/configs.dart';
-import 'package:jumpvalues/screens/utils/constants.dart';
 import 'package:jumpvalues/store/app_store.dart';
+import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/constants.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 AppStore appStore = AppStore();

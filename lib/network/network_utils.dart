@@ -6,7 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
-import 'package:jumpvalues/screens/utils/utils.dart';
+import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart'; // Add a prefix for dio
 
 enum HttpMethodType { get, post, put, patch, delete }
