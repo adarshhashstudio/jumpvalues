@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/screens/client_screens/select_screen.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
-import 'package:jumpvalues/screens/utils/utils.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
+import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/images.dart';
+import 'package:jumpvalues/utils/utils.dart';
 
 class ClientDashboard extends StatefulWidget {
   const ClientDashboard({super.key});

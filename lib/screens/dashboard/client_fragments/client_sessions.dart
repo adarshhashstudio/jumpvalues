@@ -4,14 +4,14 @@ import 'package:jumpvalues/network/dummy.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
-class CoachSessions extends StatefulWidget {
-  const CoachSessions({super.key});
+class ClientSessions extends StatefulWidget {
+  const ClientSessions({super.key});
 
   @override
-  State<CoachSessions> createState() => _CoachSessionsState();
+  State<ClientSessions> createState() => _ClientSessionsState();
 }
 
-class _CoachSessionsState extends State<CoachSessions> {
+class _ClientSessionsState extends State<ClientSessions> {
   late Future<List<BookingItem>> futureBookingItems;
 
   @override

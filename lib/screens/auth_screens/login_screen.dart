@@ -3,9 +3,10 @@ import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/auth_screens/forgot_password_screen.dart';
 import 'package:jumpvalues/screens/dashboard/dashboard.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
-import 'package:jumpvalues/screens/utils/utils.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
+import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/utils.dart';
+import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class LoginScreen extends StatefulWidget {

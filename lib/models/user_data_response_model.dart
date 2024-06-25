@@ -1,17 +1,32 @@
 class UserDataResponseModel {
-  UserDataResponseModel(
-      {this.statusCode, this.responseCode, this.message, this.data});
+  UserDataResponseModel({
+    this.statusCode,
+    this.responseCode,
+    this.message,
+    this.data,
+    this.error,
+  });
 
   UserDataResponseModel.fromJson(Map<String, dynamic> json) {
     statusCode = json['statusCode'];
     responseCode = json['responseCode'];
     message = json['message'];
-    data = json['data'] != null ? UserData.fromJson(json['data']) : null;
+    // Check if data is not a list and is not null before parsing
+    if (json['data'] != null && json['data'] is! List) {
+      data = UserData.fromJson(json['data']);
+    }
+    // Check if error is not null before parsing
+    if (json['error'] != null) {
+      error = (json['error'] as List)
+          .map((e) => Error.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
   }
   int? statusCode;
   String? responseCode;
   String? message;
   UserData? data;
+  List<Error>? error;
 }
 
 class UserData {
@@ -108,4 +123,16 @@ class ComprensiveListing {
   String? name;
   String? createdAt;
   String? updatedAt;
+}
+
+class Error {
+  Error({this.field, this.message});
+
+  Error.fromJson(Map<String, dynamic> json) {
+    field = json['field'];
+    message = json['message'];
+  }
+
+  String? field;
+  String? message;
 }

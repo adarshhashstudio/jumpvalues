@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
+import 'package:jumpvalues/utils/configs.dart';
 
 class LearnScreen extends StatefulWidget {
   const LearnScreen({super.key});

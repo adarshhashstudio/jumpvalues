@@ -105,11 +105,11 @@ Future<BaseResponseModel> verifyOtp(Map<String, dynamic> request) async {
   return response;
 }
 
-Future<BaseResponseModel?> updateUserProfile(
+Future<UserDataResponseModel?> updateUserProfile(
     Map<String, dynamic> request, String userId) async {
-  BaseResponseModel? response;
+  UserDataResponseModel? response;
   try {
-    response = BaseResponseModel.fromJson(await handleResponse(
+    response = UserDataResponseModel.fromJson(await handleResponse(
         await buildHttpResponse('users/update_user/$userId',
             request: request, isAuth: true, method: HttpMethodType.patch)));
   } catch (e) {

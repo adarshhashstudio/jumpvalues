@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/screens/utils/images.dart';
-import 'package:jumpvalues/screens/utils/utils.dart';
+import 'package:jumpvalues/models/booking_item_model.dart';
+import 'package:jumpvalues/network/dummy.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
+import 'package:jumpvalues/utils/images.dart';
+import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class CoachDashboard extends StatefulWidget {
@@ -12,10 +14,13 @@ class CoachDashboard extends StatefulWidget {
 }
 
 class _CoachDashboardState extends State<CoachDashboard> {
+  late Future<List<BookingItem>> futureBookingItems;
+
   @override
   void initState() {
     isTokenAvailable(context);
     super.initState();
+    futureBookingItems = fetchBookingItems();
   }
 
   @override
@@ -31,7 +36,7 @@ class _CoachDashboardState extends State<CoachDashboard> {
                 ),
                 todaySession(context, total: '5'),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.04,
+                  height: MediaQuery.of(context).size.height * 0.03,
                 ),
                 Row(
                   children: [
@@ -39,42 +44,59 @@ class _CoachDashboardState extends State<CoachDashboard> {
                       child: TotalWidget(
                         icon: icUpcoming,
                         title: 'Upcoming Sessions',
-                        total: '4',
+                        total: '10',
                         color: white,
                       ),
                     ),
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.02,
+                      width: MediaQuery.of(context).size.width * 0.05,
                     ),
                     Expanded(
                       child: TotalWidget(
                         icon: icCompleted,
                         title: 'Completed Sessions',
-                        total: '10',
+                        total: '8',
                         color: white,
                       ),
                     ),
                   ],
                 ),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.03,
+                  height: MediaQuery.of(context).size.height * 0.04,
                 ),
                 Row(
                   children: [
-                    Text('Recent Requests', style: boldTextStyle()),
+                    Text('Recent Requests ', style: boldTextStyle()),
                   ],
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
-                ListView.separated(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: 2,
-                  separatorBuilder: (context, index) => SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.02,
-                  ),
-                  itemBuilder: (context, index) => BookingItemComponent(showButtons: false,),
+                FutureBuilder<List<BookingItem>>(
+                  future: futureBookingItems,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text('No bookings found.'));
+                    } else {
+                      var bookingItems = snapshot.data!;
+                      return ListView.separated(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: 1,
+                        separatorBuilder: (context, index) => SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.03,
+                        ),
+                        itemBuilder: (context, index) => BookingItemComponent(
+                          showButtons: false,
+                          bookingItem: bookingItems[index],
+                        ),
+                      );
+                    }
+                  },
                 ),
               ],
             ),

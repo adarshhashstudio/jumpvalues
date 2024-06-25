@@ -8,9 +8,11 @@ import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/user_data_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/client_screens/select_screen.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
-import 'package:jumpvalues/screens/utils/utils.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
+import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/images.dart';
+import 'package:jumpvalues/utils/utils.dart';
+import 'package:jumpvalues/widgets/common_widgets.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -160,7 +162,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     positionController = TextEditingController(text: appStore.userPosition);
     aboutController = TextEditingController(text: appStore.userAboutMe);
     setState(() {
-      userName = '${appStore.userFullName}}';
+      userName = '${appStore.userFullName}';
       email = appStore.userEmail;
       profilePic = appStore.userProfilePic;
     });

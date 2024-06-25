@@ -1,5 +1,5 @@
 import 'package:jumpvalues/models/login_response.dart';
-import 'package:jumpvalues/screens/utils/constants.dart';
+import 'package:jumpvalues/utils/constants.dart';
 import 'package:mobx/mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -138,7 +138,7 @@ abstract class _AppStore with Store {
       await setUserProfilePic(response.data?.profilePic ?? '');
       await setLoggedIn(true);
       await setToken(response.token ?? '');
-      await setUserType(USERTYPE_COACH);
+      await setUserType(USERTYPE_CLIENT);
     }
   }
 

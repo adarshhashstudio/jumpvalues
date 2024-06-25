@@ -1,15 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/widgets/slots_calendar.dart';
 
-class CoachAddSlots extends StatefulWidget {
-  const CoachAddSlots({super.key});
+class ClientAddSlots extends StatefulWidget {
+  const ClientAddSlots({super.key});
 
   @override
-  State<CoachAddSlots> createState() => _CoachAddSlotsState();
+  State<ClientAddSlots> createState() => _ClientAddSlotsState();
 }
 
-class _CoachAddSlotsState extends State<CoachAddSlots> {
-  List<Meeting> globalMeetings = [];
+class _ClientAddSlotsState extends State<ClientAddSlots> {
+  List<Meeting> globalMeetings = [
+    Meeting(
+      'Motivation Session',
+      DateTime(2024, 6, 25, 9, 0),
+      DateTime(2024, 6, 25, 10, 0),
+      const Color(0xFF0F8644),
+      false,
+    ),
+    Meeting(
+      'Diat Plan',
+      DateTime(2024, 6, 25, 11, 0),
+      DateTime(2024, 6, 25, 12, 0),
+      const Color(0xFF0F8644),
+      false,
+    )
+  ];
 
   // Method to add or remove a meeting based on selected slot
   void handleSlotSelection(DateTime selectedDate, DateTime startTime,

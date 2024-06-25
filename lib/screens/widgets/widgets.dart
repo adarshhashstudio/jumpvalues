@@ -1,11 +1,14 @@
 // Function to show all selected values when the button is clicked
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
-import 'package:jumpvalues/screens/utils/images.dart';
+import 'package:jumpvalues/models/booking_item_model.dart';
+import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/images.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 Widget selectionContainerForAll(BuildContext context,
         {String? heading,
+        bool goToSelectValues = false,
+        void Function()? onTap,
         bool isLoading = false,
         double? spaceBelowTitle,
         BorderRadiusGeometry? borderRadius,
@@ -27,13 +30,23 @@ Widget selectionContainerForAll(BuildContext context,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (heading != null)
-            Text(
-              '$heading${isError ? ' required *' : ''}',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: isError
-                        ? Colors.red
-                        : Theme.of(context).textTheme.titleSmall?.color,
-                  ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '$heading${isError ? ' required *' : ''}',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: isError
+                            ? Colors.red
+                            : Theme.of(context).textTheme.titleSmall?.color,
+                      ),
+                ),
+                if (goToSelectValues)
+                  const Icon(
+                    Icons.arrow_right,
+                    size: 26,
+                  )
+              ],
             ),
           if (heading != null)
             SizedBox(
@@ -49,7 +62,13 @@ Widget selectionContainerForAll(BuildContext context,
                 )
         ],
       ),
-    );
+    ).onTap(() {
+      if (goToSelectValues) {
+        if (onTap != null) {
+          onTap();
+        }
+      }
+    });
 
 Widget todaySession(BuildContext context, {required String total}) =>
     GestureDetector(
@@ -68,7 +87,9 @@ Widget todaySession(BuildContext context, {required String total}) =>
                   child: Image.asset(icToday, height: 24).paddingAll(5),
                 ),
                 16.width,
-                Text('Today\'s Sessions', style: boldTextStyle()).expand(),
+                const Text('Today\'s Sessions',
+                        style: TextStyle(color: textSecondaryColor))
+                    .expand(),
                 16.width,
                 Text(
                   total,
@@ -124,39 +145,31 @@ class TotalWidget extends StatelessWidget {
             16.height,
             Text(
               title,
-              style: TextStyle(fontSize: 14, color: textColor),
+              style: const TextStyle(color: textSecondaryColor),
             ),
           ],
         ),
       );
 }
 
-class BookingItemComponent extends StatefulWidget {
-  BookingItemComponent({this.showButtons = false});
+class BookingItemComponent extends StatelessWidget {
+  BookingItemComponent({required this.showButtons, required this.bookingItem});
   final bool showButtons;
-  @override
-  BookingItemComponentState createState() => BookingItemComponentState();
-}
+  final BookingItem bookingItem;
 
-class BookingItemComponentState extends State<BookingItemComponent> {
   @override
   Widget build(BuildContext context) => buildBookingItem(context);
 
   Widget buildBookingItem(BuildContext context) {
-    // Dummy data for the UI components
-    var status = 'Pending';
-    var imageUrl = 'https://picsum.photos/id/27/200/300';
-    var inspection = false;
-    var showDescription = true;
-    var bookingId = '12345';
-    var serviceName = 'Sample Service';
-    var address = '123 Main St, City, Country';
-    var date = '2023-12-31';
-    var time = '12:00 PM';
-    var customerName = 'John Doe';
-    var description = 'This is a sample description.';
-    var paymentStatus = 'Paid';
-    var paymentMethod = 'Credit Card';
+    // Use data from bookingItem instead of dummy data
+    var status = bookingItem.status ?? 'Unknown';
+    var imageUrl = bookingItem.imageUrl ?? 'https://picsum.photos/200/300';
+    var bookingId = bookingItem.bookingId ?? 'N/A';
+    var serviceName = bookingItem.serviceName ?? 'Service';
+    var date = bookingItem.date ?? 'Date';
+    var time = bookingItem.time ?? 'Time';
+    var customerName = bookingItem.customerName ?? 'Customer';
+    var description = bookingItem.description ?? 'No description available';
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -217,6 +230,7 @@ class BookingItemComponentState extends State<BookingItemComponent> {
                       serviceName,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
+                        color: textSecondaryColor,
                         fontSize: 16,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -227,10 +241,11 @@ class BookingItemComponentState extends State<BookingItemComponent> {
               ),
             ],
           ),
-          if (showDescription)
-            buildDescriptionSection(context, inspection, address, date, time,
-                customerName, description, paymentStatus, paymentMethod),
-          if (widget.showButtons) buildButtons(context)
+          if (description.isNotEmpty)
+            buildDescriptionSection(
+                context, date, time, customerName, description),
+          if (showButtons)
+            if (status != 'Completed') buildButtons(context, status)
         ],
       ),
     ).onTap(() {
@@ -239,15 +254,12 @@ class BookingItemComponentState extends State<BookingItemComponent> {
   }
 
   Widget buildDescriptionSection(
-          BuildContext context,
-          bool inspection,
-          String address,
-          String date,
-          String time,
-          String customerName,
-          String description,
-          String paymentStatus,
-          String paymentMethod) =>
+    BuildContext context,
+    String date,
+    String time,
+    String customerName,
+    String description,
+  ) =>
       Container(
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
@@ -264,8 +276,7 @@ class BookingItemComponentState extends State<BookingItemComponent> {
                 Expanded(
                   child: Text(
                     '$date At $time',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 12),
+                    style: const TextStyle(fontSize: 12),
                     maxLines: 2,
                     textAlign: TextAlign.right,
                   ),
@@ -285,8 +296,7 @@ class BookingItemComponentState extends State<BookingItemComponent> {
                       Expanded(
                         child: Text(
                           customerName,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 12),
+                          style: const TextStyle(fontSize: 12),
                           textAlign: TextAlign.right,
                         ),
                       ),
@@ -309,8 +319,7 @@ class BookingItemComponentState extends State<BookingItemComponent> {
                           description,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 12),
+                          style: const TextStyle(fontSize: 12),
                           textAlign: TextAlign.right,
                         ),
                       ),
@@ -322,20 +331,22 @@ class BookingItemComponentState extends State<BookingItemComponent> {
         ),
       );
 
-  Widget buildButtons(BuildContext context) => Row(
+  Widget buildButtons(BuildContext context, String status) => Row(
         children: [
+          if (status == 'Pending')
+            AppButton(
+              text: 'Decline',
+              textColor: primaryColor,
+              color: white,
+              enabled: true,
+              onTap: () {},
+            ).expand(),
+          if (status == 'Pending')
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.03,
+            ),
           AppButton(
-            text: 'Decline',
-            textColor: primaryColor,
-            color: white,
-            enabled: true,
-            onTap: () {},
-          ).expand(),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.03,
-          ),
-          AppButton(
-            text: 'Accept',
+            text: status == 'In Progress' ? 'Call' : 'Accept',
             textColor: white,
             color: primaryColor,
             enabled: true,
