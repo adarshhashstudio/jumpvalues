@@ -48,15 +48,14 @@ class MeetingDataSource extends CalendarDataSource {
 
 /// Widget for displaying a calendar with slots/meetings and handling slot selection.
 class SlotsCalendar extends StatefulWidget {
-  final List<Meeting> meetings;
-  final void Function(DateTime, DateTime, DateTime, String, List<Meeting>)
-      onSlotSelected;
-
   const SlotsCalendar({
     Key? key,
     required this.meetings,
     required this.onSlotSelected,
   }) : super(key: key);
+  final List<Meeting> meetings;
+  final void Function(DateTime, DateTime, DateTime, String, List<Meeting>)
+      onSlotSelected;
 
   @override
   State<SlotsCalendar> createState() => _SlotsCalendarState();
@@ -64,29 +63,27 @@ class SlotsCalendar extends StatefulWidget {
 
 class _SlotsCalendarState extends State<SlotsCalendar> {
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.8,
-      child: Center(
-        child: SfCalendar(
-          view: CalendarView.day,
-          showNavigationArrow: true,
-          showDatePickerButton: true,
-          dataSource: MeetingDataSource(widget.meetings),
-          onTap: (details) => _onCalendarTapped(
-            context: context,
-            details: details,
-            meetings: widget.meetings,
-            onSlotSelected: widget.onSlotSelected,
-          ),
-          minDate: DateTime.now(),
-          monthViewSettings: const MonthViewSettings(
-            appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
+  Widget build(BuildContext context) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.8,
+        child: Center(
+          child: SfCalendar(
+            view: CalendarView.day,
+            showNavigationArrow: true,
+            showDatePickerButton: true,
+            dataSource: MeetingDataSource(widget.meetings),
+            onTap: (details) => _onCalendarTapped(
+              context: context,
+              details: details,
+              meetings: widget.meetings,
+              onSlotSelected: widget.onSlotSelected,
+            ),
+            minDate: DateTime.now(),
+            monthViewSettings: const MonthViewSettings(
+              appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 
   /// Handles tap events on the calendar.
   void _onCalendarTapped({
@@ -136,7 +133,8 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
         title: Column(
           children: [
             Text(meeting == null ? 'Add Slot' : 'Edit Slot',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
             const Divider(height: 0, color: Colors.black12),
           ],
@@ -225,7 +223,8 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                                 pickedTime.hour,
                                 pickedTime.minute,
                               );
-                              startTime = endTime.subtract(const Duration(hours: 1));
+                              startTime =
+                                  endTime.subtract(const Duration(hours: 1));
                             });
                           }
                         },
@@ -268,7 +267,6 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                   ? 'Available Slot'
                   : titleController.text;
 
-              
               if (endTime.difference(startTime).inHours > 1) {
                 // If duration exceeds 1 hour, show an error or adjust automatically
                 showDialog(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/auth_screens/otp_screen.dart';
+import 'package:jumpvalues/screens/utils/common.dart';
 import 'package:jumpvalues/screens/utils/utils.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -78,102 +78,102 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.of(context).pop();
-          },
-          child: const Icon(Icons.arrow_back_ios_new),
+        appBar: AppBar(
+          leading: GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: const Icon(Icons.arrow_back_ios_new),
+          ),
+          centerTitle: true,
         ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      children: [
-                        Image.asset(
-                          'assets/images/blue_jump.png',
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          height: MediaQuery.of(context).size.height * 0.2,
-                        ),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.01,
-                        ),
-                        const Text(
-                          'Enter your email',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 30,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w800,
-                            height: 0,
+        body: SafeArea(
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            'assets/images/blue_jump.png',
+                            width: MediaQuery.of(context).size.width * 0.4,
+                            height: MediaQuery.of(context).size.height * 0.2,
                           ),
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        const Text(
-                          'Please check mail to change password',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Color(0xFF494949),
-                            fontSize: 16,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w400,
-                            height: 0,
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.01,
                           ),
-                        ),
-                        const SizedBox(
-                          height: 50,
-                        ),
-                        textFormField(
-                          label: 'Email',
-                          autofocus: true,
-                          controller: emailController,
-                          onChanged: (value) {
-                            enableSubmitButton();
-                          },
-                          validator: (value) => validateEmail(value ?? ''),
-                          keyboardType: TextInputType.emailAddress,
-                          hintText: 'Enter Email',
-                        ),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.1,
-                        ),
-                      ],
+                          const Text(
+                            'Enter your email',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 30,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w800,
+                              height: 0,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          const Text(
+                            'Please check mail to change password',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Color(0xFF494949),
+                              fontSize: 16,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w400,
+                              height: 0,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 50,
+                          ),
+                          textFormField(
+                            label: 'Email',
+                            autofocus: true,
+                            controller: emailController,
+                            onChanged: (value) {
+                              enableSubmitButton();
+                            },
+                            validator: (value) => validateEmail(value ?? ''),
+                            keyboardType: TextInputType.emailAddress,
+                            hintText: 'Enter Email',
+                          ),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.1,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Column(
-                  children: [
-                    button(context, onPressed: () async {
-                      hideAppKeyboard(context);
-                      if (loader) {
-                      } else {
-                        await forgotPass();
-                      }
-                    },
-                        isLoading: loader,
-                        text: 'Forgot Password',
-                        isEnabled: submitButtonEnabled),
-                  ],
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: Column(
+                    children: [
+                      button(context, onPressed: () async {
+                        hideAppKeyboard(context);
+                        if (loader) {
+                        } else {
+                          await forgotPass();
+                        }
+                      },
+                          isLoading: loader,
+                          text: 'Forgot Password',
+                          isEnabled: submitButtonEnabled),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 }

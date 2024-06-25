@@ -8,7 +8,7 @@ class BaseResponseModel {
   int? statusCode;
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final data = <String, dynamic>{};
     data['message'] = message;
     data['statusCode'] = statusCode;
     return data;

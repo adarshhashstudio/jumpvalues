@@ -297,13 +297,13 @@ Widget button(
     ElevatedButton(
       style: ButtonStyle(
         backgroundColor: isBordered
-            ? MaterialStateProperty.all(isEnabled
+            ? WidgetStateProperty.all(isEnabled
                 ? Theme.of(context).scaffoldBackgroundColor
                 : disableColor)
-            : MaterialStateProperty.all(isEnabled
+            : WidgetStateProperty.all(isEnabled
                 ? Theme.of(context).colorScheme.primary
                 : disableColor),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             side: isBordered
                 ? BorderSide(color: Theme.of(context).primaryColor)

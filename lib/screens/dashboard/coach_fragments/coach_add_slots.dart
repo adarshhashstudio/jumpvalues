@@ -48,11 +48,11 @@ class _CoachAddSlotsState extends State<CoachAddSlots> {
 }
 
 class SlotsCalendar extends StatefulWidget {
+  const SlotsCalendar(
+      {super.key, required this.meetings, required this.onSlotSelected});
   final List<Meeting> meetings;
   final void Function(DateTime, DateTime, DateTime, String, List<Meeting>)
       onSlotSelected;
-  const SlotsCalendar(
-      {super.key, required this.meetings, required this.onSlotSelected});
 
   @override
   State<SlotsCalendar> createState() => _SlotsCalendarState();
@@ -305,14 +305,14 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: Text('Error'),
-                    content: Text('Slot duration cannot exceed 1 hour.'),
+                    title: const Text('Error'),
+                    content: const Text('Slot duration cannot exceed 1 hour.'),
                     actions: [
                       TextButton(
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
-                        child: Text('OK'),
+                        child: const Text('OK'),
                       ),
                     ],
                   ),
