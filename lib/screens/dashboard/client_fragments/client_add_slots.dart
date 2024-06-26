@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jumpvalues/network/dummy.dart';
+import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/slots_calendar.dart';
 
 class ClientAddSlots extends StatefulWidget {
@@ -9,52 +11,93 @@ class ClientAddSlots extends StatefulWidget {
 }
 
 class _ClientAddSlotsState extends State<ClientAddSlots> {
-  List<Meeting> globalMeetings = [
-    Meeting(
-      'Motivation Session',
-      DateTime(2024, 6, 25, 9, 0),
-      DateTime(2024, 6, 25, 10, 0),
-      const Color(0xFF0F8644),
-      false,
-    ),
-    Meeting(
-      'Diat Plan',
-      DateTime(2024, 6, 25, 11, 0),
-      DateTime(2024, 6, 25, 12, 0),
-      const Color(0xFF0F8644),
-      false,
-    )
-  ];
+  bool loader = true;
+  List<Meeting> globalMeetings = [];
 
-  // Method to add or remove a meeting based on selected slot
-  void handleSlotSelection(DateTime selectedDate, DateTime startTime,
-      DateTime endTime, String title) {
+  @override
+  void initState() {
+    super.initState();
+    fetchSlots();
+  }
+
+  void fetchSlots() async {
+    try {
+      await fetchMeetings().then((meetings) {
+        setState(() {
+          globalMeetings = meetings;
+          loader = false;
+        });
+      });
+    } catch (e) {
+      setState(() {
+        globalMeetings = [];
+        loader = false;
+      });
+      SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error, '$e');
+    }
+  }
+
+  // Method to update a meeting based on selected slot
+  void updateMeeting(
+      DateTime startTime, DateTime endTime, String title, String description) {
     setState(() {
-      // Remove any existing meeting that matches the selected slot
-      globalMeetings.removeWhere((meeting) =>
-          meeting.from == startTime &&
-          meeting.to == endTime &&
-          meeting.eventName == title);
+      // Find the meeting to be updated
+      var index = globalMeetings.indexWhere((meeting) {
+        debugPrint('${meeting.eventName} == $title');
+        debugPrint('${meeting.from} == $startTime');
+        debugPrint('${meeting.to} == $endTime');
+        debugPrint('${meeting.description} == $description');
+        return meeting.from == startTime &&
+            meeting.to == endTime &&
+            meeting.eventName == title;
+      });
 
-      // Add the selected slot as a new meeting
-      globalMeetings.add(
-          Meeting(title, startTime, endTime, const Color(0xFF0F8644), false));
+      if (index != -1) {
+        // Update the meeting details
+        globalMeetings[index] = Meeting('Booked - $title', startTime, endTime,
+            const Color(0xFF55560C), description, false);
 
-      // Optionally, you can sort the meetings by startTime if needed
-      globalMeetings.sort((a, b) => a.from.compareTo(b.from));
+        // Optionally, you can sort the meetings by startTime if needed
+        globalMeetings.sort((a, b) => a.from.compareTo(b.from));
+
+        SnackBarHelper.showStatusSnackBar(
+            context, StatusIndicator.success, 'Slot Booked Successfully.');
+      }
     });
   }
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        child: Center(
-          child: SlotsCalendar(
-            meetings: globalMeetings,
-            onSlotSelected: (DateTime selectedDate, DateTime startTime,
-                DateTime endTime, String title, List<Meeting> allSlots) {
-              handleSlotSelection(selectedDate, startTime, endTime, title);
-            },
+  Widget build(BuildContext context) => Stack(
+        children: [
+          SizedBox(
+            child: Center(
+              child: SlotsCalendar(
+                meetings: globalMeetings,
+                startBooking: true,
+                onSlotSelected: (DateTime selectedDate, DateTime startTime,
+                    DateTime endTime, String title, List<Meeting> allSlots) {},
+                onSlotBooking: (DateTime selectedDate, DateTime startTime,
+                    DateTime endTime, String title, String description) {
+                  if (!loader) {
+                    debugPrint(
+                        'Booking Slot: Booking Slot: Booking Slot:::::::::: $title');
+                    if (!loader) {
+                      if (title.contains('Booked')) {
+                        SnackBarHelper.showStatusSnackBar(context,
+                            StatusIndicator.warning, 'Already Booked.');
+                      } else {
+                        updateMeeting(startTime, endTime, title, 'description');
+                      }
+                    }
+                  }
+                },
+              ),
+            ),
           ),
-        ),
+          if (loader)
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
+        ],
       );
 }

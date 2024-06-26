@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class SlotsCalendar extends StatefulWidget {
   const SlotsCalendar(
-      {super.key, required this.meetings, required this.onSlotSelected});
+      {super.key,
+      required this.meetings,
+      required this.onSlotSelected,
+      this.onSlotBooking,
+      this.startBooking = false});
   final List<Meeting> meetings;
   final void Function(DateTime, DateTime, DateTime, String, List<Meeting>)
       onSlotSelected;
+  final void Function(DateTime, DateTime, DateTime, String, String)?
+      onSlotBooking;
+  final bool startBooking;
 
   @override
   State<SlotsCalendar> createState() => _SlotsCalendarState();
@@ -40,7 +48,23 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                 for (var i = 0; i < allSlots.length; i++) {
                   debugPrint('${allSlots[i].eventName}');
                 }
+                widget.onSlotSelected(
+                    selectedDate, startTime, endTime, title, allSlots);
               },
+              onSlotBooking:
+                  (selectedDate, startTime, endTime, title, description) {
+                // Handle the selected slot details and the list of all slots here
+                debugPrint('Selected Date: $selectedDate');
+                debugPrint('Start Time: $startTime');
+                debugPrint('End Time: $endTime');
+                debugPrint('Title: $title');
+                debugPrint('Description: $description');
+                if (widget.onSlotBooking != null) {
+                  widget.onSlotBooking!(
+                      selectedDate, startTime, endTime, title, description);
+                }
+              },
+              startBooking: widget.startBooking,
             ),
             minDate: DateTime(DateTime.now().year, DateTime.now().month,
                 DateTime.now().day, DateTime.now().hour, DateTime.now().minute),
@@ -58,24 +82,141 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
     required void Function(DateTime selectedDate, DateTime startTime,
             DateTime endTime, String title, List<Meeting> allSlots)
         onSlotSelected,
+    required void Function(DateTime selectedDate, DateTime startTime,
+            DateTime endTime, String title, String description)
+        onSlotBooking,
+    required bool startBooking,
   }) {
     if (details.targetElement == CalendarElement.calendarCell) {
-      var selectedDate = details.date!;
-      var startTime = DateTime(
-          selectedDate.year,
-          selectedDate.month,
-          selectedDate.day,
-          selectedDate.hour,
-          selectedDate.minute,
-          selectedDate.second);
-      var endTime = startTime.add(const Duration(hours: 1));
-      _showSlotDialog(context, null, selectedDate, startTime, endTime, meetings,
-          onSlotSelected);
+      if (startBooking) {
+        SnackBarHelper.showStatusSnackBar(
+            context, StatusIndicator.warning, 'Not Availalbe for booking.');
+      } else {
+        var selectedDate = details.date!;
+        var startTime = DateTime(
+            selectedDate.year,
+            selectedDate.month,
+            selectedDate.day,
+            selectedDate.hour,
+            selectedDate.minute,
+            selectedDate.second);
+        var endTime = startTime.add(const Duration(hours: 1));
+        _showSlotDialog(context, null, selectedDate, startTime, endTime,
+            meetings, onSlotSelected);
+      }
     } else if (details.targetElement == CalendarElement.appointment) {
-      final Meeting meeting = details.appointments!.first;
-      _showSlotDialog(context, meeting, meeting.from, meeting.from, meeting.to,
-          meetings, onSlotSelected);
+      final Meeting meeting = details.appointments?.first;
+      if (startBooking) {
+        _showSlotBookingDialog(context, meeting, onSlotBooking);
+      } else {
+        _showSlotDialog(context, meeting, meeting.from, meeting.from,
+            meeting.to, meetings, onSlotSelected);
+      }
     }
+  }
+
+  void _showSlotBookingDialog(
+    BuildContext context,
+    Meeting? meeting,
+    void Function(DateTime selectedDate, DateTime startTime, DateTime endTime,
+            String title, String description)
+        onSlotBooking,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Column(
+          children: [
+            Text('${meeting?.eventName}', style: boldTextStyle(size: 18)),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+            const Divider(height: 0, color: Colors.black12),
+          ],
+        ),
+        content: StatefulBuilder(
+          builder: (context, setState) => SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (meeting?.description != null)
+                  Text.rich(
+                    TextSpan(
+                      text: 'Remark : ',
+                      style: boldTextStyle(),
+                      children: [
+                        TextSpan(
+                            text:
+                                '${meeting!.description.isEmpty ? 'No Description!' : meeting.description}',
+                            style:
+                                const TextStyle(fontWeight: FontWeight.normal))
+                      ],
+                    ),
+                  ),
+                if (meeting?.description != null)
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                if (meeting?.description != null) divider(),
+                if (meeting?.description != null)
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                labelContainer(
+                  label: 'Date',
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height * 0.06,
+                  labelContainerSpace: 8,
+                  alignment: Alignment.centerLeft,
+                  text:
+                      '${meeting?.from.year}-${meeting?.from.month.toString().padLeft(2, '0')}-${meeting?.from.day.toString().padLeft(2, '0')}',
+                ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                Row(
+                  children: [
+                    labelContainer(
+                      label: 'Start Time:',
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height * 0.06,
+                      labelContainerSpace: 8,
+                      alignment: Alignment.centerLeft,
+                      text:
+                          '${DateFormat('hh:mm a').format(DateTime(meeting!.from.year, meeting.from.month, meeting.from.day, meeting.from.hour, meeting.from.minute, meeting.from.second)).toString().padLeft(2, '0')}',
+                    ).expand(),
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+                    labelContainer(
+                      label: 'End Time:',
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height * 0.06,
+                      labelContainerSpace: 8,
+                      alignment: Alignment.centerLeft,
+                      text:
+                          '${DateFormat('hh:mm a').format(meeting.to).toString().padLeft(2, '0')}',
+                    ).expand(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel',
+                style: boldTextStyle(size: 16, color: primaryColor)),
+          ),
+          AppButton(
+            onTap: () {
+              Navigator.of(context).pop();
+              onSlotBooking(meeting!.from, meeting.from, meeting.to,
+                  meeting.eventName, meeting.description);
+            },
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            shapeBorder: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(360)),
+            textColor: white,
+            color: primaryColor,
+            text: 'Book Slot',
+          ),
+        ],
+      ),
+    );
   }
 
   void _showSlotDialog(
@@ -279,13 +420,13 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                 if (meeting == null) {
                   setState(() {
                     meetings.add(Meeting(title, startTime, endTime,
-                        const Color(0xFF0F8644), false));
+                        const Color(0xFF0F8644), 'description', false));
                   });
                 } else {
                   setState(() {
                     final index = meetings.indexOf(meeting);
                     meetings[index] = Meeting(title, startTime, endTime,
-                        const Color(0xFF0F8644), false);
+                        const Color(0xFF0F8644), 'description', false);
                   });
                 }
                 Navigator.of(context).pop();
@@ -338,11 +479,21 @@ class MeetingDataSource extends CalendarDataSource {
 }
 
 class Meeting {
-  Meeting(this.eventName, this.from, this.to, this.background, this.isAllDay);
+  factory Meeting.fromJson(Map<String, dynamic> json) => Meeting(
+        json['eventName'],
+        DateTime.parse(json['from']),
+        DateTime.parse(json['to']),
+        Color(int.parse(json['background'])),
+        json['description'],
+        json['isAllDay'],
+      );
+  Meeting(this.eventName, this.from, this.to, this.background, this.description,
+      this.isAllDay);
 
   String eventName;
   DateTime from;
   DateTime to;
   Color background;
+  String description;
   bool isAllDay;
 }

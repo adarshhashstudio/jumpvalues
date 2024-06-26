@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:jumpvalues/models/booking_item_model.dart';
+import 'package:jumpvalues/widgets/slots_calendar.dart';
 
 Future<List<BookingItem>> fetchBookingItems() async {
   await Future.delayed(
@@ -45,4 +46,47 @@ Future<List<BookingItem>> fetchBookingItems() async {
   var bookingItems =
       jsonList.map((json) => BookingItem.fromJson(json)).toList();
   return bookingItems;
+}
+
+Future<List<Meeting>> fetchMeetings() async {
+  await Future.delayed(const Duration(seconds: 1));
+
+  var jsonString = '''[
+      {
+        "eventName": "Available Session",
+        "from": "2024-06-26T13:00:00",
+        "to": "2024-06-26T14:00:00",
+        "background": "0xFF0F8644",
+        "description": "Description for Availble Session",
+        "isAllDay": false
+      },
+      {
+        "eventName": "Motivation Session",
+        "from": "2024-06-27T09:00:00",
+        "to": "2024-06-27T10:00:00",
+        "background": "0xFF0F8644",
+        "description": "Description for Motivation Session",
+        "isAllDay": false
+      },
+      {
+        "eventName": "Diet Plan",
+        "from": "2024-06-27T11:00:00",
+        "to": "2024-06-27T12:00:00",
+        "background": "0xFF0F8644",
+        "description": "Description for Diet Plan",
+        "isAllDay": false
+      },
+      {
+        "eventName": "Fitness Training",
+        "from": "2024-06-28T14:00:00",
+        "to": "2024-06-28T15:00:00",
+        "background": "0xFF0F8644",
+        "description": "Description for Fitness Training",
+        "isAllDay": false
+      }
+    ]''';
+
+  List<dynamic> jsonList = json.decode(jsonString);
+  var meetings = jsonList.map((json) => Meeting.fromJson(json)).toList();
+  return meetings;
 }

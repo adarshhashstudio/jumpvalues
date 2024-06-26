@@ -22,8 +22,8 @@ class _CoachAddSlotsState extends State<CoachAddSlots> {
           meeting.eventName == title);
 
       // Add the selected slot as a new meeting
-      globalMeetings.add(
-          Meeting(title, startTime, endTime, const Color(0xFF0F8644), false));
+      globalMeetings.add(Meeting(title, startTime, endTime,
+          const Color(0xFF0F8644), 'description', false));
 
       // Optionally, you can sort the meetings by startTime if needed
       globalMeetings.sort((a, b) => a.from.compareTo(b.from));
