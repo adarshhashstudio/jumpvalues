@@ -74,19 +74,23 @@ class _ClientAddSlotsState extends State<ClientAddSlots> {
               child: SlotsCalendar(
                 meetings: globalMeetings,
                 startBooking: true,
-                onSlotSelected: (DateTime selectedDate, DateTime startTime,
-                    DateTime endTime, String title, List<Meeting> allSlots) {},
+                onSlotSelected: (
+                  DateTime selectedDate,
+                  DateTime startTime,
+                  DateTime endTime,
+                  String title,
+                  String description,
+                  List<Meeting> allSlots,
+                ) {},
                 onSlotBooking: (DateTime selectedDate, DateTime startTime,
                     DateTime endTime, String title, String description) {
                   if (!loader) {
-                    debugPrint(
-                        'Booking Slot: Booking Slot: Booking Slot:::::::::: $title');
                     if (!loader) {
                       if (title.contains('Booked')) {
                         SnackBarHelper.showStatusSnackBar(context,
                             StatusIndicator.warning, 'Already Booked.');
                       } else {
-                        updateMeeting(startTime, endTime, title, 'description');
+                        updateMeeting(startTime, endTime, title, description);
                       }
                     }
                   }

@@ -13,20 +13,20 @@ class _CoachAddSlotsState extends State<CoachAddSlots> {
 
   // Method to add or remove a meeting based on selected slot
   void handleSlotSelection(DateTime selectedDate, DateTime startTime,
-      DateTime endTime, String title) {
+      DateTime endTime, String title, String description) {
     setState(() {
-      // Remove any existing meeting that matches the selected slot
-      globalMeetings.removeWhere((meeting) =>
-          meeting.from == startTime &&
-          meeting.to == endTime &&
-          meeting.eventName == title);
+      // // Remove any existing meeting that matches the selected slot
+      // globalMeetings.removeWhere((meeting) =>
+      //     meeting.from == startTime &&
+      //     meeting.to == endTime &&
+      //     meeting.eventName == title);
 
-      // Add the selected slot as a new meeting
-      globalMeetings.add(Meeting(title, startTime, endTime,
-          const Color(0xFF0F8644), 'description', false));
+      // // Add the selected slot as a new meeting
+      // globalMeetings.add(Meeting(title, startTime, endTime,
+      //     const Color(0xFF0F8644), 'description', false));
 
-      // Optionally, you can sort the meetings by startTime if needed
-      globalMeetings.sort((a, b) => a.from.compareTo(b.from));
+      // // Optionally, you can sort the meetings by startTime if needed
+      // globalMeetings.sort((a, b) => a.from.compareTo(b.from));
     });
   }
 
@@ -35,9 +35,16 @@ class _CoachAddSlotsState extends State<CoachAddSlots> {
         child: Center(
           child: SlotsCalendar(
             meetings: globalMeetings,
-            onSlotSelected: (DateTime selectedDate, DateTime startTime,
-                DateTime endTime, String title, List<Meeting> allSlots) {
-              handleSlotSelection(selectedDate, startTime, endTime, title);
+            onSlotSelected: (
+              DateTime selectedDate,
+              DateTime startTime,
+              DateTime endTime,
+              String title,
+              String description,
+              List<Meeting> allSlots,
+            ) {
+              handleSlotSelection(
+                  selectedDate, startTime, endTime, title, description);
             },
           ),
         ),
