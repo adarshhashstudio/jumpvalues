@@ -85,7 +85,7 @@ class UserData {
   String? aboutMe;
   bool? termsAndConditions;
   String? status;
-  String? otp;
+  int? otp;
   String? createdAt;
   String? updatedAt;
   List<UserRole>? roles;

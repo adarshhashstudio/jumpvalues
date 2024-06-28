@@ -3,6 +3,7 @@ import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/auth_screens/otp_screen.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -51,9 +52,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     try {
       var request = {'email': emailController?.text ?? ''};
       var response = await forgotPassword(request);
-      setState(() {
-        loader = false;
-      });
       if (response?.statusCode == 200) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Successfully Sent to mail.');
@@ -63,16 +61,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   isFrom: 'forgotPassword',
                 )));
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong');
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
       }
     } catch (e) {
+      debugPrint('forgotPass Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-      SnackBarHelper.showStatusSnackBar(
-          context, StatusIndicator.error, e.toString());
-      rethrow;
     }
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -388,3 +389,140 @@ Widget divider() => const Divider(
       height: 0,
       color: Colors.black12,
     );
+
+void showRatingDialog(BuildContext context,
+    {void Function()? onTapRateNow,
+    void Function()? onTapMaybeLater,
+    bool isShortDialogue = false}) {
+  var messageController = TextEditingController();
+  var rating = 3.0;
+  var rateLoading = false;
+
+  var maybeLaterButton = InkWell(
+    onTap: () {
+      if (onTapMaybeLater != null) {
+        onTapMaybeLater();
+      } else {
+        // exit(0);
+        Navigator.of(context).pop();
+      }
+    },
+    child: Text(
+      'Cancel',
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.9),
+          fontSize: 13),
+    ).center(),
+  );
+
+  var alertDialog = AlertDialog(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    backgroundColor: Theme.of(context).colorScheme.background,
+    shadowColor: Theme.of(context).colorScheme.background,
+    surfaceTintColor: Theme.of(context).colorScheme.background,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+    title: Text(
+      'Your opinion matters to us',
+      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+          fontSize: 18,
+          color: Theme.of(context).brightness == Brightness.light
+              ? textColor
+              : secondaryColor),
+    ).center(),
+    content: StatefulBuilder(
+        builder: (context, setState) => Container(
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withOpacity(0.1)),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    20.height,
+                    Text(
+                      'How was your experience?',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontSize: 14,
+                          color:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? textColor
+                                  : secondaryColor),
+                    ),
+                    if (!isShortDialogue) 10.height,
+                    if (!isShortDialogue)
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.62,
+                        child: RatingBar.builder(
+                          initialRating: rating,
+                          minRating: 1,
+                          direction: Axis.horizontal,
+                          itemCount: 5,
+                          itemPadding:
+                              const EdgeInsets.symmetric(horizontal: 4.0),
+                          itemBuilder: (context, _) => const Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                          ),
+                          onRatingUpdate: (rate) {
+                            rating = rate;
+                          },
+                        ),
+                      ),
+                    if (!isShortDialogue) 16.height,
+                    if (!isShortDialogue)
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.62,
+                        child: Center(
+                          child: textFormField(
+                            controller: messageController,
+                            hintText: 'Leave Message',
+                            label: '',
+                            isLabel: false,
+                            maxLines: 3,
+                          ),
+                        ),
+                      ),
+                    20.height,
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.62,
+                      child: AppButton(
+                        onTap: () async {
+                          hideKeyboard(context);
+                          setState(() {
+                            rateLoading = true;
+                          });
+                          await Future.delayed(const Duration(seconds: 1))
+                              .then((v) {
+                            setState(() {
+                              rateLoading = false;
+                            });
+                            Navigator.of(context).pop();
+                          });
+                        },
+                        text: 'Rate Now',
+                        child: rateLoading
+                            ? Transform.scale(
+                                scale: 0.6,
+                                child: CircularProgressIndicator(
+                                  color: primaryColor,
+                                ).center(),
+                              )
+                            : null,
+                      ),
+                    ),
+                    20.height,
+                  ],
+                ),
+              ),
+            )),
+    actions: [
+      maybeLaterButton,
+    ],
+  );
+
+  showDialog(
+    context: context,
+    useSafeArea: true,
+    builder: (BuildContext context) => alertDialog,
+  );
+}

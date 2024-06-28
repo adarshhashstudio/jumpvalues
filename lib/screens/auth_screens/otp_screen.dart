@@ -68,27 +68,24 @@ class _OtpScreenState extends State<OtpScreen> {
     setState(() {
       loader = true;
     });
-
     try {
       var request = {'email': widget.email};
       var response = await forgotPassword(request);
-      setState(() {
-        loader = false;
-      });
       if (response?.statusCode == 200) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Successfully Sent to mail.');
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong');
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
       }
     } catch (e) {
+      debugPrint('forgotPass Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-      SnackBarHelper.showStatusSnackBar(
-          context, StatusIndicator.error, e.toString());
-      rethrow;
     }
   }
 
@@ -96,27 +93,24 @@ class _OtpScreenState extends State<OtpScreen> {
     setState(() {
       loader = true;
     });
-
     try {
       var request = {'email': widget.email};
       var response = await resendOtpForSignup(request);
-      setState(() {
-        loader = false;
-      });
       if (response?.statusCode == 200) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Successfully Sent to mail.');
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong');
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
       }
     } catch (e) {
+      debugPrint('sendOtp Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-      SnackBarHelper.showStatusSnackBar(
-          context, StatusIndicator.error, e.toString());
-      rethrow;
     }
   }
 
@@ -128,9 +122,6 @@ class _OtpScreenState extends State<OtpScreen> {
     try {
       var request = {'email': widget.email, 'OTP': otp?.text};
       var response = await verifyOtp(request);
-      setState(() {
-        loader = false;
-      });
       if (response.statusCode == 200) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response.message ?? 'Verified Success');
@@ -142,16 +133,17 @@ class _OtpScreenState extends State<OtpScreen> {
               MaterialPageRoute(builder: (context) => const LoginScreen()));
         }
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response.message ?? 'Something went wrong');
+        if (response.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response.message ?? errorSomethingWentWrong);
+        }
       }
     } catch (e) {
+      debugPrint('verify Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-      SnackBarHelper.showStatusSnackBar(
-          context, StatusIndicator.error, e.toString());
-      rethrow;
     }
   }
 

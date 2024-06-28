@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
-import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
+import 'package:jumpvalues/network/status_codes.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart'; // Add a prefix for dio
@@ -40,7 +40,42 @@ Uri buildBaseUrl(String endPoint) {
   return url;
 }
 
-Future<dio.Response<dynamic>> buildHttpResponse(
+String handleDioError(DioException error) {
+  switch (error.type) {
+    case DioExceptionType.connectionTimeout:
+    case DioExceptionType.sendTimeout:
+    case DioExceptionType.receiveTimeout:
+      return 'Timeout occurred while sending or receiving, Try again later.';
+    case DioExceptionType.badResponse:
+      final statusCode = error.response?.statusCode;
+      if (statusCode != null) {
+        switch (statusCode) {
+          case StatusCode.badRequest:
+            return 'Bad Request';
+          case StatusCode.unauthorized:
+          case StatusCode.forbidden:
+            return 'Unauthorized';
+          case StatusCode.notFound:
+            return 'Not Found';
+          case StatusCode.internalServerError:
+            return 'Internal Server Error';
+        }
+      }
+      return 'Server Error';
+    case DioExceptionType.cancel:
+      return 'Request Cancelled';
+    case DioExceptionType.badCertificate:
+      return 'Bad Certificate';
+    case DioExceptionType.connectionError:
+      return 'No Internet Connection';
+    case DioExceptionType.unknown:
+      return 'Unknown Error';
+    default:
+      return 'Unknown Error';
+  }
+}
+
+Future<Response<dynamic>> buildHttpResponse(
   String endPoint, {
   HttpMethodType method = HttpMethodType.get,
   Map<String, dynamic>? request,
@@ -59,9 +94,11 @@ Future<dio.Response<dynamic>> buildHttpResponse(
     var url = buildBaseUrl(endPoint);
 
     late Response response;
+    var dio = Dio();
+
+    dio.options.connectTimeout = const Duration(seconds: 15);
 
     try {
-      var dio = Dio();
       response = await dio.request(
         url.toString(),
         data: request,
@@ -70,27 +107,34 @@ Future<dio.Response<dynamic>> buildHttpResponse(
           headers: headers,
         ),
       );
-    } catch (e) {
-      if (e is DioException) {
-        // Server returned an error response
-        response = e.response ??
-            dio.Response(
-              statusCode: 1000,
-              requestOptions: RequestOptions(path: endPoint),
-              data: {
-                'error': {'message': 'Something went wrong'}
-              },
-            );
+    } on DioError catch (e) {
+      // Handle DioError specifically to capture detailed error messages
+      if (e.response != null) {
+        // If response is available, capture status code and error data
+        response = Response(
+          statusCode: e.response?.statusCode ?? StatusCode.defaultError,
+          requestOptions: RequestOptions(path: endPoint),
+          data: e.response?.data,
+        );
       } else {
-        // Other types of errors (network issues, client-side exceptions)
-        response = dio.Response(
-          statusCode: 408,
+        // Otherwise, handle other DioError types with a generic message
+        response = Response(
+          statusCode: StatusCode.defaultError,
           requestOptions: RequestOptions(path: endPoint),
           data: {
-            'error': {'message': 'Something went wrong'}
+            'error': {'message': handleDioError(e)}
           },
         );
       }
+    } catch (e) {
+      // Catch all other exceptions and wrap in Response with a generic message
+      response = Response(
+        statusCode: StatusCode.defaultError,
+        requestOptions: RequestOptions(path: endPoint),
+        data: {
+          'error': {'message': 'Unknown error occurred'}
+        },
+      );
     }
 
     apidebugPrint(
@@ -106,37 +150,75 @@ Future<dio.Response<dynamic>> buildHttpResponse(
 
     return response;
   } else {
-    throw errorInternetNotAvailable;
+    return Response(
+      statusCode: StatusCode.noInternetConnection,
+      requestOptions: RequestOptions(path: endPoint),
+      data: {
+        'error': {'message': 'No internet connection available'}
+      },
+    );
   }
 }
 
-Future handleResponse(dio.Response response,
+Future<dynamic> handleResponse(Response response,
     {String endPoint = '',
     HttpResponseType httpResponseType = HttpResponseType.JSON,
     bool? avoidTokenError,
     bool? isSadadPayment}) async {
-  if (!await isNetworkAvailable()) {
-    throw errorInternetNotAvailable;
-  }
-
-  if (response.statusCode == 200 || response.statusCode == 201) {
-    return response.data;
-  } else if (response.statusCode == 400) {
-    return response.data;
-  } else if (response.statusCode == 403) {
-    SnackBarHelper.showStatusSnackBar(
+  switch (response.statusCode) {
+    case StatusCode.success:
+      return response.data;
+    case StatusCode.noContent:
+      SnackBarHelper.showStatusSnackBar(
         NavigationService.navigatorKey.currentContext!,
         StatusIndicator.warning,
-        'Session Expired.');
-    tokenExpired(NavigationService.navigatorKey.currentContext!);
-  } else {
-    var errorMessage = response.data['message'] ?? errorSomethingWentWrong;
-    if (endPoint == 'auth/signup') {
-      // If endpoint is 'auth/signup' and there's an 'error' key in response
-      errorMessage =
-          response.data['error'][0]['message'] ?? errorSomethingWentWrong;
-    }
-    throw errorMessage;
+        response.data['message'] ?? 'No content',
+      );
+      return response.data;
+    case StatusCode.badRequest:
+      if (response.data.containsKey('errors')) {
+        // Handle multiple errors in response
+        // var errors = response.data['errors'];
+        // if (errors is List) {
+        //   errors.forEach((error) {
+        //     // Show error messages for respective fields
+        //     SnackBarHelper.showStatusSnackBar(
+        //       NavigationService.navigatorKey.currentContext!,
+        //       StatusIndicator.error,
+        //       error['message'] ?? 'Validation error',
+        //     );
+        //   });
+        // }
+      } else {
+        // Default error handling if 'errors' key is not present
+        // SnackBarHelper.showStatusSnackBar(
+        //   NavigationService.navigatorKey.currentContext!,
+        //   StatusIndicator.error,
+        //   response.data['message'] ?? 'Bad request',
+        // );
+      }
+      return response.data;
+    case StatusCode.forbidden:
+      SnackBarHelper.showStatusSnackBar(
+        NavigationService.navigatorKey.currentContext!,
+        StatusIndicator.warning,
+        response.data['message'] ?? 'Forbidden',
+      );
+      tokenExpired(NavigationService.navigatorKey.currentContext!);
+      break;
+    case StatusCode.noInternetConnection:
+      SnackBarHelper.showStatusSnackBar(
+        NavigationService.navigatorKey.currentContext!,
+        StatusIndicator.error,
+        response.data['message'] ?? 'No internet connection',
+      );
+      return response.data;
+    default:
+      SnackBarHelper.showStatusSnackBar(
+        NavigationService.navigatorKey.currentContext!,
+        StatusIndicator.error,
+        response.data['message'] ?? 'Unknown error',
+      );
   }
 }
 
@@ -181,9 +263,9 @@ Map<String, String> buildHeaderTokens({
   return header;
 }
 
-Future<dio.Response<dynamic>> uploadImage(Uri url, File imageFile,
+Future<Response<dynamic>> uploadImage(Uri url, File imageFile,
     {Map<String, String>? fields, bool isAuth = false}) async {
-  late dio.Response<dynamic> response;
+  late Response<dynamic> response;
 
   try {
     var dio = Dio();
@@ -202,12 +284,12 @@ Future<dio.Response<dynamic>> uploadImage(Uri url, File imageFile,
       url.toString(),
       data: formData,
     );
-  } catch (e) {
-    response = dio.Response(
-      statusCode: 408,
+  } on DioException catch (e) {
+    response = Response(
+      statusCode: StatusCode.defaultError,
       requestOptions: RequestOptions(path: url.toString()),
       data: {
-        'error': {'message': 'Timeout error'}
+        'error': {'message': handleDioError(e)}
       },
     );
   }

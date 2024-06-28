@@ -50,18 +50,17 @@ class _SelectScreenState extends State<SelectScreen> {
         filteredToneList = List.from(
             toneList); // Initialize filteredToneList with the same contents as toneList initially
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong.');
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
       }
-      setState(() {
-        loader = false;
-      });
     } catch (e) {
+      debugPrint('getAllComprehensive Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-      SnackBarHelper.showStatusSnackBar(
-          context, StatusIndicator.error, e.toString());
     }
   }
 
@@ -88,17 +87,17 @@ class _SelectScreenState extends State<SelectScreen> {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Saved Successfully.');
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong.');
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
       }
-      setState(() {
-        loader = false;
-      });
     } catch (e) {
+      debugPrint('saveSelectedComprehensive Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-      rethrow;
     }
   }
 
@@ -107,7 +106,7 @@ class _SelectScreenState extends State<SelectScreen> {
       loader = true;
     });
     try {
-      var response = await getUserDetails(appStore.userId.toString());
+      var response = await getUserDetails(appStore.userId ?? -1);
       if (response?.statusCode == 200) {
         setState(() {
           userData = response;
@@ -116,8 +115,8 @@ class _SelectScreenState extends State<SelectScreen> {
           // Clear selectedTones before adding new values
           selectedTones.clear();
           // Convert List<ComprensiveListing> to Set<ComprehensiveValues>
-          var convertedValues = userData!.data!.comprensiveListings!
-              .map((listing) => ComprehensiveValues(
+          var convertedValues = userData?.data?.comprensiveListings
+              ?.map((listing) => ComprehensiveValues(
                     id: listing.id,
                     name: listing.name,
                     createdAt: listing.createdAt,
@@ -125,22 +124,22 @@ class _SelectScreenState extends State<SelectScreen> {
                   ))
               .toSet();
           // Add converted values to selectedTones
-          selectedTones.addAll(convertedValues);
+          selectedTones.addAll(convertedValues ?? {});
         }
         debugPrint('Selected Tones values: $selectedTones');
         setState(() {});
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong.');
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
       }
-      setState(() {
-        loader = false;
-      });
     } catch (e) {
+      debugPrint('getUser Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-      rethrow;
     }
   }
 

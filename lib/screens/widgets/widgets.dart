@@ -1,6 +1,7 @@
 // Function to show all selected values when the button is clicked
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/models/booking_item_model.dart';
+import 'package:jumpvalues/models/service_resource.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/images.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -153,23 +154,34 @@ class TotalWidget extends StatelessWidget {
 }
 
 class BookingItemComponent extends StatelessWidget {
-  BookingItemComponent({required this.showButtons, required this.bookingItem});
+  BookingItemComponent({
+    required this.showButtons,
+    required this.bookingItem,
+    this.serviceResource,
+  });
   final bool showButtons;
   final BookingItem bookingItem;
+  final ServiceResource? serviceResource;
 
   @override
   Widget build(BuildContext context) => buildBookingItem(context);
 
   Widget buildBookingItem(BuildContext context) {
     // Use data from bookingItem instead of dummy data
-    var status = bookingItem.status ?? 'Unknown';
-    var imageUrl = bookingItem.imageUrl ?? 'https://picsum.photos/200/300';
-    var bookingId = bookingItem.bookingId ?? 'N/A';
-    var serviceName = bookingItem.serviceName ?? 'Service';
-    var date = bookingItem.date ?? 'Date';
-    var time = bookingItem.time ?? 'Time';
-    var customerName = bookingItem.customerName ?? 'Customer';
-    var description = bookingItem.description ?? 'No description available';
+    var status = serviceResource?.status ?? bookingItem.status ?? 'Unknown';
+    var imageUrl = serviceResource?.avatar ??
+        bookingItem.imageUrl ??
+        'https://picsum.photos/200/300';
+    var bookingId = serviceResource?.id ?? bookingItem.bookingId ?? 'N/A';
+    var serviceName =
+        serviceResource?.firstName ?? bookingItem.serviceName ?? 'Service';
+    var date = DateTime.now().toString() ?? bookingItem.date ?? 'Date';
+    var time = DateTime.now().toString() ?? bookingItem.time ?? 'Time';
+    var customerName =
+        serviceResource?.lastName ?? bookingItem.customerName ?? 'Customer';
+    var description = serviceResource?.email ??
+        bookingItem.description ??
+        'No description available';
 
     return Container(
       padding: const EdgeInsets.all(12),

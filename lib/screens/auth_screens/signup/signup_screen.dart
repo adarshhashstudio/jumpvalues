@@ -188,7 +188,10 @@ class _SignupScreenState extends State<SignupScreen>
         if (response.data == null) {
           // for first time signup
           SnackBarHelper.showStatusSnackBar(
-              context, StatusIndicator.success, response.message ?? '');
+            context,
+            StatusIndicator.success,
+            response.message ?? '',
+          );
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => OtpScreen(
@@ -200,7 +203,10 @@ class _SignupScreenState extends State<SignupScreen>
         } else {
           // if user already registered but not verified yet
           SnackBarHelper.showStatusSnackBar(
-              context, StatusIndicator.success, response.message ?? '');
+            context,
+            StatusIndicator.success,
+            response.message ?? '',
+          );
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) =>
@@ -209,10 +215,7 @@ class _SignupScreenState extends State<SignupScreen>
           );
         }
       } else {
-        if (response.error?.length == 1) {
-          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-              response.error?[0].message ?? 'Unexpected Error Occurred.');
-        } else {
+        if (response.error?.isNotEmpty ?? false) {
           // Set field errors and focus on the first error field
           response.error?.forEach((e) {
             fieldErrors[e.field!] = e.message!;
@@ -234,16 +237,21 @@ class _SignupScreenState extends State<SignupScreen>
           } else if (fieldErrors.containsKey('aboutMe')) {
             FocusScope.of(context).requestFocus(aboutFocusNode);
           }
-
-          setState(() {});
+        } else {
+          // Handle other errors
+          SnackBarHelper.showStatusSnackBar(
+            context,
+            StatusIndicator.error,
+            response.message ?? 'Unexpected Error Occurred.',
+          );
         }
       }
     } catch (e) {
+      debugPrint('signup Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-      // Handle other errors
-      SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error, '$e');
     }
   }
 

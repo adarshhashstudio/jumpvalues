@@ -168,16 +168,12 @@ class _CommonProfileState extends State<CommonProfile> {
           setState(() {});
         }
       }
-
-      setState(() {
-        loader = false;
-      });
     } catch (e) {
+      debugPrint('updateProfile Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-      SnackBarHelper.showStatusSnackBar(
-          context, StatusIndicator.error, e.toString());
     }
   }
 
@@ -313,17 +309,13 @@ class _CommonProfileState extends State<CommonProfile> {
           response?.message ?? 'Profile Pic Uploaded Successfully.',
         );
       } else {
-        SnackBarHelper.showStatusSnackBar(
-          context,
-          StatusIndicator.error,
-          response?.message ?? 'Something went wrong.',
-        );
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
       }
     } catch (e) {
-      debugPrint('Error uploading profile pic: $e');
-      setState(() {
-        loader = false;
-      });
+      debugPrint('uploadProfilePic Error: $e');
     } finally {
       setState(() {
         loader = false;
@@ -336,24 +328,24 @@ class _CommonProfileState extends State<CommonProfile> {
       loader = true;
     });
     try {
-      var response = await getUserDetails(appStore.userId.toString());
+      var response = await getUserDetails(appStore.userId??-1);
       if (response?.statusCode == 200) {
         setState(() {
           userData = response;
         });
         setState(() {});
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong.');
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
       }
-      setState(() {
-        loader = false;
-      });
     } catch (e) {
+      debugPrint('getUser Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-      rethrow;
     }
   }
 

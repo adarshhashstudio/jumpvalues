@@ -9,11 +9,11 @@ import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_dashbaord.dar
 import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_sessions.dart';
 import 'package:jumpvalues/screens/dashboard/common_profile.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
-import 'package:jumpvalues/screens/welcome_screen.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/images.dart';
 import 'package:jumpvalues/utils/string_extensions.dart';
 import 'package:jumpvalues/utils/utils.dart';
+import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class Dashboard extends StatefulWidget {
@@ -102,30 +102,20 @@ class DashboardState extends State<Dashboard> {
     try {
       var response = await logoutUser();
       if (response?.statusCode == 200) {
-        setState(() {
-          loader = false;
-        });
-
         await appStore.clearData();
-
-        // // Navigate to WelcomeScreen
-        await Navigator.of(profileContext).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-            (Route<dynamic> route) => false);
-      } else if (response?.statusCode == 403) {
-        setState(() {
-          loader = false;
-        });
-
-        await appStore.clearData();
-
         isTokenAvailable(context);
+      } else {
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
       }
     } catch (e) {
+      debugPrint('logoutUser Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-      rethrow;
     }
   }
 
@@ -218,6 +208,21 @@ class DashboardState extends State<Dashboard> {
                           width: 10,
                         ),
                         Text('Contact Us')
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 3,
+                    onTap: () {
+                      showRatingDialog(context);
+                    },
+                    child: const Row(
+                      children: [
+                        Icon(Icons.star),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text('Feedback')
                       ],
                     ),
                   ),
