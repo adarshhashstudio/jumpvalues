@@ -4,6 +4,7 @@ import 'package:jumpvalues/models/booking_item_model.dart';
 import 'package:jumpvalues/models/service_resource.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/images.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -106,24 +107,62 @@ class _CoachSessionsState extends State<CoachSessions> {
         children: [
           RefreshIndicator(
             onRefresh: _refreshBookingItems,
-            child: ListView.separated(
-                controller: _scrollController,
-                itemCount: _bookingItems.length + 1,
-                separatorBuilder: (context, index) => SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.03,
-                    ),
-                itemBuilder: (context, index) {
-                  if (index == _bookingItems.length) {
-                    return _isLoading
-                        ? Center(child: CircularProgressIndicator())
-                        : SizedBox.shrink();
-                  }
-                  return BookingItemComponent(
-                    showButtons: true,
-                    bookingItem: BookingItem(),
-                    serviceResource: _bookingItems[index],
-                  );
-                }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),
+            child: (!_isLoading && _bookingItems.isEmpty)
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        empty,
+                        width: MediaQuery.of(context).size.width * 0.4,
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.01,
+                      ),
+                      const Text(
+                        'Data Not Available.',
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.02,
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.refresh, color: primaryColor)
+                              .onTap(_refreshBookingItems),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.01,
+                          ),
+                          Text(
+                            'Reload',
+                            textAlign: TextAlign.center,
+                            style: boldTextStyle(color: primaryColor),
+                          ).onTap(_refreshBookingItems),
+                        ],
+                      ),
+                    ],
+                  ).center()
+                : ListView.separated(
+                    controller: _scrollController,
+                    itemCount: _bookingItems.length + 1,
+                    separatorBuilder: (context, index) => SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.03,
+                        ),
+                    itemBuilder: (context, index) {
+                      if (index == _bookingItems.length) {
+                        return _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : const SizedBox.shrink();
+                      }
+                      return BookingItemComponent(
+                        showButtons: true,
+                        bookingItem: BookingItem(),
+                        serviceResource: _bookingItems[index],
+                        index: index,
+                      );
+                    }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),
           ),
           Positioned(
               top: 0,

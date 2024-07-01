@@ -153,13 +153,14 @@ class _ClientSessionsState extends State<ClientSessions> {
                     itemBuilder: (context, index) {
                       if (index == _bookingItems.length) {
                         return _isLoading
-                            ? Center(child: CircularProgressIndicator())
-                            : SizedBox.shrink();
+                            ? const Center(child: CircularProgressIndicator())
+                            : const SizedBox.shrink();
                       }
                       return BookingItemComponent(
                         showButtons: true,
                         bookingItem: BookingItem(),
                         serviceResource: _bookingItems[index],
+                        index: index,
                       );
                     }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),
           ),

@@ -169,11 +169,6 @@ Future<dynamic> handleResponse(Response response,
     case StatusCode.success:
       return response.data;
     case StatusCode.noContent:
-      SnackBarHelper.showStatusSnackBar(
-        NavigationService.navigatorKey.currentContext!,
-        StatusIndicator.warning,
-        response.data['message'] ?? 'No content',
-      );
       return response.data;
     case StatusCode.badRequest:
       if (response.data.containsKey('errors')) {
