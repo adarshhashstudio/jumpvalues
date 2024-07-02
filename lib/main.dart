@@ -1,5 +1,7 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:jumpvalues/network/firebase_apis.dart';
 import 'package:jumpvalues/screens/splash_screen.dart';
 import 'package:jumpvalues/store/app_store.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -14,6 +16,14 @@ class NavigationService {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+      options: const FirebaseOptions(
+    apiKey: 'AIzaSyBg3DW6PG-UgfUkFB0WKurkkpXGzdS5HkE',
+    appId: '1:36694481587:android:9676cd788ef2d9dc7eaec6',
+    messagingSenderId: '36694481587',
+    projectId: 'jumpcc-8634f',
+  ));
 
   await initialize();
 

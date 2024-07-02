@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "36694481587",
+    "project_id": "jumpcc-8634f",
+    "storage_bucket": "jumpcc-8634f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:36694481587:android:9676cd788ef2d9dc7eaec6",
+        "android_client_info": {
+          "package_name": "com.jumpccc.jumpvalues"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBg3DW6PG-UgfUkFB0WKurkkpXGzdS5HkE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

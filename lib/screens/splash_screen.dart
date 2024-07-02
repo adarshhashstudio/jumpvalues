@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
+import 'package:jumpvalues/network/firebase_apis.dart';
 import 'package:jumpvalues/screens/dashboard/dashboard.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
 
@@ -14,7 +15,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     checkTokenAndNavigate();
+
+    initializeNotifications();
     super.initState();
+  }
+
+  void initializeNotifications() async {
+    await FirebaseApi().initNotifications();
   }
 
   void checkTokenAndNavigate() async {
