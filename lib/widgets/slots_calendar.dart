@@ -14,11 +14,9 @@ class SlotsCalendar extends StatefulWidget {
       this.onSlotBooking,
       this.startBooking = false});
   final List<Meeting> meetings;
-  final void Function(
-          DateTime, DateTime, DateTime, String, String, List<Meeting>)
+  final void Function(DateTime, DateTime, DateTime, String, List<Meeting>)
       onSlotSelected;
-  final void Function(DateTime, DateTime, DateTime, String, String)?
-      onSlotBooking;
+  final void Function(DateTime, DateTime, DateTime, String)? onSlotBooking;
   final bool startBooking;
 
   @override
@@ -39,30 +37,29 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
               context: context,
               details: details,
               meetings: widget.meetings,
-              onSlotSelected: (selectedDate, startTime, endTime, title,
-                  description, allSlots) {
+              onSlotSelected: (selectedDate, startTime, endTime,
+                  selectSlotRemark, allSlots) {
                 // Handle the selected slot details and the list of all slots here
                 debugPrint('Selected Date: $selectedDate');
                 debugPrint('Start Time: $startTime');
                 debugPrint('End Time: $endTime');
-                debugPrint('Title: $title');
+                debugPrint('Title: $selectSlotRemark');
                 for (var i = 0; i < allSlots.length; i++) {
-                  debugPrint('${allSlots[i].eventName}');
+                  debugPrint('${allSlots[i].remark}');
                 }
-                widget.onSlotSelected(selectedDate, startTime, endTime, title,
-                    description, allSlots);
+                widget.onSlotSelected(selectedDate, startTime, endTime,
+                    selectSlotRemark, allSlots);
               },
               onSlotBooking:
-                  (selectedDate, startTime, endTime, title, description) {
+                  (selectedDate, startTime, endTime, bookSlotRemark) {
                 // Handle the selected slot details and the list of all slots here
                 debugPrint('Selected Date: $selectedDate');
                 debugPrint('Start Time: $startTime');
                 debugPrint('End Time: $endTime');
-                debugPrint('Title: $title');
-                debugPrint('Description: $description');
+                debugPrint('Title: $bookSlotRemark');
                 if (widget.onSlotBooking != null) {
                   widget.onSlotBooking!(
-                      selectedDate, startTime, endTime, title, description);
+                      selectedDate, startTime, endTime, bookSlotRemark);
                 }
               },
               startBooking: widget.startBooking,
@@ -80,17 +77,15 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
     required BuildContext context,
     required CalendarTapDetails details,
     required List<Meeting> meetings,
-    required void Function(
-            DateTime selectedDate,
-            DateTime startTime,
-            DateTime endTime,
-            String title,
-            String description,
-            List<Meeting> allSlots)
-        onSlotSelected,
     required void Function(DateTime selectedDate, DateTime startTime,
-            DateTime endTime, String title, String description)
-        onSlotBooking,
+            DateTime endTime, String selectSlotRemark, List<Meeting> allSlots)
+        onSlotSelected,
+    required void Function(
+      DateTime selectedDate,
+      DateTime startTime,
+      DateTime endTime,
+      String bookSlotRemark,
+    ) onSlotBooking,
     required bool startBooking,
   }) {
     if (details.targetElement == CalendarElement.calendarCell) {
@@ -125,7 +120,7 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
     BuildContext context,
     Meeting? meeting,
     void Function(DateTime selectedDate, DateTime startTime, DateTime endTime,
-            String title, String description)
+            String bookSlotRemark)
         onSlotBooking,
   ) {
     showDialog(
@@ -133,7 +128,7 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
       builder: (context) => AlertDialog(
         title: Column(
           children: [
-            Text('${meeting?.eventName}', style: boldTextStyle(size: 18)),
+            Text('Book Slots', style: boldTextStyle(size: 18)),
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
             const Divider(height: 0, color: Colors.black12),
           ],
@@ -143,7 +138,7 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (meeting?.description != null)
+                if (meeting?.remark != null)
                   Text.rich(
                     TextSpan(
                       text: 'Remark : ',
@@ -151,16 +146,16 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                       children: [
                         TextSpan(
                             text:
-                                '${meeting!.description.isEmpty ? 'No Description!' : meeting.description}',
+                                '${meeting!.remark.isEmpty ? 'No Description!' : meeting.remark}',
                             style:
                                 const TextStyle(fontWeight: FontWeight.normal))
                       ],
                     ),
                   ),
-                if (meeting?.description != null)
+                if (meeting?.remark != null)
                   SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                if (meeting?.description != null) divider(),
-                if (meeting?.description != null)
+                if (meeting?.remark != null) divider(),
+                if (meeting?.remark != null)
                   SizedBox(height: MediaQuery.of(context).size.height * 0.02),
                 labelContainer(
                   label: 'Date',
@@ -210,8 +205,8 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
           AppButton(
             onTap: () {
               Navigator.of(context).pop();
-              onSlotBooking(meeting!.from, meeting.from, meeting.to,
-                  meeting.eventName, meeting.description);
+              onSlotBooking(
+                  meeting!.from, meeting.from, meeting.to, meeting.remark);
             },
             padding: const EdgeInsets.symmetric(horizontal: 16),
             shapeBorder: RoundedRectangleBorder(
@@ -233,13 +228,10 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
     DateTime endTime,
     List<Meeting> meetings,
     void Function(DateTime selectedDate, DateTime startTime, DateTime endTime,
-            String title, String description, List<Meeting> allSlots)
+            String selectSlotRemark, List<Meeting> allSlots)
         onSlotSelected,
   ) {
-    final titleController =
-        TextEditingController(text: meeting?.eventName ?? '');
-    final descriptionController =
-        TextEditingController(text: meeting?.description ?? '');
+    final remarkController = TextEditingController(text: meeting?.remark ?? '');
 
     showDialog(
       context: context,
@@ -257,13 +249,8 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
             child: Column(
               children: [
                 textFormField(
-                    controller: titleController,
-                    label: 'Title',
-                    labelTextBoxSpace: 8),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                textFormField(
-                    controller: descriptionController,
-                    label: 'Description',
+                    controller: remarkController,
+                    label: 'Remark',
                     labelTextBoxSpace: 8),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.02),
                 labelContainer(
@@ -397,7 +384,7 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                 });
                 Navigator.of(context).pop();
                 onSlotSelected(selectedDate, startTime, endTime,
-                    titleController.text, descriptionController.text, meetings);
+                    remarkController.text, meetings);
               },
               padding: const EdgeInsets.symmetric(horizontal: 16),
               shapeBorder: RoundedRectangleBorder(
@@ -408,9 +395,9 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
             ),
           AppButton(
             onTap: () {
-              var title = titleController.text.isEmpty
+              var remarkText = remarkController.text.isEmpty
                   ? 'Available Slot'
-                  : titleController.text;
+                  : remarkController.text;
 
               if (endTime.difference(startTime).inHours > 1) {
                 // If duration exceeds 1 hour, show an error or adjust automatically
@@ -433,28 +420,26 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                 if (meeting == null) {
                   setState(() {
                     meetings.add(Meeting(
-                        title,
-                        startTime,
-                        endTime,
-                        const Color(0xFF0F8644),
-                        descriptionController.text,
-                        false));
+                      remarkText,
+                      startTime,
+                      endTime,
+                      const Color(0xFF0F8644),
+                    ));
                   });
                 } else {
                   setState(() {
                     final index = meetings.indexOf(meeting);
                     meetings[index] = Meeting(
-                        title,
-                        startTime,
-                        endTime,
-                        const Color(0xFF0F8644),
-                        descriptionController.text,
-                        false);
+                      remarkText,
+                      startTime,
+                      endTime,
+                      const Color(0xFF0F8644),
+                    );
                   });
                 }
                 Navigator.of(context).pop();
-                onSlotSelected(selectedDate, startTime, endTime, title,
-                    descriptionController.text, meetings);
+                onSlotSelected(
+                    selectedDate, startTime, endTime, remarkText, meetings);
               }
             },
             padding: EdgeInsets.zero,
@@ -482,13 +467,10 @@ class MeetingDataSource extends CalendarDataSource {
   DateTime getEndTime(int index) => _getMeetingData(index).to;
 
   @override
-  String getSubject(int index) => _getMeetingData(index).eventName;
+  String getSubject(int index) => _getMeetingData(index).remark;
 
   @override
   Color getColor(int index) => _getMeetingData(index).background;
-
-  @override
-  bool isAllDay(int index) => _getMeetingData(index).isAllDay;
 
   Meeting _getMeetingData(int index) {
     final dynamic meeting = appointments![index];
@@ -507,16 +489,11 @@ class Meeting {
         DateTime.parse(json['from']),
         DateTime.parse(json['to']),
         Color(int.parse(json['background'])),
-        json['description'],
-        json['isAllDay'],
       );
-  Meeting(this.eventName, this.from, this.to, this.background, this.description,
-      this.isAllDay);
+  Meeting(this.remark, this.from, this.to, this.background);
 
-  String eventName;
+  String remark;
   DateTime from;
   DateTime to;
   Color background;
-  String description;
-  bool isAllDay;
 }

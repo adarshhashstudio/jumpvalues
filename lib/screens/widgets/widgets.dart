@@ -1,8 +1,12 @@
 // Function to show all selected values when the button is clicked
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/booking_item_model.dart';
+import 'package:jumpvalues/models/service_resource.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/images.dart';
+import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 Widget selectionContainerForAll(BuildContext context,
@@ -153,23 +157,76 @@ class TotalWidget extends StatelessWidget {
 }
 
 class BookingItemComponent extends StatelessWidget {
-  BookingItemComponent({required this.showButtons, required this.bookingItem});
+  BookingItemComponent({
+    required this.showButtons,
+    required this.bookingItem,
+    this.serviceResource,
+    this.index,
+  });
   final bool showButtons;
   final BookingItem bookingItem;
+  final ServiceResource? serviceResource;
+  final int? index;
 
   @override
   Widget build(BuildContext context) => buildBookingItem(context);
 
   Widget buildBookingItem(BuildContext context) {
     // Use data from bookingItem instead of dummy data
-    var status = bookingItem.status ?? 'Unknown';
-    var imageUrl = bookingItem.imageUrl ?? 'https://picsum.photos/200/300';
-    var bookingId = bookingItem.bookingId ?? 'N/A';
-    var serviceName = bookingItem.serviceName ?? 'Service';
-    var date = bookingItem.date ?? 'Date';
-    var time = bookingItem.time ?? 'Time';
-    var customerName = bookingItem.customerName ?? 'Customer';
-    var description = bookingItem.description ?? 'No description available';
+    var status = serviceResource?.status ?? bookingItem.status ?? 'Unknown';
+    SessionStatus sessionStatus;
+
+    if (index == 0) {
+      status = 'pending';
+      sessionStatus = SessionStatus.pending;
+    } else if (index == 1) {
+      status = 'pending';
+      sessionStatus = SessionStatus.pending;
+    } else if (index == 2) {
+      status = 'accepted';
+      sessionStatus = SessionStatus.accepted;
+    } else if (index == 3) {
+      status = 'rejected';
+      sessionStatus = SessionStatus.rejected;
+    } else if (index == 4) {
+      status = 'in-progress';
+      sessionStatus = SessionStatus.inProgress;
+    } else if (index == 5) {
+      status = 'in-progress';
+      sessionStatus = SessionStatus.inProgress;
+    } else if (index == 6) {
+      status = 'in-progress';
+      sessionStatus = SessionStatus.inProgress;
+    } else if (index == 7) {
+      status = 'completed';
+      sessionStatus = SessionStatus.completed;
+    } else if (index == 8) {
+      status = 'completed';
+      sessionStatus = SessionStatus.completed;
+    } else if (index == 9) {
+      status = 'completed';
+      sessionStatus = SessionStatus.completed;
+    } else {
+      status = 'expired';
+      sessionStatus = SessionStatus.expired;
+    }
+
+    var imageUrl = serviceResource?.avatar ??
+        bookingItem.imageUrl ??
+        'https://picsum.photos/200/300';
+    var bookingId = serviceResource?.id ?? bookingItem.bookingId ?? 'N/A';
+    var serviceName =
+        serviceResource?.firstName ?? bookingItem.serviceName ?? 'Service';
+    var date = DateFormat('yyyy-MM-dd').format(DateTime.now()).toString() ??
+        bookingItem.date ??
+        'Date';
+    var time =
+        DateFormat.jms().format(DateTime.now()) ?? bookingItem.time ?? 'Time';
+    var customerName =
+        serviceResource?.lastName ?? bookingItem.customerName ?? 'Customer';
+    var description = serviceResource?.email ??
+        bookingItem.description ??
+        'No description available';
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -202,14 +259,15 @@ class BookingItemComponent extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.1),
+                                color: getColorByStatus(sessionStatus)
+                                    .withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                status,
-                                style: const TextStyle(
+                                getNameByStatus(sessionStatus),
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.grey,
+                                  color: getColorByStatus(sessionStatus),
                                   fontSize: 12,
                                 ),
                               ),
@@ -227,7 +285,7 @@ class BookingItemComponent extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      serviceName,
+                      '$serviceName $customerName',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: textSecondaryColor,
@@ -244,8 +302,7 @@ class BookingItemComponent extends StatelessWidget {
           if (description.isNotEmpty)
             buildDescriptionSection(
                 context, date, time, customerName, description),
-          if (showButtons)
-            if (status != 'Completed') buildButtons(context, status)
+          if (showButtons) buildButtons(context, status)
         ],
       ),
     ).onTap(() {
@@ -283,27 +340,27 @@ class BookingItemComponent extends StatelessWidget {
                 ),
               ],
             ).paddingAll(8),
-            if (customerName.isNotEmpty)
-              Column(
-                children: [
-                  const Divider(height: 0, color: Colors.black12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Client',
-                          style: TextStyle(color: Colors.grey)),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          customerName,
-                          style: const TextStyle(fontSize: 12),
-                          textAlign: TextAlign.right,
-                        ),
-                      ),
-                    ],
-                  ).paddingAll(8),
-                ],
-              ),
+            // if (customerName.isNotEmpty)
+            //   Column(
+            //     children: [
+            //       const Divider(height: 0, color: Colors.black12),
+            //       Row(
+            //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //         children: [
+            //           const Text('Client',
+            //               style: TextStyle(color: Colors.grey)),
+            //           const SizedBox(width: 8),
+            //           Expanded(
+            //             child: Text(
+            //               customerName,
+            //               style: const TextStyle(fontSize: 12),
+            //               textAlign: TextAlign.right,
+            //             ),
+            //           ),
+            //         ],
+            //       ).paddingAll(8),
+            //     ],
+            //   ),
             if (description.isNotEmpty)
               Column(
                 children: [
@@ -311,7 +368,7 @@ class BookingItemComponent extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Comments',
+                      const Text('Remarks',
                           style: TextStyle(color: Colors.grey)),
                       const SizedBox(width: 8),
                       Expanded(
@@ -333,25 +390,79 @@ class BookingItemComponent extends StatelessWidget {
 
   Widget buildButtons(BuildContext context, String status) => Row(
         children: [
-          if (status == 'Pending')
-            AppButton(
-              text: 'Decline',
-              textColor: primaryColor,
-              color: white,
-              enabled: true,
-              onTap: () {},
+          if (status == 'pending')
+            Row(
+              children: [
+                if (appStore.userTypeCoach)
+                  AppButton(
+                    text: 'Decline',
+                    textColor: primaryColor,
+                    color: white,
+                    enabled: true,
+                    onTap: () {},
+                  ).expand(),
+                if (appStore.userTypeCoach)
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.03,
+                  ),
+                AppButton(
+                  text: appStore.userTypeCoach ? 'Accept' : 'Pending',
+                  textColor: white,
+                  color: primaryColor,
+                  enabled: true,
+                  onTap: () {},
+                ).expand(),
+              ],
             ).expand(),
-          if (status == 'Pending')
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.03,
-            ),
-          AppButton(
-            text: status == 'In Progress' ? 'Call' : 'Accept',
-            textColor: white,
-            color: primaryColor,
-            enabled: true,
-            onTap: () {},
-          ).expand(),
+          if (status == 'accepted')
+            Row(
+              children: [
+                AppButton(
+                  text: 'Accepted',
+                  textColor: white,
+                  color: primaryColor,
+                  enabled: true,
+                  onTap: () {},
+                ).expand(),
+              ],
+            ).expand(),
+          if (status == 'rejected')
+            Row(
+              children: [
+                AppButton(
+                  text: 'Rejected',
+                  textColor: Colors.black38,
+                  color: Colors.grey.withOpacity(0.5),
+                  onTap: () {},
+                ).expand(),
+              ],
+            ).expand(),
+          if (status == 'in-progress')
+            Row(
+              children: [
+                AppButton(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.av_timer,
+                        color: white,
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.01,
+                      ),
+                      Text(
+                        'In Progress',
+                        style: TextStyle(color: white),
+                      )
+                    ],
+                  ),
+                  textColor: white,
+                  color: primaryColor,
+                  onTap: () {},
+                ).expand(),
+              ],
+            ).expand(),
         ],
       );
 }

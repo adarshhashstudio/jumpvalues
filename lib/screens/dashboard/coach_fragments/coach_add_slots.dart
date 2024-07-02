@@ -13,7 +13,7 @@ class _CoachAddSlotsState extends State<CoachAddSlots> {
 
   // Method to add or remove a meeting based on selected slot
   void handleSlotSelection(DateTime selectedDate, DateTime startTime,
-      DateTime endTime, String title, String description) {
+      DateTime endTime, String remark) {
     setState(() {
       // // Remove any existing meeting that matches the selected slot
       // globalMeetings.removeWhere((meeting) =>
@@ -39,12 +39,11 @@ class _CoachAddSlotsState extends State<CoachAddSlots> {
               DateTime selectedDate,
               DateTime startTime,
               DateTime endTime,
-              String title,
-              String description,
+              String selectSlotRemark,
               List<Meeting> allSlots,
             ) {
               handleSlotSelection(
-                  selectedDate, startTime, endTime, title, description);
+                  selectedDate, startTime, endTime, selectSlotRemark);
             },
           ),
         ),

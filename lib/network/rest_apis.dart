@@ -1,6 +1,4 @@
 import 'dart:io';
-
-import 'package:flutter/material.dart';
 import 'package:jumpvalues/models/all_comprehensive_response.dart';
 import 'package:jumpvalues/models/base_response.dart';
 import 'package:jumpvalues/models/login_response.dart';
@@ -17,10 +15,8 @@ Future<SignupResponseModel> signupUser(Map<String, dynamic> request) async {
         await buildHttpResponse('auth/signup',
             request: request, method: HttpMethodType.post)));
   } catch (e) {
-    debugPrint('Signup Response: $e');
     rethrow;
   }
-
   return response;
 }
 
@@ -33,7 +29,6 @@ Future<LoginResponseModel?> loginUser(Map<String, dynamic> request) async {
             isJsonEncode: false,
             method: HttpMethodType.post)));
   } catch (e) {
-    debugPrint('Login Response: $e');
     rethrow;
   }
   return response;
@@ -46,7 +41,6 @@ Future<BaseResponseModel?> logoutUser() async {
         await buildHttpResponse('auth/logout',
             isAuth: true, method: HttpMethodType.post)));
   } catch (e) {
-    debugPrint('Logout Response: $e');
     rethrow;
   }
   return response;
@@ -59,7 +53,6 @@ Future<BaseResponseModel?> forgotPassword(Map<String, dynamic> request) async {
         await buildHttpResponse('auth/forget_password',
             request: request, method: HttpMethodType.patch)));
   } catch (e) {
-    debugPrint('Forgot Password Response: $e');
     rethrow;
   }
   return response;
@@ -73,7 +66,6 @@ Future<BaseResponseModel?> resendOtpForSignup(
         await buildHttpResponse('auth/send_otp',
             request: request, method: HttpMethodType.post)));
   } catch (e) {
-    debugPrint('Resend Otp Response: $e');
     rethrow;
   }
   return response;
@@ -86,7 +78,6 @@ Future<BaseResponseModel?> resetPassword(Map<String, dynamic> request) async {
         await buildHttpResponse('auth/reset_password',
             request: request, method: HttpMethodType.post)));
   } catch (e) {
-    debugPrint('Reset Password Response: $e');
     rethrow;
   }
   return response;
@@ -99,7 +90,6 @@ Future<BaseResponseModel> verifyOtp(Map<String, dynamic> request) async {
         await buildHttpResponse('auth/verify_OTP',
             request: request, method: HttpMethodType.post)));
   } catch (e) {
-    debugPrint('Verfication OTP Response: $e');
     rethrow;
   }
   return response;
@@ -113,7 +103,6 @@ Future<UserDataResponseModel?> updateUserProfile(
         await buildHttpResponse('users/update_user/$userId',
             request: request, isAuth: true, method: HttpMethodType.patch)));
   } catch (e) {
-    debugPrint('User Update Data Response: $e');
     rethrow;
   }
   return response;
@@ -129,20 +118,18 @@ Future<ProfilePictureResponse?> updateUserProfilePic(
     response = ProfilePictureResponse.fromJson(
         await handleResponse(await uploadImage(url, image!, isAuth: true)));
   } catch (e) {
-    debugPrint('Profile Update Response: $e');
     rethrow;
   }
   return response;
 }
 
-Future<UserDataResponseModel?> getUserDetails(String userId) async {
+Future<UserDataResponseModel?> getUserDetails(int userId) async {
   UserDataResponseModel? response;
   try {
     response = UserDataResponseModel.fromJson(await handleResponse(
         await buildHttpResponse('users/$userId',
             isAuth: true, method: HttpMethodType.get)));
   } catch (e) {
-    debugPrint('User Data Response: $e');
     rethrow;
   }
   return response;
@@ -155,7 +142,6 @@ Future<AllComprehensiveValues?> getAllComprehensiveValues() async {
         await buildHttpResponse('comprensive/get_all_comprensive',
             isAuth: true, method: HttpMethodType.get)));
   } catch (e) {
-    debugPrint('All Comprehensive Response: $e');
     rethrow;
   }
   return response;
@@ -172,7 +158,6 @@ Future<BaseResponseModel?> addUserComprehensiveListing(
             isAuth: true,
             method: HttpMethodType.patch)));
   } catch (e) {
-    debugPrint('Added Comprehensive Response: $e');
     rethrow;
   }
   return response;

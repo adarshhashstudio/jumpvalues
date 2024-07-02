@@ -4,6 +4,14 @@ import 'package:jumpvalues/screens/welcome_screen.dart';
 import 'package:jumpvalues/utils/configs.dart';
 
 enum StatusIndicator { warning, error, success }
+enum SessionStatus {
+  pending,
+  accepted,
+  rejected,
+  inProgress,
+  completed,
+  expired,
+}
 
 void hideAppKeyboard(context) =>
     FocusScope.of(context).requestFocus(FocusNode());
@@ -87,4 +95,32 @@ void isTokenAvailable(BuildContext context) async {
 void tokenExpired(BuildContext context) async {
   await appStore.clearData();
   isTokenAvailable(context);
+}
+
+// Define colors for each status
+const Map<SessionStatus, Color> statusColors = {
+  SessionStatus.pending: Color(0xFFEA2F2F),
+  SessionStatus.accepted: Color(0xFF00968A),
+  SessionStatus.inProgress: Color(0xFFB953C0),
+  SessionStatus.rejected: Color(0xFF8D0E06),
+  SessionStatus.completed: Color(0xFF3CAE5C),
+  SessionStatus.expired: Color(0xFFC41520),
+};
+
+// Define display names for each status
+const Map<SessionStatus, String> statusDisplayNames = {
+  SessionStatus.pending: 'Pending',
+  SessionStatus.accepted: 'Accepted',
+  SessionStatus.inProgress: 'In Progress',
+  SessionStatus.rejected: 'Rejected',
+  SessionStatus.completed: 'Completed',
+  SessionStatus.expired: 'Expired',
+};
+
+Color getColorByStatus(SessionStatus status) {
+  return statusColors[status] ?? Colors.grey; // Default to grey if status not found
+}
+
+String getNameByStatus(SessionStatus status) {
+  return statusDisplayNames[status] ?? 'Unknown'; // Default to 'Unknown' if status not found
 }

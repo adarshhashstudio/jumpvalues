@@ -13,6 +13,7 @@ import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/images.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -76,8 +77,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Profile Updated Successfully.');
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong.');
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
       }
 
       setState(() {
@@ -301,24 +304,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       loader = true;
     });
     try {
-      var response = await getUserDetails(appStore.userId.toString());
+      var response = await getUserDetails(appStore.userId ?? -1);
       if (response?.statusCode == 200) {
         setState(() {
           userData = response;
         });
         setState(() {});
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong.');
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
       }
-      setState(() {
-        loader = false;
-      });
     } catch (e) {
+      debugPrint('getUser Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-      rethrow;
     }
   }
 

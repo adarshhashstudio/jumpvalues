@@ -5,6 +5,7 @@ import 'package:jumpvalues/screens/welcome_screen.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 class UpdatePasswordScreen extends StatefulWidget {
   const UpdatePasswordScreen({super.key, required this.email});
@@ -50,9 +51,6 @@ class _ForgotPasswordScreenState extends State<UpdatePasswordScreen> {
         'confirmPassword': confirmPassword?.text ?? ''
       };
       var response = await resetPassword(request);
-      setState(() {
-        loader = false;
-      });
       if (response?.statusCode == 200) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Password Reset Successfully.');
@@ -61,16 +59,17 @@ class _ForgotPasswordScreenState extends State<UpdatePasswordScreen> {
             MaterialPageRoute(builder: (context) => const WelcomeScreen()),
             (Route<dynamic> route) => false);
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong');
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
       }
     } catch (e) {
+      debugPrint('reset Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-      SnackBarHelper.showStatusSnackBar(
-          context, StatusIndicator.error, e.toString());
-      rethrow;
     }
   }
 

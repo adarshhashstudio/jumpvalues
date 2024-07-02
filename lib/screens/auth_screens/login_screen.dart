@@ -79,23 +79,18 @@ class _LoginScreenState extends State<LoginScreen> {
               MaterialPageRoute(builder: (context) => Dashboard()));
         } else {
           // Handle missing token
+          if (response.message != null) {
           SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-              response.message ?? 'Token not found in response');
+              response.message ?? errorSomethingWentWrong);
         }
-      } else {
-        // Handle null response
-        SnackBarHelper.showStatusSnackBar(
-            context, StatusIndicator.error, 'Unexpected error occurred.');
+        }
       }
     } catch (e) {
+      debugPrint('login Error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-
-      debugPrint('Login Error: $e');
-
-      // Handle errors
-      SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error, '$e');
     }
   }
 

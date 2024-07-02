@@ -38,24 +38,22 @@ class _ClientAddSlotsState extends State<ClientAddSlots> {
   }
 
   // Method to update a meeting based on selected slot
-  void updateMeeting(
-      DateTime startTime, DateTime endTime, String title, String description) {
+  void updateMeeting(DateTime startTime, DateTime endTime, String title) {
     setState(() {
       // Find the meeting to be updated
       var index = globalMeetings.indexWhere((meeting) {
-        debugPrint('${meeting.eventName} == $title');
+        debugPrint('${meeting.remark} == $title');
         debugPrint('${meeting.from} == $startTime');
         debugPrint('${meeting.to} == $endTime');
-        debugPrint('${meeting.description} == $description');
         return meeting.from == startTime &&
             meeting.to == endTime &&
-            meeting.eventName == title;
+            meeting.remark == title;
       });
 
       if (index != -1) {
         // Update the meeting details
-        globalMeetings[index] = Meeting('Booked - $title', startTime, endTime,
-            const Color(0xFF55560C), description, false);
+        globalMeetings[index] = Meeting(
+            'Booked - $title', startTime, endTime, const Color(0xFF55560C));
 
         // Optionally, you can sort the meetings by startTime if needed
         globalMeetings.sort((a, b) => a.from.compareTo(b.from));
@@ -78,19 +76,18 @@ class _ClientAddSlotsState extends State<ClientAddSlots> {
                   DateTime selectedDate,
                   DateTime startTime,
                   DateTime endTime,
-                  String title,
-                  String description,
+                  String selectSlotRemark,
                   List<Meeting> allSlots,
                 ) {},
                 onSlotBooking: (DateTime selectedDate, DateTime startTime,
-                    DateTime endTime, String title, String description) {
+                    DateTime endTime, String bookSlotRemark) {
                   if (!loader) {
                     if (!loader) {
-                      if (title.contains('Booked')) {
+                      if (bookSlotRemark.contains('Booked')) {
                         SnackBarHelper.showStatusSnackBar(context,
                             StatusIndicator.warning, 'Already Booked.');
                       } else {
-                        updateMeeting(startTime, endTime, title, description);
+                        updateMeeting(startTime, endTime, bookSlotRemark);
                       }
                     }
                   }

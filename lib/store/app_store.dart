@@ -138,7 +138,9 @@ abstract class _AppStore with Store {
       await setUserProfilePic(response.data?.profilePic ?? '');
       await setLoggedIn(true);
       await setToken(response.token ?? '');
-      await setUserType(USERTYPE_CLIENT);
+      await setUserType(response.data?.email == 'coach@yopmail.com'
+          ? USERTYPE_COACH
+          : USERTYPE_CLIENT);
     }
   }
 
