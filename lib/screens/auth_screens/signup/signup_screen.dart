@@ -579,7 +579,7 @@ class _SignupScreenState extends State<SignupScreen>
                     labelContainer(
                       label: 'Categories',
                       width: MediaQuery.of(context).size.width * 1,
-                      height: MediaQuery.of(context).size.width * 0.13,
+                      height: MediaQuery.of(context).size.height * 0.13,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       isError: selectCategoriesError,
                       borderRadius: selectedCategories.isEmpty

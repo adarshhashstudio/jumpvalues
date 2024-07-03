@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:jumpvalues/network/firebase_apis.dart';
 import 'package:jumpvalues/screens/splash_screen.dart';
 import 'package:jumpvalues/store/app_store.dart';
 import 'package:jumpvalues/utils/configs.dart';

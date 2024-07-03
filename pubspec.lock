@@ -241,6 +241,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.6"
+  dartlin:
+    dependency: transitive
+    description:
+      name: dartlin
+      sha256: "80764ff3d1801a086c2b802bd39ff6d306e783710741fab8e9981d2ba5ad68a1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.3"
   dbus:
     dependency: transitive
     description:
@@ -257,6 +265,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.4.3+1"
+  enum_to_string:
+    dependency: transitive
+    description:
+      name: enum_to_string
+      sha256: bd9e83a33b754cb43a75b36a9af2a0b92a757bfd9847d2621ca0b1bed45f8e7a
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      sha256: c2b87cb7756efdf69892005af546c56c0b5037f54d2a88269b4f347a505e3ca2
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.5"
   fake_async:
     dependency: transitive
     description:
@@ -840,6 +864,46 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.1"
+  permission_handler:
+    dependency: transitive
+    description:
+      name: permission_handler
+      sha256: bc56bfe9d3f44c3c612d8d393bd9b174eb796d706759f9b495ac254e4294baa5
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.4.5"
+  permission_handler_android:
+    dependency: transitive
+    description:
+      name: permission_handler_android
+      sha256: "59c6322171c29df93a22d150ad95f3aa19ed86542eaec409ab2691b8f35f9a47"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.3.6"
+  permission_handler_apple:
+    dependency: transitive
+    description:
+      name: permission_handler_apple
+      sha256: "99e220bce3f8877c78e4ace901082fb29fa1b4ebde529ad0932d8d664b34f3f5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.1.4"
+  permission_handler_platform_interface:
+    dependency: transitive
+    description:
+      name: permission_handler_platform_interface
+      sha256: "6760eb5ef34589224771010805bea6054ad28453906936f843a8cc4d3a55c4a4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.12.0"
+  permission_handler_windows:
+    dependency: transitive
+    description:
+      name: permission_handler_windows
+      sha256: cc074aace208760f1eee6aa4fae766b45d947df85bc831cde77009cdb4720098
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.3"
   petitparser:
     dependency: transitive
     description:
@@ -1117,6 +1181,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
+  twilio_programmable_video:
+    dependency: "direct main"
+    description:
+      name: twilio_programmable_video
+      sha256: "951140cdbc0e0631c872443125b13e473e5775c33bd826de56c9e63ba2f15761"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
+  twilio_programmable_video_platform_interface:
+    dependency: transitive
+    description:
+      name: twilio_programmable_video_platform_interface
+      sha256: b78602053784b75d5e9d8d1ccd737a346ad2ec548ec5ad7ff8cf9edefde542bd
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
+  twilio_programmable_video_web:
+    dependency: transitive
+    description:
+      name: twilio_programmable_video_web
+      sha256: fef6bdb40b9948248c1c3023b2bce4ff9803d56a91488850dcaa6199c8838b31
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   typed_data:
     dependency: transitive
     description:
@@ -1165,6 +1253,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  version:
+    dependency: transitive
+    description:
+      name: version
+      sha256: b8d9fc75327de5da108942502043f0b7d6500fbded3137560ec2254dc4b9f8ba
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.3"
   vm_service:
     dependency: transitive
     description:

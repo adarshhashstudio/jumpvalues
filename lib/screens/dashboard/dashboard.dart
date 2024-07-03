@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
-import 'package:jumpvalues/screens/dashboard/client_fragments/client_add_slots.dart';
+import 'package:jumpvalues/screens/dashboard/client_fragments/client_all_coaches.dart';
 import 'package:jumpvalues/screens/dashboard/client_fragments/client_dashbaord.dart';
 import 'package:jumpvalues/screens/dashboard/client_fragments/client_sessions.dart';
 import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_add_slots.dart';
@@ -46,7 +46,7 @@ class DashboardState extends State<Dashboard> {
     fragmentList = [
       appStore.userTypeCoach ? const CoachDashboard() : const ClientDashboard(),
       appStore.userTypeCoach ? const CoachSessions() : const ClientSessions(),
-      appStore.userTypeCoach ? const CoachAddSlots() : const ClientAddSlots(),
+      appStore.userTypeCoach ? const CoachAddSlots() : const ClientAllCoaches(),
       const CommonProfile(),
     ];
     init();
@@ -153,7 +153,7 @@ class DashboardState extends State<Dashboard> {
               [
                 'Welcome',
                 'Session',
-                'Add Slot',
+                appStore.userTypeCoach ? 'Add Slot' : 'Available Coaches',
                 'Profile',
               ][currentIndex],
               style: TextStyle(

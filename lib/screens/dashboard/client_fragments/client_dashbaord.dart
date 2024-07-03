@@ -4,6 +4,8 @@ import 'package:jumpvalues/screens/web_view_screen.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/images.dart';
 import 'package:jumpvalues/utils/utils.dart';
+import 'package:jumpvalues/widgets/common_widgets.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 class ClientDashboard extends StatefulWidget {
   const ClientDashboard({super.key});
@@ -13,6 +15,14 @@ class ClientDashboard extends StatefulWidget {
 }
 
 class _ClientDashboardState extends State<ClientDashboard> {
+  List<String> goalsList = [
+    'Confidence',
+    'Listen actively',
+    'Wake up early',
+    'Procrastination',
+    'Be proactive'
+  ];
+
   @override
   void initState() {
     isTokenAvailable(context);
@@ -23,41 +33,94 @@ class _ClientDashboardState extends State<ClientDashboard> {
   Widget build(BuildContext context) => SingleChildScrollView(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.02,
-                ),
-                gradientContainer(context,
-                    startColor: const Color(0xFFF69273),
-                    endColor: const Color(0xFFFF6E7A),
-                    icon: learnImage,
-                    title:
-                        'Start your Journey by learning more about personal values.',
-                    buttonTitle: 'Learn ( Values )', onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const WebViewScreen(
-                            url: learnSectionUrl,
-                          )));
-                  // Navigator.of(context).push(MaterialPageRoute(
-                  //     builder: (context) => const LearnScreen()));
-                }),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.03,
-                ),
-                gradientContainer(context,
-                    startColor: const Color(0xFF95cfd3),
-                    endColor: const Color(0xFF96d3c5),
-                    icon: selectImage,
-                    title:
-                        'Click to select your values from our comprehensive list.',
-                    buttonTitle: 'Select ( Values )', onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const SelectScreen()));
-                }),
-              ],
+            padding: const EdgeInsets.all(16),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        gradientContainer(context,
+                            startColor: const Color(0xFFF69273),
+                            endColor: const Color(0xFFFF6E7A),
+                            icon: learnImage,
+                            title:
+                                'Start your Journey by learning more about personal values.',
+                            buttonTitle: 'Learn ( Values )', onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const WebViewScreen(
+                                    url: learnSectionUrl,
+                                  )));
+                        }),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.035,
+                        ),
+                        gradientContainer(context,
+                            startColor: const Color(0xFF95cfd3),
+                            endColor: const Color(0xFF96d3c5),
+                            icon: selectImage,
+                            title:
+                                'Click to select your values from our comprehensive list.',
+                            buttonTitle: 'Select ( Values )', onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const SelectScreen()));
+                        }),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.03,
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 1,
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height * 0.35,
+                    ),
+                    decoration: boxDecorationDefault(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'My Goals',
+                                  style: boldTextStyle(),
+                                ),
+                                Icon(
+                                  Icons.edit_note,
+                                  color: primaryColor,
+                                ).onTap(() {})
+                              ],
+                            ),
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.01,
+                            ),
+                            divider(),
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.02,
+                            ),
+                          ],
+                        ),
+                        ListView.separated(
+                          itemCount: goalsList.length,
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          separatorBuilder: (context, index) => SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.03,
+                          ),
+                          itemBuilder: (context, index) =>
+                              Text('${index + 1}. ${goalsList[index]}'),
+                        ),
+                      ],
+                    ).paddingSymmetric(horizontal: 16, vertical: 16),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -73,10 +136,10 @@ class _ClientDashboardState extends State<ClientDashboard> {
       GestureDetector(
         onTap: onTap,
         child: Container(
-          width: MediaQuery.of(context).size.width,
-          padding: const EdgeInsets.all(30),
+          width: MediaQuery.of(context).size.width * 0.44,
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
                 colors: [
                   startColor,
@@ -117,8 +180,8 @@ class _ClientDashboardState extends State<ClientDashboard> {
                 style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 18),
-              ),
+                    fontSize: 14),
+              ).withHeight(MediaQuery.of(context).size.height * 0.11),
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.03,
               ),

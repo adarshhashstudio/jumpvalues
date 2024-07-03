@@ -156,6 +156,150 @@ class TotalWidget extends StatelessWidget {
       );
 }
 
+class CoachItemComponent extends StatelessWidget {
+  CoachItemComponent({this.coachDetail, this.index, this.onTap});
+
+  final ServiceResource? coachDetail;
+  final int? index;
+  final void Function()? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    var imageUrl = coachDetail?.avatar;
+    var firstName = coachDetail?.firstName;
+    var lastName = coachDetail?.lastName;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      width: MediaQuery.of(context).size.width,
+      decoration: boxDecorationDefault(
+          borderRadius: radius(), color: context.cardColor),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CachedImageWidget(
+                url: imageUrl ?? 'https://picsum.photos/200/300',
+                height: 70,
+                width: 70,
+                fit: BoxFit.cover,
+                radius: BorderRadius.circular(12),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$firstName $lastName',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: textSecondaryColor,
+                        fontSize: 17,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.01,
+                    ),
+                    Text.rich(
+                      TextSpan(
+                        text: 'Years of Experience: ',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.normal,
+                          color: textSecondaryColor,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: '${(index ?? 0) + 2}',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: textSecondaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.01,
+          ),
+          buildDescriptionSection(context,
+              certificate:
+                  'Certified Professional in Training Management (CPTM)',
+              philosophy:
+                  'Personal development, Be Yourself, Integrity, Mutual respect, Take accountability, Leadership'),
+        ],
+      ),
+    ).onTap(onTap ?? () {});
+  }
+
+  Widget buildDescriptionSection(BuildContext context,
+          {String? certificate, String? philosophy}) =>
+      Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Coaching Certificate',
+                    style: TextStyle(color: primaryColor)),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.005,
+                ),
+                Text(
+                  certificate ?? 'N/A',
+                  style:
+                      const TextStyle(fontSize: 12, color: textSecondaryColor),
+                  maxLines: 2,
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.015,
+                ),
+                const Divider(
+                    height: 0, color: Color.fromARGB(31, 147, 142, 142)),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.015,
+                ),
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Coaching Philosophy',
+                    style: TextStyle(color: primaryColor)),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.005,
+                ),
+                Text(
+                  philosophy ?? 'N/A',
+                  style:
+                      const TextStyle(fontSize: 12, color: textSecondaryColor),
+                  maxLines: 2,
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.015,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+}
+
 class BookingItemComponent extends StatelessWidget {
   BookingItemComponent({
     required this.showButtons,
@@ -217,11 +361,8 @@ class BookingItemComponent extends StatelessWidget {
     var bookingId = serviceResource?.id ?? bookingItem.bookingId ?? 'N/A';
     var serviceName =
         serviceResource?.firstName ?? bookingItem.serviceName ?? 'Service';
-    var date = DateFormat('yyyy-MM-dd').format(DateTime.now()).toString() ??
-        bookingItem.date ??
-        'Date';
-    var time =
-        DateFormat.jms().format(DateTime.now()) ?? bookingItem.time ?? 'Time';
+    var date = DateFormat('yyyy-MM-dd').format(DateTime.now()).toString();
+    var time = DateFormat.jms().format(DateTime.now());
     var customerName =
         serviceResource?.lastName ?? bookingItem.customerName ?? 'Customer';
     var description = serviceResource?.email ??
@@ -444,14 +585,14 @@ class BookingItemComponent extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.av_timer,
                         color: white,
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.01,
                       ),
-                      Text(
+                      const Text(
                         'In Progress',
                         style: TextStyle(color: white),
                       )
@@ -634,3 +775,41 @@ class _AppButtonState extends State<AppButton>
         ),
       );
 }
+
+Widget dataNotFoundWidget(BuildContext context,
+        {required void Function() onTap, String? text}) =>
+    Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Image.asset(
+          empty,
+          width: MediaQuery.of(context).size.width * 0.4,
+        ),
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.01,
+        ),
+        Text(
+          text ?? 'Data Not Available.',
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.02,
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.refresh, color: primaryColor).onTap(onTap),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.01,
+            ),
+            Text(
+              'Reload',
+              textAlign: TextAlign.center,
+              style: boldTextStyle(color: primaryColor),
+            ).onTap(onTap),
+          ],
+        ),
+      ],
+    ).center();

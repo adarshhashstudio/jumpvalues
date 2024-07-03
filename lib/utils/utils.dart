@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
 import 'package:jumpvalues/utils/configs.dart';
 
 enum StatusIndicator { warning, error, success }
+
 enum SessionStatus {
   pending,
   accepted,
@@ -117,10 +120,22 @@ const Map<SessionStatus, String> statusDisplayNames = {
   SessionStatus.expired: 'Expired',
 };
 
-Color getColorByStatus(SessionStatus status) {
-  return statusColors[status] ?? Colors.grey; // Default to grey if status not found
-}
+Color getColorByStatus(SessionStatus status) =>
+    statusColors[status] ?? Colors.grey;
 
-String getNameByStatus(SessionStatus status) {
-  return statusDisplayNames[status] ?? 'Unknown'; // Default to 'Unknown' if status not found
+String getNameByStatus(SessionStatus status) =>
+    statusDisplayNames[status] ?? 'Unknown';
+
+class Debouncer {
+  Debouncer({required this.milliseconds});
+  final int milliseconds;
+  VoidCallback? action;
+  Timer? _timer;
+
+  run(VoidCallback action) {
+    if (_timer != null) {
+      _timer!.cancel();
+    }
+    _timer = Timer(Duration(milliseconds: milliseconds), action);
+  }
 }
