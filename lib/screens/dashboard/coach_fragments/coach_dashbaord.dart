@@ -15,7 +15,7 @@ class CoachDashboard extends StatefulWidget {
 }
 
 class _CoachDashboardState extends State<CoachDashboard> {
-  List<ServiceResource> _bookingItems = [];
+  final List<ServiceResource> _bookingItems = [];
   bool _isLoading = false;
 
   @override

@@ -74,7 +74,7 @@ Widget labelContainer(
         bool isError = false,
         required String label,
         required double width,
-        required double height,
+        required double? height,
         Color? color,
         void Function()? onTap,
         BorderRadiusGeometry? borderRadius,
@@ -417,9 +417,9 @@ void showRatingDialog(BuildContext context,
 
   var alertDialog = AlertDialog(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    backgroundColor: Theme.of(context).colorScheme.background,
-    shadowColor: Theme.of(context).colorScheme.background,
-    surfaceTintColor: Theme.of(context).colorScheme.background,
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    shadowColor: Theme.of(context).colorScheme.surface,
+    surfaceTintColor: Theme.of(context).colorScheme.surface,
     contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
     title: Text(
       'Your opinion matters to us',

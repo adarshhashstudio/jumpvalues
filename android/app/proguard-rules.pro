@@ -7,3 +7,7 @@
 -keep class io.flutter.embedding.** { *; }
 -dontwarn io.flutter.embedding.**
 -ignorewarnings
+-keep class tvi.webrtc.** { *; }
+-keep class com.twilio.video.** { *; }
+-keep class com.twilio.common.** { *; }
+-keepattributes InnerClasses

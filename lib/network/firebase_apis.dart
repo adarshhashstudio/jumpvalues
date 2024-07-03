@@ -74,7 +74,6 @@ class FirebaseApi {
 
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveBackgroundNotificationResponse: handleNavigation,
       onDidReceiveNotificationResponse: handleNavigation,
     );
   }

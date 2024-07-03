@@ -4,7 +4,6 @@ import 'package:jumpvalues/models/booking_item_model.dart';
 import 'package:jumpvalues/models/service_resource.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/configs.dart';
-import 'package:jumpvalues/utils/images.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -21,8 +20,8 @@ class _CoachSessionsState extends State<CoachSessions> {
   TextEditingController searchController = TextEditingController();
   bool isSearching = false;
 
-  ScrollController _scrollController = ScrollController();
-  List<ServiceResource> _bookingItems = [];
+  final ScrollController _scrollController = ScrollController();
+  final List<ServiceResource> _bookingItems = [];
   int _currentPage = 1;
   bool _isLoading = false;
   bool _hasMoreData = true;
@@ -56,8 +55,7 @@ class _CoachSessionsState extends State<CoachSessions> {
       var response = await dio.get('https://reqres.in/api/users',
           queryParameters: {'page': _currentPage});
       debugPrint('${response.data}');
-      ServiceResourcePagination pagination =
-          ServiceResourcePagination.fromJson(response.data);
+      var pagination = ServiceResourcePagination.fromJson(response.data);
 
       setState(() {
         _bookingItems.addAll(pagination.data ?? []);
@@ -108,42 +106,7 @@ class _CoachSessionsState extends State<CoachSessions> {
           RefreshIndicator(
             onRefresh: _refreshBookingItems,
             child: (!_isLoading && _bookingItems.isEmpty)
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        empty,
-                        width: MediaQuery.of(context).size.width * 0.4,
-                      ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.01,
-                      ),
-                      const Text(
-                        'Data Not Available.',
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.02,
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.refresh, color: primaryColor)
-                              .onTap(_refreshBookingItems),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.01,
-                          ),
-                          Text(
-                            'Reload',
-                            textAlign: TextAlign.center,
-                            style: boldTextStyle(color: primaryColor),
-                          ).onTap(_refreshBookingItems),
-                        ],
-                      ),
-                    ],
-                  ).center()
+                ? dataNotFoundWidget(context, onTap: _refreshBookingItems)
                 : ListView.separated(
                     controller: _scrollController,
                     itemCount: _bookingItems.length + 1,

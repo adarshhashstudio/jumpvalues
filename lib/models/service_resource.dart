@@ -44,8 +44,7 @@ class ServiceResourcePagination {
 
   factory ServiceResourcePagination.fromJson(Map<String, dynamic> json) {
     var list = json['data'] as List;
-    List<ServiceResource> resourceList =
-        list.map((i) => ServiceResource.fromJson(i)).toList();
+    var resourceList = list.map((i) => ServiceResource.fromJson(i)).toList();
 
     return ServiceResourcePagination(
       page: json['page'],

@@ -21,8 +21,8 @@ class _ClientSessionsState extends State<ClientSessions> {
   TextEditingController searchController = TextEditingController();
   bool isSearching = false;
 
-  ScrollController _scrollController = ScrollController();
-  List<ServiceResource> _bookingItems = [];
+  final ScrollController _scrollController = ScrollController();
+  final List<ServiceResource> _bookingItems = [];
   int _currentPage = 1;
   bool _isLoading = false;
   bool _hasMoreData = true;
@@ -56,8 +56,7 @@ class _ClientSessionsState extends State<ClientSessions> {
       var response = await dio.get('https://reqres.in/api/users',
           queryParameters: {'page': _currentPage});
       debugPrint('${response.data}');
-      ServiceResourcePagination pagination =
-          ServiceResourcePagination.fromJson(response.data);
+      var pagination = ServiceResourcePagination.fromJson(response.data);
 
       setState(() {
         _bookingItems.addAll(pagination.data ?? []);
