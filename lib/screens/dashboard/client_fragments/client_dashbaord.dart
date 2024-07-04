@@ -1,6 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/screens/client_screens/select_screen.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
+import 'package:jumpvalues/screens/widgets/widgets.dart';
+import 'package:jumpvalues/store/goals_data_hive.dart';
+import 'package:jumpvalues/store/goals_store.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/images.dart';
 import 'package:jumpvalues/utils/utils.dart';
@@ -15,17 +22,13 @@ class ClientDashboard extends StatefulWidget {
 }
 
 class _ClientDashboardState extends State<ClientDashboard> {
-  List<String> goalsList = [
-    'Confidence',
-    'Listen actively',
-    'Wake up early',
-    'Procrastination',
-    'Be proactive'
-  ];
+  final goalsStore = GoalsStore(goalsBox);
 
   @override
   void initState() {
     isTokenAvailable(context);
+
+    goalsStore.loadGoals();
     super.initState();
   }
 
@@ -73,58 +76,199 @@ class _ClientDashboardState extends State<ClientDashboard> {
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.03,
                   ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 1,
-                    constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height * 0.35,
-                    ),
-                    decoration: boxDecorationDefault(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'My Goals',
-                                  style: boldTextStyle(),
-                                ),
-                                Icon(
-                                  Icons.edit_note,
-                                  color: primaryColor,
-                                ).onTap(() {})
-                              ],
-                            ),
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.01,
-                            ),
-                            divider(),
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.02,
-                            ),
-                          ],
-                        ),
-                        ListView.separated(
-                          itemCount: goalsList.length,
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          separatorBuilder: (context, index) => SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.03,
-                          ),
-                          itemBuilder: (context, index) =>
-                              Text('${index + 1}. ${goalsList[index]}'),
-                        ),
-                      ],
-                    ).paddingSymmetric(horizontal: 16, vertical: 16),
-                  ),
+                  buildGoalsWidget(context),
                 ],
               ),
             ),
           ),
         ),
       );
+
+  Observer buildGoalsWidget(BuildContext context) => Observer(
+      builder: (_) => Container(
+            width: MediaQuery.of(context).size.width * 1,
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height * 0.35,
+            ),
+            decoration: boxDecorationDefault(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'My Goals',
+                          style: boldTextStyle(),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              'Add',
+                              style: boldTextStyle(color: primaryColor),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.01,
+                            ),
+                            Icon(
+                              Icons.edit_note,
+                              color: primaryColor,
+                            ),
+                          ],
+                        ).onTap(() async {
+                          await showAddGoalsDialogue(context);
+                        })
+                      ],
+                    ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.01,
+                    ),
+                    divider(),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.02,
+                    ),
+                  ],
+                ),
+                goalsStore.goalsList.isEmpty
+                    ? dataNotFoundWidget(context,
+                        text:
+                            'Write Your Goals, Watch Your Life Grow.\nEg. Procrastination, Confidence,...')
+                    : ListView.separated(
+                        itemCount: goalsStore.goalsList.length,
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        separatorBuilder: (context, index) => SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.03,
+                        ),
+                        itemBuilder: (context, index) => Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${index + 1}. ${goalsStore.goalsList[index].goalName}',
+                              style: TextStyle(
+                                  decoration:
+                                      goalsStore.goalsList[index].goalSelected
+                                          ? TextDecoration.lineThrough
+                                          : null),
+                            ).expand(),
+                            Icon(
+                              goalsStore.goalsList[index].goalSelected
+                                  ? Icons.check_box
+                                  : Icons.check_box_outline_blank_outlined,
+                              color: greenColor.withOpacity(0.5),
+                              size: 20,
+                            ).onTap(() {
+                              setState(() {
+                                goalsStore
+                                    .toggleGoal(goalsStore.goalsList[index]);
+                              });
+                            }),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.01,
+                            ),
+                            Icon(
+                              Icons.delete_rounded,
+                              color: redColor.withOpacity(0.5),
+                              size: 20,
+                            ).onTap(() {
+                              setState(() {
+                                goalsStore
+                                    .removeGoal(goalsStore.goalsList[index]);
+                              });
+                            }),
+                          ],
+                        ),
+                      ),
+              ],
+            ).paddingSymmetric(horizontal: 16, vertical: 16),
+          ));
+
+  Future<void> showAddGoalsDialogue(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(builder: (context, setState) {
+        var goalController = TextEditingController();
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          title: Column(
+            children: [
+              Text(
+                'Add Goals (Max. 5 Goals Allowed)',
+                style: boldTextStyle(),
+              ).center(),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+              divider(),
+            ],
+          ),
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width * 1,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  textFormField(
+                    label: '',
+                    controller: goalController,
+                    isLabel: false,
+                    maxLines: 3,
+                    hintText: 'Enter Your Goal',
+                    textInputAction: TextInputAction.done,
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                  Row(
+                    children: [
+                      button(context, onPressed: () {
+                        Navigator.of(context).pop();
+                      }, isBordered: true, text: 'Cancel')
+                          .expand(),
+                      SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+                      button(context, onPressed: () {
+                        if (goalsStore.goalsList.length > 4) {
+                          SnackBarHelper.showStatusSnackBar(
+                              context,
+                              StatusIndicator.error,
+                              'Maximum 5 goals are allowed.');
+                        } else {
+                          if (goalController.text == '') {
+                            SnackBarHelper.showStatusSnackBar(
+                                context,
+                                StatusIndicator.error,
+                                'Goal text should not be empty.');
+                          } else {
+                            // 'Confidence',
+                            // 'Listen actively',
+                            // 'Wake up early',
+                            // 'Procrastination',
+                            // 'Be proactive'
+                            setState(() {
+                              var newGoal = GoalsData(
+                                  goalId: Random().nextInt(100),
+                                  goalName: goalController.text);
+
+                              goalsStore.addGoal(newGoal);
+                            });
+                            Navigator.of(context).pop();
+                            SnackBarHelper.showStatusSnackBar(
+                                context,
+                                StatusIndicator.success,
+                                'Goal Added Successfully!!');
+                          }
+                        }
+                      }, text: 'Add')
+                          .expand(),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }),
+    ).then((v) {
+      setState(() {});
+    });
+  }
 
   Widget gradientContainer(BuildContext context,
           {required Color startColor,
@@ -139,7 +283,7 @@ class _ClientDashboardState extends State<ClientDashboard> {
           width: MediaQuery.of(context).size.width * 0.44,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(8),
             gradient: LinearGradient(
                 colors: [
                   startColor,
