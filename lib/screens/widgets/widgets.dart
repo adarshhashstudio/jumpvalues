@@ -481,27 +481,6 @@ class BookingItemComponent extends StatelessWidget {
                 ),
               ],
             ).paddingAll(8),
-            // if (customerName.isNotEmpty)
-            //   Column(
-            //     children: [
-            //       const Divider(height: 0, color: Colors.black12),
-            //       Row(
-            //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //         children: [
-            //           const Text('Client',
-            //               style: TextStyle(color: Colors.grey)),
-            //           const SizedBox(width: 8),
-            //           Expanded(
-            //             child: Text(
-            //               customerName,
-            //               style: const TextStyle(fontSize: 12),
-            //               textAlign: TextAlign.right,
-            //             ),
-            //           ),
-            //         ],
-            //       ).paddingAll(8),
-            //     ],
-            //   ),
             if (description.isNotEmpty)
               Column(
                 children: [
@@ -777,7 +756,7 @@ class _AppButtonState extends State<AppButton>
 }
 
 Widget dataNotFoundWidget(BuildContext context,
-        {required void Function() onTap, String? text}) =>
+        {void Function()? onTap, String? text}) =>
     Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -796,20 +775,21 @@ Widget dataNotFoundWidget(BuildContext context,
         SizedBox(
           height: MediaQuery.of(context).size.height * 0.02,
         ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.refresh, color: primaryColor).onTap(onTap),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.01,
-            ),
-            Text(
-              'Reload',
-              textAlign: TextAlign.center,
-              style: boldTextStyle(color: primaryColor),
-            ).onTap(onTap),
-          ],
-        ),
+        if (onTap != null)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.refresh, color: primaryColor).onTap(onTap),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.01,
+              ),
+              Text(
+                'Reload',
+                textAlign: TextAlign.center,
+                style: boldTextStyle(color: primaryColor),
+              ).onTap(onTap),
+            ],
+          ),
       ],
     ).center();

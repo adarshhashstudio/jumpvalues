@@ -1,13 +1,16 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:jumpvalues/screens/splash_screen.dart';
 import 'package:jumpvalues/store/app_store.dart';
+import 'package:jumpvalues/store/goals_data_hive.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/constants.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 AppStore appStore = AppStore();
+late Box<GoalsData> goalsBox;
 
 class NavigationService {
   static final navigatorKey = GlobalKey<NavigatorState>();
@@ -50,12 +53,15 @@ void main() async {
     await appStore.setUserType(getStringAsync(USER_TYPE), isInitializing: true);
   }
 
+  await Hive.initFlutter();
+  Hive.registerAdapter(GoalsDataAdapter());
+  goalsBox = await Hive.openBox<GoalsData>('goalsBox');
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) => RestartAppWidget(
         child: Observer(
