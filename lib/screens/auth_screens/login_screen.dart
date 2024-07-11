@@ -1,4 +1,3 @@
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
@@ -30,7 +29,6 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     emailController = TextEditingController();
     passwordController = TextEditingController();
-    FirebaseCrashlytics.instance.crash();
     super.initState();
   }
 

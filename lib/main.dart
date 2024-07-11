@@ -25,10 +25,10 @@ Future<void> main() async {
 
   await Firebase.initializeApp(
     options: const FirebaseOptions(
-      apiKey: 'AIzaSyBg3DW6PG-UgfUkFB0WKurkkpXGzdS5HkE',
-      appId: '1:36694481587:android:9676cd788ef2d9dc7eaec6',
-      messagingSenderId: '36694481587',
-      projectId: 'jumpcc-8634f',
+      apiKey: 'AIzaSyDLkgae9qZezwFRfeU8PcDf1s9DLHKi7mk',
+      appId: '1:927941200379:android:8cd86db678ad12b734235e',
+      messagingSenderId: '927941200379',
+      projectId: 'jumpcc-app',
     ),
   );
 
