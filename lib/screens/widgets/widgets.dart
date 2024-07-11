@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/booking_item_model.dart';
 import 'package:jumpvalues/models/service_resource.dart';
+import 'package:jumpvalues/screens/video_calling_module/video_call_page.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/images.dart';
 import 'package:jumpvalues/utils/utils.dart';
@@ -579,7 +580,10 @@ class BookingItemComponent extends StatelessWidget {
                   ),
                   textColor: white,
                   color: primaryColor,
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => VideoCallPage()));
+                  },
                 ).expand(),
               ],
             ).expand(),

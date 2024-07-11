@@ -3,7 +3,6 @@ plugins {
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
     id 'com.google.gms.google-services'
-    id 'com.google.firebase.crashlytics'
 }
 
 def localProperties = new Properties()
@@ -50,12 +49,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.jumpccc.jumpvalues"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion 21
-        targetSdkVersion flutter.targetSdkVersion
+        minSdkVersion flutter.minSdkVersion // Android 4.1 (JELLY_BEAN) - 99.8% Usage
+        targetSdkVersion 34 // Android 14 (UPSIDE_DOWN_CAKE) (API level 34) to be submitted to Google Play - 16.3% Usage
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }

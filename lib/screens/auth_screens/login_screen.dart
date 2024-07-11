@@ -80,9 +80,9 @@ class _LoginScreenState extends State<LoginScreen> {
         } else {
           // Handle missing token
           if (response.message != null) {
-          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-              response.message ?? errorSomethingWentWrong);
-        }
+            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+                response.message ?? errorSomethingWentWrong);
+          }
         }
       }
     } catch (e) {
