@@ -31,22 +31,36 @@ class _SignupScreenState extends State<SignupScreen>
 
   TextEditingController? firstNameController;
   TextEditingController? lastNameController;
-  TextEditingController? companyController;
   TextEditingController? emailController;
   TextEditingController? passwordController;
+  TextEditingController? phoneNumberController;
+  TextEditingController? educationController;
+  TextEditingController? philosophyController;
+  TextEditingController? certificationsController;
+  TextEditingController? industriesServedController;
+  TextEditingController? experianceController;
+  TextEditingController? nicheController;
+
+  TextEditingController? companyController;
   TextEditingController? positionController;
   TextEditingController? aboutController;
-  TextEditingController? phoneNumberController;
 
   // FocusNodes for each field
   final FocusNode firstNameFocusNode = FocusNode();
   final FocusNode lastNameFocusNode = FocusNode();
   final FocusNode emailFocusNode = FocusNode();
-  final FocusNode companyFocusNode = FocusNode();
   final FocusNode passwordFocusNode = FocusNode();
+  final FocusNode phoneNumberFocusNode = FocusNode();
+  final FocusNode educationFocusNode = FocusNode();
+  final FocusNode philosophyFocusNode = FocusNode();
+  final FocusNode certificationsFocusNode = FocusNode();
+  final FocusNode industriesServedFocusNode = FocusNode();
+  final FocusNode experianceFocusNode = FocusNode();
+  final FocusNode nicheFocusNode = FocusNode();
+
+  final FocusNode companyFocusNode = FocusNode();
   final FocusNode positionFocusNode = FocusNode();
   final FocusNode aboutFocusNode = FocusNode();
-  final FocusNode phoneNumberFocusNode = FocusNode();
 
   // Map to store error messages for each field
   Map<String, String> fieldErrors = {};
@@ -66,27 +80,67 @@ class _SignupScreenState extends State<SignupScreen>
   bool _obscureText = true;
   int tabIndex = 0;
 
+  List<String> preferViaList = ['Phone', 'Email'];
+  String? selectedPreferVia;
+
   @override
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
 
     firstNameController = TextEditingController();
     lastNameController = TextEditingController();
-    companyController = TextEditingController();
     emailController = TextEditingController();
     passwordController = TextEditingController();
+    phoneNumberController = TextEditingController();
+    educationController = TextEditingController();
+    philosophyController = TextEditingController();
+    certificationsController = TextEditingController();
+    industriesServedController = TextEditingController();
+    experianceController = TextEditingController();
+    nicheController = TextEditingController();
+
+    companyController = TextEditingController();
     positionController = TextEditingController();
     aboutController = TextEditingController();
-    phoneNumberController = TextEditingController();
+
     super.initState();
     getCategoriesDropdown();
   }
 
   @override
   void dispose() {
+    firstNameController?.dispose();
+    lastNameController?.dispose();
     emailController?.dispose();
     passwordController?.dispose();
     phoneNumberController?.dispose();
+    educationController?.dispose();
+    philosophyController?.dispose();
+    certificationsController?.dispose();
+    industriesServedController?.dispose();
+    experianceController?.dispose();
+    nicheController?.dispose();
+
+    companyController?.dispose();
+    positionController?.dispose();
+    aboutController?.dispose();
+
+    firstNameFocusNode.dispose();
+    lastNameFocusNode.dispose();
+    emailFocusNode.dispose();
+    passwordFocusNode.dispose();
+    phoneNumberFocusNode.dispose();
+    educationFocusNode.dispose();
+    philosophyFocusNode.dispose();
+    certificationsFocusNode.dispose();
+    industriesServedFocusNode.dispose();
+    experianceFocusNode.dispose();
+    nicheFocusNode.dispose();
+
+    companyFocusNode.dispose();
+    positionFocusNode.dispose();
+    aboutFocusNode.dispose();
+
     _tabController.dispose();
     super.dispose();
   }
@@ -133,13 +187,21 @@ class _SignupScreenState extends State<SignupScreen>
     // }
   }
 
-  enableCoachSubmitButton() {
+  void enableCoachSubmitButton() {
     // Coach
     if (firstNameController!.text.isNotEmpty &&
         lastNameController!.text.isNotEmpty &&
         emailController!.text.isNotEmpty &&
         passwordController!.text.isNotEmpty &&
-        phoneNumberController!.text.isNotEmpty) {
+        phoneNumberController!.text.isNotEmpty &&
+        educationController!.text.isNotEmpty &&
+        philosophyController!.text.isNotEmpty &&
+        certificationsController!.text.isNotEmpty &&
+        industriesServedController!.text.isNotEmpty &&
+        experianceController!.text.isNotEmpty &&
+        nicheController!.text.isNotEmpty &&
+        selectedPreferVia != null &&
+        selectedCategories.isNotEmpty) {
       setState(() {
         coachSubmitButtonEnabled = true;
       });
@@ -184,6 +246,9 @@ class _SignupScreenState extends State<SignupScreen>
     });
 
     var request = <String, dynamic>{};
+    List<int> selectedCategoriesId = [];
+    selectedCategoriesId.addAll(
+        selectedCategories.map((elemente) => elemente.id ?? -1).toList());
 
     if (isCoach) {
       request = {
@@ -191,9 +256,14 @@ class _SignupScreenState extends State<SignupScreen>
         'lastName': lastNameController?.text,
         'email': emailController?.text,
         'password': passwordController?.text,
-        // 'phonenumber': sPhoneNumber,
-        // 'countryCode': sCountryCode,
-        // 'categories': selectedCategories,
+        'role': 'coach',
+        'prefer_via': selectedPreferVia == 'Phone' ? 1 : 2,
+        'philosophy': philosophyController?.text,
+        'certifications': certificationsController?.text,
+        'industries_served': industriesServedController?.text,
+        'experiance': experianceController?.text,
+        'niche': nicheController?.text,
+        'categoryIds': selectedCategoriesId
       };
     } else {
       request = {
@@ -300,6 +370,7 @@ class _SignupScreenState extends State<SignupScreen>
                     ),
                     textFormField(
                       label: 'First Name',
+                      labelTextBoxSpace: 8,
                       autofocus: true,
                       controller: firstNameController,
                       focusNode: firstNameFocusNode,
@@ -319,6 +390,7 @@ class _SignupScreenState extends State<SignupScreen>
                     ),
                     textFormField(
                       label: 'Last Name',
+                      labelTextBoxSpace: 8,
                       controller: lastNameController,
                       focusNode: lastNameFocusNode,
                       errorText: fieldErrors['lastName'],
@@ -336,6 +408,7 @@ class _SignupScreenState extends State<SignupScreen>
                     ),
                     textFormField(
                       label: 'Email',
+                      labelTextBoxSpace: 8,
                       controller: emailController,
                       focusNode: emailFocusNode,
                       errorText: fieldErrors['email'],
@@ -352,6 +425,7 @@ class _SignupScreenState extends State<SignupScreen>
                     ),
                     textFormField(
                       label: 'Company',
+                      labelTextBoxSpace: 8,
                       controller: companyController,
                       focusNode: companyFocusNode,
                       errorText: fieldErrors['company'],
@@ -366,6 +440,7 @@ class _SignupScreenState extends State<SignupScreen>
                     ),
                     textFormField(
                       label: 'Password',
+                      labelTextBoxSpace: 8,
                       controller: passwordController,
                       focusNode: passwordFocusNode,
                       errorText: fieldErrors['password'],
@@ -391,6 +466,7 @@ class _SignupScreenState extends State<SignupScreen>
                     ),
                     textFormField(
                       label: 'Position',
+                      labelTextBoxSpace: 8,
                       controller: positionController,
                       focusNode: positionFocusNode,
                       errorText: fieldErrors['positions'],
@@ -405,6 +481,7 @@ class _SignupScreenState extends State<SignupScreen>
                     ),
                     textFormField(
                       label: 'About Me',
+                      labelTextBoxSpace: 8,
                       controller: aboutController,
                       focusNode: aboutFocusNode,
                       errorText: fieldErrors['aboutMe'],
@@ -512,6 +589,7 @@ class _SignupScreenState extends State<SignupScreen>
                     ),
                     textFormField(
                       label: 'First Name',
+                      labelTextBoxSpace: 8,
                       autofocus: true,
                       controller: firstNameController,
                       focusNode: firstNameFocusNode,
@@ -531,6 +609,7 @@ class _SignupScreenState extends State<SignupScreen>
                     ),
                     textFormField(
                       label: 'Last Name',
+                      labelTextBoxSpace: 8,
                       controller: lastNameController,
                       focusNode: lastNameFocusNode,
                       errorText: fieldErrors['lastName'],
@@ -548,6 +627,7 @@ class _SignupScreenState extends State<SignupScreen>
                     ),
                     textFormField(
                       label: 'Email',
+                      labelTextBoxSpace: 8,
                       controller: emailController,
                       focusNode: emailFocusNode,
                       errorText: fieldErrors['email'],
@@ -564,6 +644,7 @@ class _SignupScreenState extends State<SignupScreen>
                     ),
                     textFormField(
                       label: 'Password',
+                      labelTextBoxSpace: 8,
                       controller: passwordController,
                       focusNode: passwordFocusNode,
                       errorText: fieldErrors['password'],
@@ -589,6 +670,7 @@ class _SignupScreenState extends State<SignupScreen>
                     ),
                     intlPhoneField(
                       label: 'Phone Number',
+                      labelTextBoxSpace: 8,
                       controller: phoneNumberController,
                       onChanged: (phoneNumber) {
                         setState(() {
@@ -607,8 +689,129 @@ class _SignupScreenState extends State<SignupScreen>
                     const SizedBox(
                       height: 20,
                     ),
+                    textFormField(
+                      label: 'Education',
+                      labelTextBoxSpace: 8,
+                      controller: educationController,
+                      focusNode: educationFocusNode,
+                      errorText: fieldErrors['education'],
+                      onChanged: (value) {
+                        enableCoachSubmitButton();
+                      },
+                      keyboardType: TextInputType.text,
+                      hintText: 'Enter Education',
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    labelContainer(
+                      label: 'Prefer Via',
+                      labelTextBoxSpace: 8,
+                      width: MediaQuery.of(context).size.width * 1,
+                      height: MediaQuery.of(context).size.height * 0.06,
+                      child: DropdownButton<String>(
+                        value: selectedPreferVia,
+                        isExpanded: true,
+                        underline: const SizedBox(),
+                        hint: Text(
+                          'Select Preference',
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 15,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 15,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w400,
+                        ),
+                        items: preferViaList
+                            .map((String value) => DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                ))
+                            .toList(),
+                        onChanged: (String? value) {
+                          setState(() {
+                            selectedPreferVia = value;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    textFormField(
+                      label: 'Philosophy',
+                      labelTextBoxSpace: 8,
+                      controller: philosophyController,
+                      focusNode: philosophyFocusNode,
+                      errorText: fieldErrors['philosophy'],
+                      onChanged: (value) {
+                        enableCoachSubmitButton();
+                      },
+                      keyboardType: TextInputType.text,
+                      hintText: 'Enter Philosophy',
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    textFormField(
+                      label: 'Certifications',
+                      labelTextBoxSpace: 8,
+                      controller: certificationsController,
+                      focusNode: certificationsFocusNode,
+                      errorText: fieldErrors['certifications'],
+                      onChanged: (value) {
+                        enableCoachSubmitButton();
+                      },
+                      keyboardType: TextInputType.text,
+                      hintText: 'Enter Certifications',
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    textFormField(
+                      label: 'Experiance',
+                      labelTextBoxSpace: 8,
+                      controller: experianceController,
+                      focusNode: experianceFocusNode,
+                      errorText: fieldErrors['experiance'],
+                      onChanged: (value) {
+                        enableCoachSubmitButton();
+                      },
+                      keyboardType: TextInputType.text,
+                      hintText: 'Enter Experiance',
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    textFormField(
+                      label: 'Niche',
+                      labelTextBoxSpace: 8,
+                      controller: nicheController,
+                      focusNode: nicheFocusNode,
+                      errorText: fieldErrors['niche'],
+                      onChanged: (value) {
+                        enableCoachSubmitButton();
+                      },
+                      keyboardType: TextInputType.text,
+                      hintText: 'Enter Niche',
+                      textInputAction: TextInputAction.done,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
                     labelContainer(
                       label: 'Categories',
+                      labelTextBoxSpace: 8,
                       width: MediaQuery.of(context).size.width * 1,
                       height: MediaQuery.of(context).size.height * 0.06,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -620,6 +823,7 @@ class _SignupScreenState extends State<SignupScreen>
                               topRight: Radius.circular(20),
                             ),
                       onTap: () {
+                        hideKeyboard(context);
                         showCategoryDialog(context, categories,
                             (categoriesFromDialogue) {
                           setState(() {

@@ -212,7 +212,7 @@ Future<dynamic> handleResponse(Response response,
       SnackBarHelper.showStatusSnackBar(
         NavigationService.navigatorKey.currentContext!,
         StatusIndicator.error,
-        response.data['message'] ?? 'Unknown error',
+        response.data['message'] ?? 'Timeout occurred while sending or receiving, Try again later.',
       );
   }
 }

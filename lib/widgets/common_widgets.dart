@@ -82,6 +82,7 @@ Widget labelContainer(
         AlignmentGeometry alignment = Alignment.center,
         double? labelContainerSpace = 16,
         String? text,
+        double labelTextBoxSpace = 16,
         Widget? child}) =>
     Column(
       children: [
@@ -100,7 +101,7 @@ Widget labelContainer(
           ),
         if (isLabel)
           SizedBox(
-            height: labelContainerSpace,
+            height: labelTextBoxSpace,
           ),
         GestureDetector(
           onTap: onTap,
@@ -266,6 +267,7 @@ Widget intlPhoneField({
   String initialCountryCode = 'IN',
   String label = 'Phone Number',
   double borderRadius = 20,
+  double labelTextBoxSpace = 16,
   bool isLabel = true,
 }) =>
     Column(
@@ -284,8 +286,8 @@ Widget intlPhoneField({
             ),
           ),
         if (isLabel)
-          const SizedBox(
-            height: 16,
+          SizedBox(
+            height: labelTextBoxSpace,
           ),
         IntlPhoneField(
           focusNode: focusNode,
