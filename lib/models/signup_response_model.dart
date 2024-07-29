@@ -1,99 +1,57 @@
 class SignupResponseModel {
-  SignupResponseModel({
-    this.statusCode,
-    this.responseCode,
-    this.message,
-    this.data,
-    this.error,
-  });
-
-  SignupResponseModel.fromJson(Map<String, dynamic> json) {
-    statusCode = json['status'] ?? json['statusCode'];
-    responseCode = json['responseCode'];
-    message = json['message'];
-    // Check if data is not a list and is not null before parsing
-    if (json['data'] != null && json['data'] is! List) {
-      data = SignedUserData.fromJson(json['data']);
-    }
-    // Check if error is not null before parsing
-    if (json['error'] != null) {
-      error = (json['error'] as List)
-          .map((e) => Error.fromJson(e as Map<String, dynamic>))
-          .toList();
-    }
-  }
-
-  int? statusCode;
-  String? responseCode;
+  bool? status;
+  String? flag;
   String? message;
-  SignedUserData? data;
-  List<Error>? error;
-}
+  List<ErrorDetail>? errors;
 
-class SignedUserData {
-  SignedUserData({
-    this.profilePic,
+  SignupResponseModel({
     this.status,
-    this.otp,
-    this.isVerified,
-    this.id,
-    this.firstName,
-    this.lastName,
-    this.email,
-    this.password,
-    this.company,
-    this.positions,
-    this.aboutMe,
-    this.termsAndConditions,
-    this.updatedAt,
-    this.createdAt,
+    this.flag,
+    this.message,
+    this.errors,
   });
 
-  SignedUserData.fromJson(Map<String, dynamic> json) {
-    profilePic = json['profile_pic'];
-    status = json['status'];
-    otp = json['OTP'];
-    isVerified = json['isVerified'];
-    id = json['id'];
-    firstName = json['firstName'];
-    lastName = json['lastName'];
-    email = json['email'];
-    password = json['password'];
-    company = json['company'];
-    positions = json['positions'];
-    aboutMe = json['aboutMe'];
-    termsAndConditions = json['termsAndConditions'];
-    updatedAt =
-        json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null;
-    createdAt =
-        json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null;
+  factory SignupResponseModel.fromJson(Map<String, dynamic> json) {
+    return SignupResponseModel(
+      status: json['status'] as bool?,
+      flag: json['flag'] as String?,
+      message: json['message'] as String?,
+      errors: (json['errors'] as List<dynamic>?)
+          ?.map((item) => ErrorDetail.fromJson(item as Map<String, dynamic>))
+          .toList(),
+    );
   }
 
-  String? profilePic;
-  String? status;
-  int? otp;
-  bool? isVerified;
-  int? id;
-  String? firstName;
-  String? lastName;
-  String? email;
-  String? password;
-  String? company;
-  String? positions;
-  String? aboutMe;
-  bool? termsAndConditions;
-  DateTime? updatedAt;
-  DateTime? createdAt;
+  Map<String, dynamic> toJson() {
+    return {
+      'status': status,
+      'flag': flag,
+      'message': message,
+      'errors': errors?.map((e) => e.toJson()).toList(),
+    };
+  }
 }
 
-class Error {
-  Error({this.field, this.message});
-
-  Error.fromJson(Map<String, dynamic> json) {
-    field = json['field'];
-    message = json['message'];
-  }
-
+class ErrorDetail {
   String? field;
   String? message;
+
+  ErrorDetail({
+    this.field,
+    this.message,
+  });
+
+  factory ErrorDetail.fromJson(Map<String, dynamic> json) {
+    return ErrorDetail(
+      field: json['field'] as String?,
+      message: json['message'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'field': field,
+      'message': message,
+    };
+  }
 }

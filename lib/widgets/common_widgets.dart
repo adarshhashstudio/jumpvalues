@@ -258,18 +258,18 @@ Widget textFormField({
       ],
     );
 
-Widget intlPhoneField({
-  void Function(PhoneNumber)? onChanged,
-  FutureOr<String?> Function(PhoneNumber?)? validator,
-  TextEditingController? controller,
-  FocusNode? focusNode,
-  bool autofocus = false,
-  String initialCountryCode = 'IN',
-  String label = 'Phone Number',
-  double borderRadius = 20,
-  double labelTextBoxSpace = 16,
-  bool isLabel = true,
-}) =>
+Widget intlPhoneField(
+        {void Function(PhoneNumber)? onChanged,
+        FutureOr<String?> Function(PhoneNumber?)? validator,
+        TextEditingController? controller,
+        FocusNode? focusNode,
+        bool autofocus = false,
+        String initialCountryCode = 'IN',
+        String label = 'Phone Number',
+        double borderRadius = 20,
+        double labelTextBoxSpace = 16,
+        bool isLabel = true,
+        String? errorText}) =>
     Column(
       children: [
         if (isLabel)
@@ -310,6 +310,7 @@ Widget intlPhoneField({
               borderRadius: BorderRadius.circular(borderRadius),
             ),
             filled: true,
+            errorText: errorText,
             errorStyle: const TextStyle(color: Color(0xffff3333)),
             focusedBorder: OutlineInputBorder(
               borderSide: const BorderSide(width: 1, color: Colors.blue),

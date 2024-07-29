@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:jumpvalues/models/all_comprehensive_response.dart';
 import 'package:jumpvalues/models/base_response.dart';
 import 'package:jumpvalues/models/category_dropdown_response.dart';
@@ -8,24 +9,35 @@ import 'package:jumpvalues/models/signup_response_model.dart';
 import 'package:jumpvalues/models/user_data_response_model.dart';
 import 'package:jumpvalues/network/network_utils.dart';
 
+Future<Map<String, dynamic>> handleResponse(Response response) async {
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    return response.data;
+  } else if (response.statusCode != 200 || response.statusCode != 201) {
+    return response.data;
+  } else {
+    throw Exception('Error: ${response.data}');
+  }
+}
+
 Future<CategoryDropdownResponse?> categoriesDropdown() async {
   CategoryDropdownResponse? response;
   try {
     response = CategoryDropdownResponse.fromJson(await handleResponse(
-        await buildHttpResponse('category/dropdown',
-            isAuth: true, method: HttpMethodType.get)));
+      await buildHttpResponse('category/dropdown',
+          isAuth: true, method: HttpMethodType.get),
+    ));
   } catch (e) {
     rethrow;
   }
   return response;
 }
 
-Future<SignupResponseModel> signupUser(Map<String, dynamic> request) async {
+Future<SignupResponseModel> signupUser(
+    Map<String, dynamic> request, String endPoint) async {
   SignupResponseModel response;
   try {
     response = SignupResponseModel.fromJson(await handleResponse(
-        endPoint: 'auth/signup',
-        await buildHttpResponse('auth/signup',
+        await buildHttpResponse(endPoint,
             request: request, method: HttpMethodType.post)));
   } catch (e) {
     rethrow;

@@ -40,41 +40,6 @@ Uri buildBaseUrl(String endPoint) {
   return url;
 }
 
-String handleDioError(DioException error) {
-  switch (error.type) {
-    case DioExceptionType.connectionTimeout:
-    case DioExceptionType.sendTimeout:
-    case DioExceptionType.receiveTimeout:
-      return 'Timeout occurred while sending or receiving, Try again later.';
-    case DioExceptionType.badResponse:
-      final statusCode = error.response?.statusCode;
-      if (statusCode != null) {
-        switch (statusCode) {
-          case StatusCode.badRequest:
-            return 'Bad Request';
-          case StatusCode.unauthorized:
-          case StatusCode.forbidden:
-            return 'Unauthorized';
-          case StatusCode.notFound:
-            return 'Not Found';
-          case StatusCode.internalServerError:
-            return 'Internal Server Error';
-        }
-      }
-      return 'Server Error';
-    case DioExceptionType.cancel:
-      return 'Request Cancelled';
-    case DioExceptionType.badCertificate:
-      return 'Bad Certificate';
-    case DioExceptionType.connectionError:
-      return 'No Internet Connection';
-    case DioExceptionType.unknown:
-      return 'Unknown Error';
-    default:
-      return 'Unknown Error';
-  }
-}
-
 Future<Response<dynamic>> buildHttpResponse(
   String endPoint, {
   HttpMethodType method = HttpMethodType.get,
@@ -96,7 +61,7 @@ Future<Response<dynamic>> buildHttpResponse(
     late Response response;
     var dio = Dio();
 
-    dio.options.connectTimeout = const Duration(seconds: 15);
+    dio.options.connectTimeout = const Duration(milliseconds: 700);
 
     try {
       response = await dio.request(
@@ -108,16 +73,13 @@ Future<Response<dynamic>> buildHttpResponse(
         ),
       );
     } on DioError catch (e) {
-      // Handle DioError specifically to capture detailed error messages
       if (e.response != null) {
-        // If response is available, capture status code and error data
         response = Response(
           statusCode: e.response?.statusCode ?? StatusCode.defaultError,
           requestOptions: RequestOptions(path: endPoint),
           data: e.response?.data,
         );
       } else {
-        // Otherwise, handle other DioError types with a generic message
         response = Response(
           statusCode: StatusCode.defaultError,
           requestOptions: RequestOptions(path: endPoint),
@@ -127,7 +89,6 @@ Future<Response<dynamic>> buildHttpResponse(
         );
       }
     } catch (e) {
-      // Catch all other exceptions and wrap in Response with a generic message
       response = Response(
         statusCode: StatusCode.defaultError,
         requestOptions: RequestOptions(path: endPoint),
@@ -157,63 +118,6 @@ Future<Response<dynamic>> buildHttpResponse(
         'error': {'message': 'No internet connection available'}
       },
     );
-  }
-}
-
-Future<dynamic> handleResponse(Response response,
-    {String endPoint = '',
-    HttpResponseType httpResponseType = HttpResponseType.JSON,
-    bool? avoidTokenError,
-    bool? isSadadPayment}) async {
-  switch (response.statusCode) {
-    case StatusCode.success:
-      return response.data;
-    case StatusCode.noContent:
-      return response.data;
-    case StatusCode.badRequest:
-      if (response.data.containsKey('errors')) {
-        // Handle multiple errors in response
-        // var errors = response.data['errors'];
-        // if (errors is List) {
-        //   errors.forEach((error) {
-        //     // Show error messages for respective fields
-        //     SnackBarHelper.showStatusSnackBar(
-        //       NavigationService.navigatorKey.currentContext!,
-        //       StatusIndicator.error,
-        //       error['message'] ?? 'Validation error',
-        //     );
-        //   });
-        // }
-      } else {
-        // Default error handling if 'errors' key is not present
-        // SnackBarHelper.showStatusSnackBar(
-        //   NavigationService.navigatorKey.currentContext!,
-        //   StatusIndicator.error,
-        //   response.data['message'] ?? 'Bad request',
-        // );
-      }
-      return response.data;
-    case StatusCode.forbidden:
-      SnackBarHelper.showStatusSnackBar(
-        NavigationService.navigatorKey.currentContext!,
-        StatusIndicator.warning,
-        response.data['message'] ?? 'Forbidden',
-      );
-      tokenExpired(NavigationService.navigatorKey.currentContext!);
-      break;
-    case StatusCode.noInternetConnection:
-      SnackBarHelper.showStatusSnackBar(
-        NavigationService.navigatorKey.currentContext!,
-        StatusIndicator.error,
-        response.data['message'] ?? 'No internet connection',
-      );
-      return response.data;
-    default:
-      SnackBarHelper.showStatusSnackBar(
-        NavigationService.navigatorKey.currentContext!,
-        StatusIndicator.error,
-        response.data['message'] ?? 'Timeout occurred while sending or receiving, Try again later.',
-      );
   }
 }
 
@@ -299,4 +203,21 @@ Future<Response<dynamic>> uploadImage(Uri url, File imageFile,
   );
 
   return response;
+}
+
+String handleDioError(DioError error) {
+  switch (error.type) {
+    case DioErrorType.connectionError:
+      return 'Connection timeout';
+    case DioErrorType.sendTimeout:
+      return 'Send timeout';
+    case DioErrorType.receiveTimeout:
+      return 'Receive timeout';
+    case DioErrorType.cancel:
+      return 'Request cancelled';
+    case DioErrorType.unknown:
+      return 'Unknown error occurred';
+    default:
+      return 'Something went wrong';
+  }
 }

@@ -63,7 +63,7 @@ class _SignupScreenState extends State<SignupScreen>
   final FocusNode aboutFocusNode = FocusNode();
 
   // Map to store error messages for each field
-  Map<String, String> fieldErrors = {};
+  Map<String, dynamic> fieldErrors = {};
 
   bool submitButtonEnabled = false;
   bool coachSubmitButtonEnabled = false;
@@ -205,10 +205,12 @@ class _SignupScreenState extends State<SignupScreen>
       setState(() {
         coachSubmitButtonEnabled = true;
       });
+      debugPrint('Coach submit button enabled');
     } else {
       setState(() {
         coachSubmitButtonEnabled = false;
       });
+      debugPrint('Coach submit button disabled');
     }
   }
 
@@ -246,7 +248,7 @@ class _SignupScreenState extends State<SignupScreen>
     });
 
     var request = <String, dynamic>{};
-    List<int> selectedCategoriesId = [];
+    var selectedCategoriesId = <int>[];
     selectedCategoriesId.addAll(
         selectedCategories.map((elemente) => elemente.id ?? -1).toList());
 
@@ -278,15 +280,17 @@ class _SignupScreenState extends State<SignupScreen>
       };
     }
 
+    var endPoint = isCoach ? 'auth/coach/register' : 'auth/client/register';
+
     try {
-      var response = await signupUser(request);
+      var response = await signupUser(request, endPoint);
 
       setState(() {
         loader = false;
       });
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.data == null) {
+      if (response.status == true) {
+        if (response.flag == 'SUCCESS') {
           // for first time signup
           SnackBarHelper.showStatusSnackBar(
             context,
@@ -316,27 +320,35 @@ class _SignupScreenState extends State<SignupScreen>
           );
         }
       } else {
-        if (response.error?.isNotEmpty ?? false) {
+        if (response.errors?.isNotEmpty ?? false) {
           // Set field errors and focus on the first error field
-          response.error?.forEach((e) {
+          response.errors?.forEach((e) {
             fieldErrors[e.field!] = e.message!;
           });
 
           // Focus on the first error field
-          if (fieldErrors.containsKey('firstName')) {
+          if (fieldErrors.containsKey('first_name')) {
             FocusScope.of(context).requestFocus(firstNameFocusNode);
-          } else if (fieldErrors.containsKey('lastName')) {
+          } else if (fieldErrors.containsKey('last_name')) {
             FocusScope.of(context).requestFocus(lastNameFocusNode);
           } else if (fieldErrors.containsKey('email')) {
             FocusScope.of(context).requestFocus(emailFocusNode);
-          } else if (fieldErrors.containsKey('company')) {
-            FocusScope.of(context).requestFocus(companyFocusNode);
           } else if (fieldErrors.containsKey('password')) {
             FocusScope.of(context).requestFocus(passwordFocusNode);
-          } else if (fieldErrors.containsKey('positions')) {
-            FocusScope.of(context).requestFocus(positionFocusNode);
-          } else if (fieldErrors.containsKey('aboutMe')) {
-            FocusScope.of(context).requestFocus(aboutFocusNode);
+          } else if (fieldErrors.containsKey('phone')) {
+            FocusScope.of(context).requestFocus(phoneNumberFocusNode);
+          } else if (fieldErrors.containsKey('education')) {
+            FocusScope.of(context).requestFocus(educationFocusNode);
+          } else if (fieldErrors.containsKey('philosophy')) {
+            FocusScope.of(context).requestFocus(philosophyFocusNode);
+          } else if (fieldErrors.containsKey('certifications')) {
+            FocusScope.of(context).requestFocus(certificationsFocusNode);
+          } else if (fieldErrors.containsKey('industries_served')) {
+            FocusScope.of(context).requestFocus(industriesServedFocusNode);
+          } else if (fieldErrors.containsKey('experiance')) {
+            FocusScope.of(context).requestFocus(experianceFocusNode);
+          } else if (fieldErrors.containsKey('niche')) {
+            FocusScope.of(context).requestFocus(nicheFocusNode);
           }
         } else {
           // Handle other errors
@@ -593,7 +605,7 @@ class _SignupScreenState extends State<SignupScreen>
                       autofocus: true,
                       controller: firstNameController,
                       focusNode: firstNameFocusNode,
-                      errorText: fieldErrors['firstName'],
+                      errorText: fieldErrors['first_name'],
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
                       ],
@@ -612,7 +624,7 @@ class _SignupScreenState extends State<SignupScreen>
                       labelTextBoxSpace: 8,
                       controller: lastNameController,
                       focusNode: lastNameFocusNode,
-                      errorText: fieldErrors['lastName'],
+                      errorText: fieldErrors['last_name'],
                       onChanged: (value) {
                         enableCoachSubmitButton();
                       },
@@ -672,6 +684,8 @@ class _SignupScreenState extends State<SignupScreen>
                       label: 'Phone Number',
                       labelTextBoxSpace: 8,
                       controller: phoneNumberController,
+                      focusNode: phoneNumberFocusNode,
+                      errorText: fieldErrors['phone'],
                       onChanged: (phoneNumber) {
                         setState(() {
                           sPhoneNumber = phoneNumber.number;
@@ -736,6 +750,7 @@ class _SignupScreenState extends State<SignupScreen>
                                 ))
                             .toList(),
                         onChanged: (String? value) {
+                          enableCoachSubmitButton();
                           setState(() {
                             selectedPreferVia = value;
                           });
@@ -778,6 +793,22 @@ class _SignupScreenState extends State<SignupScreen>
                       height: 20,
                     ),
                     textFormField(
+                      label: 'Industries Served',
+                      labelTextBoxSpace: 8,
+                      controller: industriesServedController,
+                      focusNode: industriesServedFocusNode,
+                      errorText: fieldErrors['industries_served'],
+                      onChanged: (value) {
+                        enableCoachSubmitButton();
+                      },
+                      keyboardType: TextInputType.text,
+                      hintText: 'Enter Industries Served',
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    textFormField(
                       label: 'Experiance',
                       labelTextBoxSpace: 8,
                       controller: experianceController,
@@ -786,7 +817,8 @@ class _SignupScreenState extends State<SignupScreen>
                       onChanged: (value) {
                         enableCoachSubmitButton();
                       },
-                      keyboardType: TextInputType.text,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      keyboardType: TextInputType.number,
                       hintText: 'Enter Experiance',
                       textInputAction: TextInputAction.next,
                     ),
@@ -823,6 +855,7 @@ class _SignupScreenState extends State<SignupScreen>
                               topRight: Radius.circular(20),
                             ),
                       onTap: () {
+                        enableCoachSubmitButton();
                         hideKeyboard(context);
                         showCategoryDialog(context, categories,
                             (categoriesFromDialogue) {
