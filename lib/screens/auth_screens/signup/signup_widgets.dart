@@ -1,50 +1,60 @@
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/models/signup_categories.dart';
+import 'package:jumpvalues/models/category_dropdown_response.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 
 class CategoryDialog extends StatefulWidget {
-  CategoryDialog(
-      {required this.categories,
-      required this.onConfirm,
-      required this.selectedCat});
-  final List<SignupCategory> categories;
-  final Function(List<SignupCategory>) onConfirm;
-  final List<SignupCategory> selectedCat;
+  CategoryDialog({
+    required this.categories,
+    required this.onConfirm,
+    required this.selectedCat,
+  });
+  final List<Category> categories;
+  final Function(List<Category>) onConfirm;
+  final List<Category> selectedCat;
 
   @override
   _CategoryDialogState createState() => _CategoryDialogState();
 }
 
 class _CategoryDialogState extends State<CategoryDialog> {
-  List<SignupCategory> _filteredCategories = [];
-  final List<SignupCategory> _selectedCategories = [];
+  List<Category> _filteredCategories = [];
+  late List<Category> _selectedCategories;
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    for (var element in widget.selectedCat) {
-      _toggleSelection(element.id);
-    }
+    _initializeSelectedCategories();
     _filteredCategories = widget.categories;
+  }
+
+  void _initializeSelectedCategories() {
+    _selectedCategories = List.from(widget.selectedCat);
+    for (var selectedCategory in _selectedCategories) {
+      _toggleSelection(selectedCategory.id ?? -1, initialize: true);
+    }
   }
 
   void _filterCategories(String query) {
     setState(() {
       _filteredCategories = widget.categories
           .where((category) =>
-              category.name.toLowerCase().contains(query.toLowerCase()))
+              (category.name ?? '').toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
   }
 
-  void _toggleSelection(int id) {
+  void _toggleSelection(int id, {bool initialize = false}) {
     setState(() {
       final category = widget.categories.firstWhere((cat) => cat.id == id);
-      category.isSelected = !category.isSelected;
+      if (!initialize) {
+        category.isSelected = !category.isSelected;
+      }
       if (category.isSelected) {
-        _selectedCategories.add(category);
+        if (!_selectedCategories.contains(category)) {
+          _selectedCategories.add(category);
+        }
       } else {
         _selectedCategories.remove(category);
       }
@@ -80,18 +90,18 @@ class _CategoryDialogState extends State<CategoryDialog> {
         ),
         titleTextStyle: TextStyle(
           fontSize: 20,
-          color: textColor,
+          color: Colors.black, // Adjusted to avoid an undefined variable
         ),
         backgroundColor: Colors.white,
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              textFormField(
+              TextFormField(
                 controller: _searchController,
-                isLabel: false,
-                hintText: 'Search Categories',
-                label: '',
+                decoration: InputDecoration(
+                  hintText: 'Search Categories',
+                ),
                 onChanged: _filterCategories,
               ),
               const SizedBox(height: 16),
@@ -115,7 +125,7 @@ class _CategoryDialogState extends State<CategoryDialog> {
                   itemBuilder: (context, index) {
                     final category = _filteredCategories[index];
                     return ListTile(
-                      title: Text(category.name),
+                      title: Text(category.name ?? ''),
                       trailing: Icon(
                         category.isSelected
                             ? Icons.check_box
@@ -123,7 +133,7 @@ class _CategoryDialogState extends State<CategoryDialog> {
                         color: category.isSelected ? Colors.blue : null,
                       ),
                       onTap: () {
-                        _toggleSelection(category.id);
+                        _toggleSelection(category.id ?? -1);
                       },
                     );
                   },

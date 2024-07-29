@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:jumpvalues/models/signup_categories.dart';
+import 'package:jumpvalues/models/category_dropdown_response.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/auth_screens/generate_otp_screen.dart';
 import 'package:jumpvalues/screens/auth_screens/otp_screen.dart';
@@ -57,10 +57,12 @@ class _SignupScreenState extends State<SignupScreen>
   String sPhoneNumber = '';
   String sCountryCode = '';
 
-  List<SignupCategory> selectedCategories = [];
+  List<Category> selectedCategories = [];
+  List<Category> categories = [];
 
   bool acceptTerms = false;
   bool loader = false;
+  bool initialLoader = false;
   bool _obscureText = true;
   int tabIndex = 0;
 
@@ -77,6 +79,7 @@ class _SignupScreenState extends State<SignupScreen>
     aboutController = TextEditingController();
     phoneNumberController = TextEditingController();
     super.initState();
+    getCategoriesDropdown();
   }
 
   @override
@@ -98,14 +101,15 @@ class _SignupScreenState extends State<SignupScreen>
     enableCoachSubmitButton();
   }
 
-  void showCategoryDialog(BuildContext context, List<SignupCategory> categories,
-      Function(List<SignupCategory>) onConfirm) {
+  void showCategoryDialog(BuildContext context, List<Category> categories,
+      Function(List<Category>) onConfirm) {
     showDialog(
       context: context,
       builder: (BuildContext context) => CategoryDialog(
-          categories: categories,
-          onConfirm: onConfirm,
-          selectedCat: selectedCategories),
+        categories: categories,
+        onConfirm: onConfirm,
+        selectedCat: categories.where((cat) => cat.isSelected).toList(),
+      ),
     );
   }
 
@@ -142,6 +146,33 @@ class _SignupScreenState extends State<SignupScreen>
     } else {
       setState(() {
         coachSubmitButtonEnabled = false;
+      });
+    }
+  }
+
+  Future<void> getCategoriesDropdown() async {
+    setState(() {
+      initialLoader = true;
+    });
+
+    try {
+      var response = await categoriesDropdown();
+      if (response?.status == true) {
+        setState(() {
+          categories.clear();
+          categories = response?.data ?? [];
+        });
+      } else {
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
+      }
+    } catch (e) {
+      debugPrint('categoriesDropdown Error: $e');
+    } finally {
+      setState(() {
+        initialLoader = false;
       });
     }
   }
@@ -579,7 +610,7 @@ class _SignupScreenState extends State<SignupScreen>
                     labelContainer(
                       label: 'Categories',
                       width: MediaQuery.of(context).size.width * 1,
-                      height: MediaQuery.of(context).size.height * 0.13,
+                      height: MediaQuery.of(context).size.height * 0.06,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       isError: selectCategoriesError,
                       borderRadius: selectedCategories.isEmpty
@@ -589,13 +620,6 @@ class _SignupScreenState extends State<SignupScreen>
                               topRight: Radius.circular(20),
                             ),
                       onTap: () {
-                        // Sample categories
-                        var categories = <SignupCategory>[
-                          SignupCategory(id: 1, name: 'Sports'),
-                          SignupCategory(id: 2, name: 'Music'),
-                          SignupCategory(id: 3, name: 'Movies'),
-                          SignupCategory(id: 4, name: 'Books'),
-                        ];
                         showCategoryDialog(context, categories,
                             (categoriesFromDialogue) {
                           setState(() {
@@ -619,11 +643,13 @@ class _SignupScreenState extends State<SignupScreen>
                             style: TextStyle(
                                 color: selectCategoriesError
                                     ? Colors.red
-                                    : textColor),
+                                    : Colors.black),
                           ),
                           Icon(
                             Icons.arrow_drop_down,
-                            color: selectCategoriesError ? Colors.red : black,
+                            color: selectCategoriesError
+                                ? Colors.red
+                                : Colors.black,
                           ),
                         ],
                       ),
@@ -640,7 +666,7 @@ class _SignupScreenState extends State<SignupScreen>
                               )
                             : BorderRadius.circular(20),
                         children: [
-                          for (var tone in selectedCategories)
+                          for (var item in selectedCategories)
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 2),
@@ -649,8 +675,8 @@ class _SignupScreenState extends State<SignupScreen>
                                   border: Border.all(width: 0.05),
                                   borderRadius: BorderRadius.circular(12)),
                               child: Text(
-                                tone.name,
-                                style: const TextStyle(color: white),
+                                item.name ?? '',
+                                style: const TextStyle(color: Colors.white),
                               ),
                             ),
                         ],
@@ -742,18 +768,27 @@ class _SignupScreenState extends State<SignupScreen>
                 );
               }
             },
-            child: SafeArea(
-              child: Form(
-                key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: TabBarView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    buildClientForm(context),
-                    buildCoachForm(context),
-                  ],
+            child: Stack(
+              children: [
+                SafeArea(
+                  child: Form(
+                    key: _formKey,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    child: TabBarView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        buildClientForm(context),
+                        buildCoachForm(context),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                if (initialLoader)
+                  const Positioned.fill(
+                      child: Center(
+                    child: CircularProgressIndicator(),
+                  )),
+              ],
             ),
           ),
         ),

@@ -1,11 +1,24 @@
 import 'dart:io';
 import 'package:jumpvalues/models/all_comprehensive_response.dart';
 import 'package:jumpvalues/models/base_response.dart';
+import 'package:jumpvalues/models/category_dropdown_response.dart';
 import 'package:jumpvalues/models/login_response.dart';
 import 'package:jumpvalues/models/profile_pic_response.dart';
 import 'package:jumpvalues/models/signup_response_model.dart';
 import 'package:jumpvalues/models/user_data_response_model.dart';
 import 'package:jumpvalues/network/network_utils.dart';
+
+Future<CategoryDropdownResponse?> categoriesDropdown() async {
+  CategoryDropdownResponse? response;
+  try {
+    response = CategoryDropdownResponse.fromJson(await handleResponse(
+        await buildHttpResponse('category/dropdown',
+            isAuth: true, method: HttpMethodType.get)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
 
 Future<SignupResponseModel> signupUser(Map<String, dynamic> request) async {
   SignupResponseModel response;

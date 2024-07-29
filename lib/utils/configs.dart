@@ -16,7 +16,7 @@ Color warningColor = const Color(0xFFFFAB1A);
 const APP_NAME = 'JumpCC';
 
 // Network
-const domainUrl = 'http://18.209.192.96:8080'; // 'http://13.234.173.125:6060';
+const domainUrl = 'http://192.168.1.166:8000/api/v1';
 const baseUrl = '$domainUrl/';
 const webViewUrl = 'http://18.209.192.96/pages/';
 
