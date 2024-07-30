@@ -114,7 +114,7 @@ Future<BaseResponseModel?> resetPassword(Map<String, dynamic> request) async {
   try {
     response = BaseResponseModel.fromJson(await handleResponse(
         await buildHttpResponse('auth/reset_password',
-            request: request, method: HttpMethodType.post)));
+            request: request, method: HttpMethodType.patch)));
   } catch (e) {
     rethrow;
   }

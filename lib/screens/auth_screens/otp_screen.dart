@@ -120,6 +120,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
   Future<void> verify() async {
     setState(() {
+      fieldErrors.clear();
       loader = true;
     });
 

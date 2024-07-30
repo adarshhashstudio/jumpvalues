@@ -15,9 +15,12 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController? emailController;
+  final FocusNode emailFocusNode = FocusNode();
   bool submitButtonEnabled = false;
 
   bool loader = false;
+
+  Map<String, dynamic> fieldErrors = {};
 
   @override
   void initState() {
@@ -46,6 +49,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Future<void> forgotPass() async {
     setState(() {
+      fieldErrors.clear();
       loader = true;
     });
 
@@ -61,7 +65,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   isFrom: 'forgotPassword',
                 )));
       } else {
-        if (response?.message != null) {
+        if (response?.errors != null) {
+          response?.errors?.forEach((e) {
+            fieldErrors[e.field ?? '0'] = e.message ?? '0';
+          });
+
+          if (fieldErrors.containsKey('email')) {
+            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+                fieldErrors['email'] ?? errorSomethingWentWrong);
+            FocusScope.of(context).requestFocus(emailFocusNode);
+          }
+        } else {
           SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
               response?.message ?? errorSomethingWentWrong);
         }
@@ -137,6 +151,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             label: 'Email',
                             autofocus: true,
                             controller: emailController,
+                            focusNode: emailFocusNode,
+                            errorText: fieldErrors['email'],
                             onChanged: (value) {
                               enableSubmitButton();
                             },

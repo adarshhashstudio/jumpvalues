@@ -19,11 +19,14 @@ class _ForgotPasswordScreenState extends State<UpdatePasswordScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController? newPassword;
   TextEditingController? confirmPassword;
+  final FocusNode newPasswordFocusNode = FocusNode();
+  final FocusNode confirmPasswordFocusNode = FocusNode();
   bool _obscureText = true;
   bool submitButtonEnabled = false;
   String? confirmPasswordError;
 
   bool loader = false;
+  Map<String, dynamic> fieldErrors = {};
 
   @override
   void initState() {
@@ -41,14 +44,15 @@ class _ForgotPasswordScreenState extends State<UpdatePasswordScreen> {
 
   Future<void> reset() async {
     setState(() {
+      fieldErrors.clear();
       loader = true;
     });
 
     try {
       var request = {
         'email': widget.email,
-        'newPassword': newPassword?.text ?? '',
-        'confirmPassword': confirmPassword?.text ?? ''
+        'new_password': newPassword?.text ?? '',
+        'confirm_password': confirmPassword?.text ?? ''
       };
       var response = await resetPassword(request);
       if (response?.status == true) {
@@ -59,7 +63,17 @@ class _ForgotPasswordScreenState extends State<UpdatePasswordScreen> {
             MaterialPageRoute(builder: (context) => const WelcomeScreen()),
             (Route<dynamic> route) => false);
       } else {
-        if (response?.message != null) {
+        if (response?.errors != null) {
+          response?.errors?.forEach((e) {
+            fieldErrors[e.field ?? '0'] = e.message ?? '0';
+          });
+
+          if (fieldErrors.containsKey('new_password')) {
+            FocusScope.of(context).requestFocus(newPasswordFocusNode);
+          } else if (fieldErrors.containsKey('confirm_password')) {
+            FocusScope.of(context).requestFocus(confirmPasswordFocusNode);
+          }
+        } else {
           SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
               response?.message ?? errorSomethingWentWrong);
         }
@@ -183,6 +197,7 @@ class _ForgotPasswordScreenState extends State<UpdatePasswordScreen> {
                             fontFamily: 'Roboto',
                             fontWeight: FontWeight.w400,
                           ),
+                          focusNode: newPasswordFocusNode,
                           decoration: InputDecoration(
                             counterText: '',
                             hintText: 'Enter New Password',
@@ -192,6 +207,7 @@ class _ForgotPasswordScreenState extends State<UpdatePasswordScreen> {
                               fontFamily: 'Roboto',
                               fontWeight: FontWeight.w400,
                             ),
+                            errorText: fieldErrors['new_password'],
                             enabled: true,
                             enabledBorder: OutlineInputBorder(
                               borderSide:
@@ -274,6 +290,7 @@ class _ForgotPasswordScreenState extends State<UpdatePasswordScreen> {
                             fontFamily: 'Roboto',
                             fontWeight: FontWeight.w400,
                           ),
+                          focusNode: confirmPasswordFocusNode,
                           decoration: InputDecoration(
                             counterText: '',
                             hintText: 'Enter Confirm Password',
@@ -283,6 +300,7 @@ class _ForgotPasswordScreenState extends State<UpdatePasswordScreen> {
                               fontFamily: 'Roboto',
                               fontWeight: FontWeight.w400,
                             ),
+                            errorText: fieldErrors['confirm_password'],
                             enabled: true,
                             enabledBorder: OutlineInputBorder(
                               borderSide:
