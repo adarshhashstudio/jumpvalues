@@ -88,6 +88,9 @@ Future<void> main() async {
   Hive.registerAdapter(GoalsDataAdapter());
   goalsBox = await Hive.openBox<GoalsData>('goalsBox');
 
+  appStore.setLoggedIn(true);
+  appStore.setUserType(USERTYPE_COACH);
+
   runApp(const MyApp());
 }
 

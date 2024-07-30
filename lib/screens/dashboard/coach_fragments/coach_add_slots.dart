@@ -1,51 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_add_multiple_slots.dart';
+import 'package:jumpvalues/screens/widgets/widgets.dart';
+import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/widgets/slots_calendar.dart';
+import 'package:nb_utils/nb_utils.dart' as nb;
 
-class CoachAddSlots extends StatefulWidget {
-  const CoachAddSlots({super.key});
+class CoachMySlots extends StatefulWidget {
+  const CoachMySlots({super.key});
 
   @override
-  State<CoachAddSlots> createState() => _CoachAddSlotsState();
+  State<CoachMySlots> createState() => _CoachMySlotsState();
 }
 
-class _CoachAddSlotsState extends State<CoachAddSlots> {
+class _CoachMySlotsState extends State<CoachMySlots> {
   List<Meeting> globalMeetings = [];
 
-  // Method to add or remove a meeting based on selected slot
-  void handleSlotSelection(DateTime selectedDate, DateTime startTime,
-      DateTime endTime, String remark) {
-    setState(() {
-      // // Remove any existing meeting that matches the selected slot
-      // globalMeetings.removeWhere((meeting) =>
-      //     meeting.from == startTime &&
-      //     meeting.to == endTime &&
-      //     meeting.eventName == title);
-
-      // // Add the selected slot as a new meeting
-      // globalMeetings.add(Meeting(title, startTime, endTime,
-      //     const Color(0xFF0F8644), 'description', false));
-
-      // // Optionally, you can sort the meetings by startTime if needed
-      // globalMeetings.sort((a, b) => a.from.compareTo(b.from));
-    });
-  }
-
   @override
-  Widget build(BuildContext context) => SizedBox(
-        child: Center(
-          child: SlotsCalendar(
+  Widget build(BuildContext context) => Stack(
+        children: [
+          SlotsCalendar(
             meetings: globalMeetings,
-            onSlotSelected: (
-              DateTime selectedDate,
-              DateTime startTime,
-              DateTime endTime,
-              String selectSlotRemark,
-              List<Meeting> allSlots,
-            ) {
-              handleSlotSelection(
-                  selectedDate, startTime, endTime, selectSlotRemark);
-            },
+            onSlotSelected: (p0, p1, p2, p3, p4) {},
           ),
-        ),
+          Positioned(
+              bottom: 16,
+              right: 16,
+              child: AppButton(
+                onTap: () async {
+                  final list = await Navigator.of(context).push<List<Meeting>>(MaterialPageRoute(
+                      builder: (context) => const CoachAddMultipleSlots()));
+                  if (list != null) {
+                    setState(() {
+                      globalMeetings = list;
+                    });
+                  }
+                },
+                color: primaryColor,
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.01,
+                    ),
+                    Text(
+                      'Add Slots',
+                      style: nb.boldTextStyle(color: nb.white),
+                    ),
+                  ],
+                ),
+              ))
+        ],
       );
 }

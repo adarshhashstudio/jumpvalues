@@ -46,7 +46,7 @@ class DashboardState extends State<Dashboard> {
     fragmentList = [
       appStore.userTypeCoach ? const CoachDashboard() : const ClientDashboard(),
       appStore.userTypeCoach ? const CoachSessions() : const ClientSessions(),
-      appStore.userTypeCoach ? const CoachAddSlots() : const ClientAllCoaches(),
+      appStore.userTypeCoach ? const CoachMySlots() : const ClientAllCoaches(),
       const CommonProfile(),
     ];
     init();
