@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/network/status_codes.dart';
 import 'package:jumpvalues/utils/configs.dart';
-import 'package:jumpvalues/utils/utils.dart';
-import 'package:nb_utils/nb_utils.dart'; // Add a prefix for dio
+import 'package:nb_utils/nb_utils.dart';
 
 enum HttpMethodType { get, post, put, patch, delete }
 
@@ -72,7 +71,7 @@ Future<Response<dynamic>> buildHttpResponse(
           headers: headers,
         ),
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null) {
         response = Response(
           statusCode: e.response?.statusCode ?? StatusCode.defaultError,
@@ -205,17 +204,17 @@ Future<Response<dynamic>> uploadImage(Uri url, File imageFile,
   return response;
 }
 
-String handleDioError(DioError error) {
+String handleDioError(DioException error) {
   switch (error.type) {
-    case DioErrorType.connectionError:
+    case DioExceptionType.connectionError:
       return 'Connection timeout';
-    case DioErrorType.sendTimeout:
+    case DioExceptionType.sendTimeout:
       return 'Send timeout';
-    case DioErrorType.receiveTimeout:
+    case DioExceptionType.receiveTimeout:
       return 'Receive timeout';
-    case DioErrorType.cancel:
+    case DioExceptionType.cancel:
       return 'Request cancelled';
-    case DioErrorType.unknown:
+    case DioExceptionType.unknown:
       return 'Unknown error occurred';
     default:
       return 'Something went wrong';

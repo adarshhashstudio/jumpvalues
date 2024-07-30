@@ -24,7 +24,20 @@ Future<CategoryDropdownResponse?> categoriesDropdown() async {
   try {
     response = CategoryDropdownResponse.fromJson(await handleResponse(
       await buildHttpResponse('category/dropdown',
-          isAuth: true, method: HttpMethodType.get),
+          isAuth: false, method: HttpMethodType.get),
+    ));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<CategoryDropdownResponse?> sponsorDropdown() async {
+  CategoryDropdownResponse? response;
+  try {
+    response = CategoryDropdownResponse.fromJson(await handleResponse(
+      await buildHttpResponse('sponsor/dropdown',
+          isAuth: false, method: HttpMethodType.get),
     ));
   } catch (e) {
     rethrow;
@@ -88,8 +101,8 @@ Future<BaseResponseModel?> resendOtpForSignup(
   BaseResponseModel? response;
   try {
     response = BaseResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse('auth/send_otp',
-            request: request, method: HttpMethodType.post)));
+        await buildHttpResponse('auth/resend/otp',
+            request: request, method: HttpMethodType.patch)));
   } catch (e) {
     rethrow;
   }
@@ -112,8 +125,8 @@ Future<BaseResponseModel> verifyOtp(Map<String, dynamic> request) async {
   BaseResponseModel? response;
   try {
     response = BaseResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse('auth/verify_OTP',
-            request: request, method: HttpMethodType.post)));
+        await buildHttpResponse('auth/verify/otp',
+            request: request, method: HttpMethodType.patch)));
   } catch (e) {
     rethrow;
   }

@@ -1,7 +1,7 @@
 class LoginResponseModel {
   LoginResponseModel({
+    this.statusCode,
     this.responseCode,
-    this.responseStatus,
     this.message,
     this.token,
     this.data,
@@ -10,13 +10,13 @@ class LoginResponseModel {
   factory LoginResponseModel.fromJson(Map<String, dynamic> json) =>
       LoginResponseModel(
         responseCode: json['responseCode'],
-        responseStatus: json['responseStatus'],
+        statusCode: json['statusCode'],
         message: json['message'],
         token: json['token'],
         data: json['data'] != null ? UserData.fromJson(json['data']) : null,
       );
-  final int? responseCode;
-  final String? responseStatus;
+  final String? responseCode;
+  final int? statusCode;
   final String? message;
   final String? token;
   final UserData? data;

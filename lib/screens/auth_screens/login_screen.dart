@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/auth_screens/forgot_password_screen.dart';
+import 'package:jumpvalues/screens/auth_screens/generate_otp_screen.dart';
 import 'package:jumpvalues/screens/dashboard/dashboard.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -79,10 +80,22 @@ class _LoginScreenState extends State<LoginScreen> {
               MaterialPageRoute(builder: (context) => Dashboard()));
         } else {
           // Handle missing token
-          if (response.message != null) {
-            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-                response.message ?? errorSomethingWentWrong);
-          }
+          // if (response.message != null) {
+          //   SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+          //       response.message ?? errorSomethingWentWrong);
+          // }
+          // if user already registered but not verified yet
+          SnackBarHelper.showStatusSnackBar(
+            context,
+            StatusIndicator.success,
+            response.message ?? '',
+          );
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => GenerateOtpScreen(
+                  email:emailController?.text ?? ''),
+            ),
+          );
         }
       }
     } catch (e) {

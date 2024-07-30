@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jumpvalues/models/category_dropdown_response.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
-import 'package:jumpvalues/screens/auth_screens/generate_otp_screen.dart';
 import 'package:jumpvalues/screens/auth_screens/otp_screen.dart';
 import 'package:jumpvalues/screens/auth_screens/signup/signup_widgets.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
@@ -41,9 +40,13 @@ class _SignupScreenState extends State<SignupScreen>
   TextEditingController? experianceController;
   TextEditingController? nicheController;
 
-  TextEditingController? companyController;
-  TextEditingController? positionController;
-  TextEditingController? aboutController;
+  TextEditingController? firstNameControllerClient;
+  TextEditingController? lastNameControllerClient;
+  TextEditingController? emailControllerClient;
+  TextEditingController? passwordControllerClient;
+  TextEditingController? phoneNumberControllerClient;
+  TextEditingController? positionControllerClient;
+  TextEditingController? aboutControllerClient;
 
   // FocusNodes for each field
   final FocusNode firstNameFocusNode = FocusNode();
@@ -58,21 +61,32 @@ class _SignupScreenState extends State<SignupScreen>
   final FocusNode experianceFocusNode = FocusNode();
   final FocusNode nicheFocusNode = FocusNode();
 
-  final FocusNode companyFocusNode = FocusNode();
-  final FocusNode positionFocusNode = FocusNode();
-  final FocusNode aboutFocusNode = FocusNode();
+  final FocusNode firstNameClientFocusNode = FocusNode();
+  final FocusNode lastNameClientFocusNode = FocusNode();
+  final FocusNode emailClientFocusNode = FocusNode();
+  final FocusNode passwordClientFocusNode = FocusNode();
+  final FocusNode phoneNumberClientFocusNode = FocusNode();
+  final FocusNode positionClientFocusNode = FocusNode();
+  final FocusNode aboutMeClientFocusNode = FocusNode();
 
   // Map to store error messages for each field
   Map<String, dynamic> fieldErrors = {};
+  Map<String, dynamic> fieldClientErrors = {};
 
   bool submitButtonEnabled = false;
   bool coachSubmitButtonEnabled = false;
   bool selectCategoriesError = false;
+
   String sPhoneNumber = '';
   String sCountryCode = '';
 
+  String sPhoneNumberClient = '';
+  String sCountryCodeClient = '';
+
   List<Category> selectedCategories = [];
   List<Category> categories = [];
+
+  List<Category> sponsors = [];
 
   bool acceptTerms = false;
   bool loader = false;
@@ -81,7 +95,9 @@ class _SignupScreenState extends State<SignupScreen>
   int tabIndex = 0;
 
   List<String> preferViaList = ['Phone', 'Email'];
-  String? selectedPreferVia;
+  String? selectedPreferVia = 'Phone';
+
+  Category? selectedSponsorId;
 
   @override
   void initState() {
@@ -99,12 +115,19 @@ class _SignupScreenState extends State<SignupScreen>
     experianceController = TextEditingController();
     nicheController = TextEditingController();
 
-    companyController = TextEditingController();
-    positionController = TextEditingController();
-    aboutController = TextEditingController();
+    firstNameControllerClient = TextEditingController();
+    lastNameControllerClient = TextEditingController();
+    emailControllerClient = TextEditingController();
+    passwordControllerClient = TextEditingController();
+    phoneNumberControllerClient = TextEditingController();
+    positionControllerClient = TextEditingController();
+    aboutControllerClient = TextEditingController();
 
     super.initState();
-    getCategoriesDropdown();
+    Future.wait([
+      getCategoriesDropdown(),
+      getSponsorDropdown(),
+    ]);
   }
 
   @override
@@ -121,9 +144,13 @@ class _SignupScreenState extends State<SignupScreen>
     experianceController?.dispose();
     nicheController?.dispose();
 
-    companyController?.dispose();
-    positionController?.dispose();
-    aboutController?.dispose();
+    firstNameControllerClient?.dispose();
+    lastNameControllerClient?.dispose();
+    emailControllerClient?.dispose();
+    passwordControllerClient?.dispose();
+    phoneNumberControllerClient?.dispose();
+    positionControllerClient?.dispose();
+    aboutControllerClient?.dispose();
 
     firstNameFocusNode.dispose();
     lastNameFocusNode.dispose();
@@ -137,9 +164,13 @@ class _SignupScreenState extends State<SignupScreen>
     experianceFocusNode.dispose();
     nicheFocusNode.dispose();
 
-    companyFocusNode.dispose();
-    positionFocusNode.dispose();
-    aboutFocusNode.dispose();
+    firstNameClientFocusNode.dispose();
+    lastNameClientFocusNode.dispose();
+    emailClientFocusNode.dispose();
+    passwordClientFocusNode.dispose();
+    phoneNumberClientFocusNode.dispose();
+    positionClientFocusNode.dispose();
+    aboutMeClientFocusNode.dispose();
 
     _tabController.dispose();
     super.dispose();
@@ -189,29 +220,32 @@ class _SignupScreenState extends State<SignupScreen>
 
   void enableCoachSubmitButton() {
     // Coach
-    if (firstNameController!.text.isNotEmpty &&
-        lastNameController!.text.isNotEmpty &&
-        emailController!.text.isNotEmpty &&
-        passwordController!.text.isNotEmpty &&
-        phoneNumberController!.text.isNotEmpty &&
-        educationController!.text.isNotEmpty &&
-        philosophyController!.text.isNotEmpty &&
-        certificationsController!.text.isNotEmpty &&
-        industriesServedController!.text.isNotEmpty &&
-        experianceController!.text.isNotEmpty &&
-        nicheController!.text.isNotEmpty &&
-        selectedPreferVia != null &&
-        selectedCategories.isNotEmpty) {
-      setState(() {
-        coachSubmitButtonEnabled = true;
-      });
-      debugPrint('Coach submit button enabled');
-    } else {
-      setState(() {
-        coachSubmitButtonEnabled = false;
-      });
-      debugPrint('Coach submit button disabled');
-    }
+    // if (firstNameController!.text.isNotEmpty &&
+    //     lastNameController!.text.isNotEmpty &&
+    //     emailController!.text.isNotEmpty &&
+    //     passwordController!.text.isNotEmpty &&
+    //     phoneNumberController!.text.isNotEmpty &&
+    //     educationController!.text.isNotEmpty &&
+    //     philosophyController!.text.isNotEmpty &&
+    //     certificationsController!.text.isNotEmpty &&
+    //     industriesServedController!.text.isNotEmpty &&
+    //     experianceController!.text.isNotEmpty &&
+    //     nicheController!.text.isNotEmpty &&
+    //     selectedPreferVia != null &&
+    //     selectedCategories.isNotEmpty) {
+    //   setState(() {
+    //     coachSubmitButtonEnabled = true;
+    //   });
+    //   debugPrint('Coach submit button enabled');
+    // } else {
+    //   setState(() {
+    //     coachSubmitButtonEnabled = false;
+    //   });
+    //   debugPrint('Coach submit button disabled');
+    // }
+    setState(() {
+      coachSubmitButtonEnabled = true;
+    });
   }
 
   Future<void> getCategoriesDropdown() async {
@@ -241,10 +275,38 @@ class _SignupScreenState extends State<SignupScreen>
     }
   }
 
+  Future<void> getSponsorDropdown() async {
+    setState(() {
+      initialLoader = true;
+    });
+
+    try {
+      var response = await sponsorDropdown();
+      if (response?.status == true) {
+        setState(() {
+          sponsors.clear();
+          sponsors = response?.data ?? [];
+        });
+      } else {
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
+      }
+    } catch (e) {
+      debugPrint('sponsorsDropdown Error: $e');
+    } finally {
+      setState(() {
+        initialLoader = false;
+      });
+    }
+  }
+
   Future<void> signup({required bool isCoach}) async {
     setState(() {
       loader = true;
       fieldErrors.clear(); // Clear previous errors
+      fieldClientErrors.clear();
     });
 
     var request = <String, dynamic>{};
@@ -254,11 +316,12 @@ class _SignupScreenState extends State<SignupScreen>
 
     if (isCoach) {
       request = {
-        'firstName': firstNameController?.text,
-        'lastName': lastNameController?.text,
+        'first_name': firstNameController?.text,
+        'last_name': lastNameController?.text,
         'email': emailController?.text,
         'password': passwordController?.text,
         'role': 'coach',
+        'education': educationController?.text,
         'prefer_via': selectedPreferVia == 'Phone' ? 1 : 2,
         'philosophy': philosophyController?.text,
         'certifications': certificationsController?.text,
@@ -269,14 +332,16 @@ class _SignupScreenState extends State<SignupScreen>
       };
     } else {
       request = {
-        'firstName': firstNameController?.text,
-        'lastName': lastNameController?.text,
-        'email': emailController?.text,
-        'password': passwordController?.text,
-        'company': companyController?.text,
-        'positions': positionController?.text,
-        'aboutMe': aboutController?.text,
-        'termsAndConditions': acceptTerms ? 'true' : 'false'
+        'first_name': firstNameControllerClient?.text,
+        'last_name': lastNameControllerClient?.text,
+        'email': emailControllerClient?.text,
+        'password': passwordControllerClient?.text,
+        'country_code': sCountryCodeClient,
+        'phone': sPhoneNumberClient,
+        'role': 'client',
+        'position': positionControllerClient?.text,
+        'about_me': aboutControllerClient?.text,
+        'sponsor_id': selectedSponsorId?.id,
       };
     }
 
@@ -300,62 +365,73 @@ class _SignupScreenState extends State<SignupScreen>
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => OtpScreen(
-                email: emailController?.text ?? '',
+                email: isCoach
+                    ? emailController?.text ?? ''
+                    : emailControllerClient?.text ?? '',
                 isFrom: 'signup',
               ),
-            ),
-          );
-        } else {
-          // if user already registered but not verified yet
-          SnackBarHelper.showStatusSnackBar(
-            context,
-            StatusIndicator.success,
-            response.message ?? '',
-          );
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) =>
-                  GenerateOtpScreen(email: emailController?.text ?? ''),
             ),
           );
         }
       } else {
         if (response.errors?.isNotEmpty ?? false) {
-          // Set field errors and focus on the first error field
-          response.errors?.forEach((e) {
-            fieldErrors[e.field!] = e.message!;
-          });
-
-          // Focus on the first error field
-          if (fieldErrors.containsKey('first_name')) {
-            FocusScope.of(context).requestFocus(firstNameFocusNode);
-          } else if (fieldErrors.containsKey('last_name')) {
-            FocusScope.of(context).requestFocus(lastNameFocusNode);
-          } else if (fieldErrors.containsKey('email')) {
-            FocusScope.of(context).requestFocus(emailFocusNode);
-          } else if (fieldErrors.containsKey('password')) {
-            FocusScope.of(context).requestFocus(passwordFocusNode);
-          } else if (fieldErrors.containsKey('phone')) {
-            FocusScope.of(context).requestFocus(phoneNumberFocusNode);
-          } else if (fieldErrors.containsKey('education')) {
-            FocusScope.of(context).requestFocus(educationFocusNode);
-          } else if (fieldErrors.containsKey('philosophy')) {
-            FocusScope.of(context).requestFocus(philosophyFocusNode);
-          } else if (fieldErrors.containsKey('certifications')) {
-            FocusScope.of(context).requestFocus(certificationsFocusNode);
-          } else if (fieldErrors.containsKey('industries_served')) {
-            FocusScope.of(context).requestFocus(industriesServedFocusNode);
-          } else if (fieldErrors.containsKey('experiance')) {
-            FocusScope.of(context).requestFocus(experianceFocusNode);
-          } else if (fieldErrors.containsKey('niche')) {
-            FocusScope.of(context).requestFocus(nicheFocusNode);
+          if (isCoach) {
+            // Set field errors and focus on the first error field
+            response.errors?.forEach((e) {
+              fieldErrors[e.field ?? '0'] = e.message ?? '0';
+            });
+            // Focus on the first error
+            if (fieldErrors.containsKey('first_name')) {
+              FocusScope.of(context).requestFocus(firstNameFocusNode);
+            } else if (fieldErrors.containsKey('last_name')) {
+              FocusScope.of(context).requestFocus(lastNameFocusNode);
+            } else if (fieldErrors.containsKey('email')) {
+              FocusScope.of(context).requestFocus(emailFocusNode);
+            } else if (fieldErrors.containsKey('password')) {
+              FocusScope.of(context).requestFocus(passwordFocusNode);
+            } else if (fieldErrors.containsKey('phone')) {
+              FocusScope.of(context).requestFocus(phoneNumberFocusNode);
+            } else if (fieldErrors.containsKey('education')) {
+              FocusScope.of(context).requestFocus(educationFocusNode);
+            } else if (fieldErrors.containsKey('philosophy')) {
+              FocusScope.of(context).requestFocus(philosophyFocusNode);
+            } else if (fieldErrors.containsKey('certifications')) {
+              FocusScope.of(context).requestFocus(certificationsFocusNode);
+            } else if (fieldErrors.containsKey('industries_served')) {
+              FocusScope.of(context).requestFocus(industriesServedFocusNode);
+            } else if (fieldErrors.containsKey('experiance')) {
+              FocusScope.of(context).requestFocus(experianceFocusNode);
+            } else if (fieldErrors.containsKey('niche')) {
+              FocusScope.of(context).requestFocus(nicheFocusNode);
+            }
+          } else {
+            // Set field errors and focus on the first error field
+            response.errors?.forEach((e) {
+              fieldClientErrors[e.field ?? '0'] = e.message ?? '0';
+            });
+            // Focus on the first error
+            if (fieldClientErrors.containsKey('first_name')) {
+              FocusScope.of(context).requestFocus(firstNameClientFocusNode);
+            } else if (fieldClientErrors.containsKey('last_name')) {
+              FocusScope.of(context).requestFocus(lastNameClientFocusNode);
+            } else if (fieldClientErrors.containsKey('email')) {
+              FocusScope.of(context).requestFocus(emailClientFocusNode);
+            } else if (fieldClientErrors.containsKey('password')) {
+              FocusScope.of(context).requestFocus(passwordClientFocusNode);
+            } else if (fieldClientErrors.containsKey('phone')) {
+              FocusScope.of(context).requestFocus(phoneNumberClientFocusNode);
+            } else if (fieldClientErrors.containsKey('position')) {
+              FocusScope.of(context).requestFocus(positionClientFocusNode);
+            } else if (fieldClientErrors.containsKey('about_me')) {
+              FocusScope.of(context).requestFocus(aboutMeClientFocusNode);
+            }
           }
         } else {
           // Handle other errors
           SnackBarHelper.showStatusSnackBar(
             context,
             StatusIndicator.error,
-            response.message ?? 'Unexpected Error Occurred.',
+            response.message ?? 'Server Timeout, Please try after sometime.',
           );
         }
       }
@@ -384,9 +460,9 @@ class _SignupScreenState extends State<SignupScreen>
                       label: 'First Name',
                       labelTextBoxSpace: 8,
                       autofocus: true,
-                      controller: firstNameController,
-                      focusNode: firstNameFocusNode,
-                      errorText: fieldErrors['firstName'],
+                      controller: firstNameControllerClient,
+                      focusNode: firstNameClientFocusNode,
+                      errorText: fieldClientErrors['first_name'],
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
                       ],
@@ -403,9 +479,9 @@ class _SignupScreenState extends State<SignupScreen>
                     textFormField(
                       label: 'Last Name',
                       labelTextBoxSpace: 8,
-                      controller: lastNameController,
-                      focusNode: lastNameFocusNode,
-                      errorText: fieldErrors['lastName'],
+                      controller: lastNameControllerClient,
+                      focusNode: lastNameClientFocusNode,
+                      errorText: fieldClientErrors['last_name'],
                       onChanged: (value) {
                         enableSubmitButton();
                       },
@@ -421,9 +497,9 @@ class _SignupScreenState extends State<SignupScreen>
                     textFormField(
                       label: 'Email',
                       labelTextBoxSpace: 8,
-                      controller: emailController,
-                      focusNode: emailFocusNode,
-                      errorText: fieldErrors['email'],
+                      controller: emailControllerClient,
+                      focusNode: emailClientFocusNode,
+                      errorText: fieldClientErrors['email'],
                       onChanged: (value) {
                         enableSubmitButton();
                       },
@@ -436,26 +512,11 @@ class _SignupScreenState extends State<SignupScreen>
                       height: 20,
                     ),
                     textFormField(
-                      label: 'Company',
-                      labelTextBoxSpace: 8,
-                      controller: companyController,
-                      focusNode: companyFocusNode,
-                      errorText: fieldErrors['company'],
-                      onChanged: (value) {
-                        enableSubmitButton();
-                      },
-                      keyboardType: TextInputType.name,
-                      hintText: 'Enter Company Name',
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    textFormField(
                       label: 'Password',
                       labelTextBoxSpace: 8,
-                      controller: passwordController,
-                      focusNode: passwordFocusNode,
-                      errorText: fieldErrors['password'],
+                      controller: passwordControllerClient,
+                      focusNode: passwordClientFocusNode,
+                      errorText: fieldClientErrors['password'],
                       onChanged: (value) {
                         enableSubmitButton();
                       },
@@ -476,12 +537,75 @@ class _SignupScreenState extends State<SignupScreen>
                     const SizedBox(
                       height: 20,
                     ),
+                    intlPhoneField(
+                      label: 'Phone Number',
+                      labelTextBoxSpace: 8,
+                      controller: phoneNumberControllerClient,
+                      focusNode: phoneNumberClientFocusNode,
+                      errorText: fieldClientErrors['phone'],
+                      onChanged: (phoneNumber) {
+                        setState(() {
+                          sPhoneNumberClient = phoneNumber.number;
+                          sCountryCodeClient = phoneNumber.countryCode;
+                        });
+                        enableCoachSubmitButton();
+                      },
+                      validator: (phoneNumber) {
+                        if (phoneNumber == null || phoneNumber.number.isEmpty) {
+                          return 'Phone number is required';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    labelContainer(
+                      label: 'Sponser',
+                      labelTextBoxSpace: 8,
+                      width: MediaQuery.of(context).size.width * 1,
+                      height: MediaQuery.of(context).size.height * 0.06,
+                      child: DropdownButton<Category>(
+                        value: selectedSponsorId,
+                        isExpanded: true,
+                        underline: const SizedBox(),
+                        hint: Text(
+                          'Select Sponser',
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 15,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 15,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w400,
+                        ),
+                        items: sponsors
+                            .map((Category value) => DropdownMenuItem<Category>(
+                                  value: value,
+                                  child: Text(value.name ?? ''),
+                                ))
+                            .toList(),
+                        onChanged: (Category? value) {
+                          setState(() {
+                            selectedSponsorId = value;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
                     textFormField(
                       label: 'Position',
                       labelTextBoxSpace: 8,
-                      controller: positionController,
-                      focusNode: positionFocusNode,
-                      errorText: fieldErrors['positions'],
+                      controller: positionControllerClient,
+                      focusNode: positionClientFocusNode,
+                      errorText: fieldClientErrors['position'],
                       onChanged: (value) {
                         enableSubmitButton();
                       },
@@ -494,9 +618,9 @@ class _SignupScreenState extends State<SignupScreen>
                     textFormField(
                       label: 'About Me',
                       labelTextBoxSpace: 8,
-                      controller: aboutController,
-                      focusNode: aboutFocusNode,
-                      errorText: fieldErrors['aboutMe'],
+                      controller: aboutControllerClient,
+                      focusNode: aboutMeClientFocusNode,
+                      errorText: fieldClientErrors['about_me'],
                       onChanged: (value) {
                         enableSubmitButton();
                       },
@@ -932,13 +1056,19 @@ class _SignupScreenState extends State<SignupScreen>
               hideAppKeyboard(context);
               if (loader) {
               } else {
-                if (selectedCategories.isEmpty) {
-                  setState(() {
-                    selectCategoriesError = true;
-                  });
-                } else {
-                  await signup(isCoach: true);
-                }
+                //       if (selectedCategories.isEmpty) {
+                //         SnackBarHelper.showStatusSnackBar(
+                //   context,
+                //   StatusIndicator.error,
+                //   'Please select categories',
+                // );
+                //         setState(() {
+                //           selectCategoriesError = true;
+                //         });
+                //       } else {
+
+                //       }
+                await signup(isCoach: true);
               }
             },
                 isLoading: loader,

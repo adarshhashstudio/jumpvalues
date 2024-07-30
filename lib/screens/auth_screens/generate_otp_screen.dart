@@ -53,7 +53,7 @@ class _GenerateOtpScreenState extends State<GenerateOtpScreen> {
     try {
       var request = {'email': emailController?.text};
       var response = await resendOtpForSignup(request);
-      if (response?.statusCode == 200) {
+      if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Successfully Sent to mail.');
         await Navigator.of(context).push(
@@ -139,6 +139,7 @@ class _GenerateOtpScreenState extends State<GenerateOtpScreen> {
                         ),
                         textFormField(
                           label: 'Email',
+                          labelTextBoxSpace: 8,
                           autofocus: true,
                           controller: emailController,
                           onChanged: (value) {

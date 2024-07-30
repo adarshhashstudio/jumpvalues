@@ -83,7 +83,7 @@ class _SelectScreenState extends State<SelectScreen> {
 
       debugPrint('Request Map: $request');
       var response = await addUserComprehensiveListing(request);
-      if (response?.statusCode == 200) {
+      if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Saved Successfully.');
       } else {

@@ -1,16 +1,28 @@
 class BaseResponseModel {
-  BaseResponseModel({this.message, this.statusCode});
-
   factory BaseResponseModel.fromJson(Map<String, dynamic> json) =>
       BaseResponseModel(
-          message: json['message'], statusCode: json['statusCode']);
-  String? message;
-  int? statusCode;
+        status: json['status'],
+        flag: json['flag'],
+        message: json['message'],
+        errors: (json['errors'] as List<dynamic>?)
+            ?.map((e) => ErrorModel.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
 
-  Map<String, dynamic> toJson() {
-    final data = <String, dynamic>{};
-    data['message'] = message;
-    data['statusCode'] = statusCode;
-    return data;
-  }
+  BaseResponseModel({this.status, this.flag, this.message, this.errors});
+  bool? status;
+  String? flag;
+  String? message;
+  List<ErrorModel>? errors;
+}
+
+class ErrorModel {
+  ErrorModel({this.field, this.message});
+
+  factory ErrorModel.fromJson(Map<String, dynamic> json) => ErrorModel(
+        field: json['field'],
+        message: json['message'],
+      );
+  String? field;
+  String? message;
 }

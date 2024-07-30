@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/models/category_dropdown_response.dart';
-import 'package:jumpvalues/utils/configs.dart';
-import 'package:jumpvalues/widgets/common_widgets.dart';
 
 class CategoryDialog extends StatefulWidget {
   CategoryDialog({
@@ -88,7 +86,7 @@ class _CategoryDialogState extends State<CategoryDialog> {
             )
           ],
         ),
-        titleTextStyle: TextStyle(
+        titleTextStyle: const TextStyle(
           fontSize: 20,
           color: Colors.black, // Adjusted to avoid an undefined variable
         ),
@@ -99,7 +97,7 @@ class _CategoryDialogState extends State<CategoryDialog> {
             children: [
               TextFormField(
                 controller: _searchController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Search Categories',
                 ),
                 onChanged: _filterCategories,

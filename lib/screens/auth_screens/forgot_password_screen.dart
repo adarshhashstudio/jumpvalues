@@ -52,7 +52,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     try {
       var request = {'email': emailController?.text ?? ''};
       var response = await forgotPassword(request);
-      if (response?.statusCode == 200) {
+      if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Successfully Sent to mail.');
         await Navigator.of(context).push(MaterialPageRoute(

@@ -128,7 +128,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
     try {
       var response = await logoutUser();
-      if (response?.statusCode == 200) {
+      if (response?.status == true) {
         setState(() {
           loader = false;
         });
@@ -139,7 +139,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         await Navigator.of(profileContext).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const WelcomeScreen()),
             (Route<dynamic> route) => false);
-      } else if (response?.statusCode == 403) {
+      } else if (response?.status == false) {
         setState(() {
           loader = false;
         });

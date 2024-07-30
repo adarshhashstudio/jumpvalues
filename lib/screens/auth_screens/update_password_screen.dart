@@ -51,7 +51,7 @@ class _ForgotPasswordScreenState extends State<UpdatePasswordScreen> {
         'confirmPassword': confirmPassword?.text ?? ''
       };
       var response = await resetPassword(request);
-      if (response?.statusCode == 200) {
+      if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Password Reset Successfully.');
         // Navigate to WelcomeScreen

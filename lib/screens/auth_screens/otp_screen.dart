@@ -22,11 +22,14 @@ class OtpScreen extends StatefulWidget {
 
 class _OtpScreenState extends State<OtpScreen> {
   TextEditingController? otp;
+  final FocusNode otpFocusNode = FocusNode();
   bool otpEnabled = false;
   bool loader = false;
   int count = 30;
   bool counting = false;
   late Timer _timer;
+
+  Map<String, dynamic> fieldErrors = {};
 
   @override
   void initState() {
@@ -38,6 +41,7 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   void dispose() {
     otp?.dispose();
+    otpFocusNode.dispose();
     _timer.cancel();
     super.dispose();
   }
@@ -71,7 +75,7 @@ class _OtpScreenState extends State<OtpScreen> {
     try {
       var request = {'email': widget.email};
       var response = await forgotPassword(request);
-      if (response?.statusCode == 200) {
+      if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Successfully Sent to mail.');
       } else {
@@ -89,14 +93,14 @@ class _OtpScreenState extends State<OtpScreen> {
     }
   }
 
-  Future<void> sendOtp() async {
+  Future<void> reSendOtp() async {
     setState(() {
       loader = true;
     });
     try {
       var request = {'email': widget.email};
       var response = await resendOtpForSignup(request);
-      if (response?.statusCode == 200) {
+      if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Successfully Sent to mail.');
       } else {
@@ -106,7 +110,7 @@ class _OtpScreenState extends State<OtpScreen> {
         }
       }
     } catch (e) {
-      debugPrint('sendOtp Error: $e');
+      debugPrint('reSendOtp for Signup Error: $e');
     } finally {
       setState(() {
         loader = false;
@@ -120,9 +124,9 @@ class _OtpScreenState extends State<OtpScreen> {
     });
 
     try {
-      var request = {'email': widget.email, 'OTP': otp?.text};
+      var request = {'email': widget.email, 'otp': otp?.text};
       var response = await verifyOtp(request);
-      if (response.statusCode == 200) {
+      if (response.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response.message ?? 'Verified Success');
         if (widget.isFrom == 'forgotPassword') {
@@ -133,7 +137,18 @@ class _OtpScreenState extends State<OtpScreen> {
               MaterialPageRoute(builder: (context) => const LoginScreen()));
         }
       } else {
-        if (response.message != null) {
+        if (response.errors != null) {
+          response.errors?.forEach((e) {
+            fieldErrors[e.field ?? '0'] = e.message ?? '0';
+          });
+
+          if (fieldErrors.containsKey('email')) {
+            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+                fieldErrors['email'] ?? errorSomethingWentWrong);
+          } else if (fieldErrors.containsKey('otp')) {
+            FocusScope.of(context).requestFocus(otpFocusNode);
+          }
+        } else {
           SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
               response.message ?? errorSomethingWentWrong);
         }
@@ -233,12 +248,15 @@ class _OtpScreenState extends State<OtpScreen> {
                               ),
                               textFormField(
                                 label: 'OTP',
+                                labelTextBoxSpace: 8,
                                 controller: otp,
                                 maxLength: 4,
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly
                                 ],
                                 autofocus: true,
+                                errorText: fieldErrors['otp'],
+                                focusNode: otpFocusNode,
                                 onChanged: (value) {
                                   setState(() {
                                     if (value.isNotEmpty && value.length == 4) {
@@ -275,7 +293,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                                 'forgotPassword') {
                                               await forgotPass();
                                             } else {
-                                              await sendOtp();
+                                              await reSendOtp();
                                             }
                                             setState(() {
                                               count = 30;

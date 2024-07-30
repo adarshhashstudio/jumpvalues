@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 
 class TwilioFunctionsService {
@@ -10,7 +9,8 @@ class TwilioFunctionsService {
 
   Future<String> createToken(String identity) async {
     try {
-      final response = await _dio.get(accessTokenUrl, queryParameters: {'user': identity});
+      final response =
+          await _dio.get(accessTokenUrl, queryParameters: {'user': identity});
       return response.data['accessToken'];
     } catch (error) {
       throw Exception('Failed to create token: $error');

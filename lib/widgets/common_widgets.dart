@@ -155,7 +155,7 @@ Widget textFormField({
   Widget? prefixIcon,
   double borderRadius = 20,
   String? errorText,
-  double labelTextBoxSpace = 16,
+  double labelTextBoxSpace = 8,
   required String label,
   bool isPassword = false, // New parameter to control password field
 }) =>
@@ -296,6 +296,7 @@ Widget intlPhoneField(
           onChanged: onChanged,
           autofocus: autofocus,
           initialCountryCode: initialCountryCode,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: InputDecoration(
             counterText: '',
             hintText: 'Enter Phone Number',

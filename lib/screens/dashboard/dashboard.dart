@@ -101,7 +101,7 @@ class DashboardState extends State<Dashboard> {
     });
     try {
       var response = await logoutUser();
-      if (response?.statusCode == 200) {
+      if (response?.status == true) {
         await appStore.clearData();
         isTokenAvailable(context);
       } else {
