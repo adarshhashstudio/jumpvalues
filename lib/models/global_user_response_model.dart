@@ -67,7 +67,9 @@ class Data {
       coachProfile: json['coach_profile'] != null
           ? CoachProfile.fromJson(json['coach_profile'])
           : null,
-      coreValues: coreValuesList,
+      coreValues: (json['core_values'] as List<dynamic>?)
+          ?.map((e) => CoreValue.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
   final int? id;
@@ -90,7 +92,7 @@ class Data {
   final List<dynamic>? categories;
   final ClientProfile? clientProfile;
   final CoachProfile? coachProfile;
-  final List<dynamic>? coreValues;
+  final List<CoreValue>? coreValues;
 }
 
 class Role {
@@ -223,4 +225,35 @@ class CoachProfile {
   final String? deletedAt;
   final String? createdAt;
   final String? updatedAt;
+}
+
+class CoreValue {
+  CoreValue({
+    this.id,
+    this.name,
+    this.status,
+    this.deletedAt,
+    this.createdAt,
+  });
+
+  factory CoreValue.fromJson(Map<String, dynamic> json) => CoreValue(
+        id: json['id'] as int?,
+        name: json['name'] as String?,
+        status: json['status'] as int?,
+        deletedAt: json['deleted_at'] as String?,
+        createdAt: json['created_at'] as String?,
+      );
+  final int? id;
+  final String? name;
+  final int? status;
+  final String? deletedAt;
+  final String? createdAt;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'status': status,
+        'deleted_at': deletedAt,
+        'created_at': createdAt,
+      };
 }

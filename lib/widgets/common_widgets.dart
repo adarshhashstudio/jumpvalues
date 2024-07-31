@@ -269,6 +269,7 @@ Widget intlPhoneField(
         double borderRadius = 20,
         double labelTextBoxSpace = 16,
         bool isLabel = true,
+        String? initialValue,
         String? errorText}) =>
     Column(
       children: [
@@ -295,6 +296,7 @@ Widget intlPhoneField(
           validator: validator,
           onChanged: onChanged,
           autofocus: autofocus,
+          initialValue: initialValue,
           initialCountryCode: initialCountryCode,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: InputDecoration(

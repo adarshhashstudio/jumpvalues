@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
+import 'package:jumpvalues/models/client_profile_response_model.dart';
 import 'package:jumpvalues/models/service_resource.dart';
-import 'package:jumpvalues/models/user_data_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/dashboard/client_fragments/client_add_slots.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -19,7 +19,7 @@ class CoachDetailsScreen extends StatefulWidget {
 }
 
 class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
-  UserDataResponseModel? userData;
+  ClientProfileResponseModel? userData;
   bool loader = false;
   final preferVia = 'phone';
 
@@ -28,8 +28,8 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
       loader = true;
     });
     try {
-      var response = await getUserDetails(appStore.userId ?? -1);
-      if (response?.statusCode == 200) {
+      var response = await getUserClientDetails(appStore.userId ?? -1);
+      if (response?.status == true) {
         setState(() {
           userData = response;
         });

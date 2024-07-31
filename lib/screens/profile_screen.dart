@@ -303,18 +303,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       loader = true;
     });
     try {
-      var response = await getUserDetails(appStore.userId ?? -1);
-      if (response?.statusCode == 200) {
-        setState(() {
-          userData = response;
-        });
-        setState(() {});
-      } else {
-        if (response?.message != null) {
-          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-              response?.message ?? errorSomethingWentWrong);
-        }
-      }
+      // var response = await getUserDetails(appStore.userId ?? -1);
+      // if (response?.statusCode == 200) {
+      //   setState(() {
+      //     userData = response;
+      //   });
+      //   setState(() {});
+      // } else {
+      //   if (response?.message != null) {
+      //     SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+      //         response?.message ?? errorSomethingWentWrong);
+      //   }
+      // }
     } catch (e) {
       debugPrint('getUser Error: $e');
     } finally {

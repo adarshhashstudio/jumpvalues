@@ -181,6 +181,23 @@ mixin _$AppStore on _AppStore, Store {
     });
   }
 
+  late final _$userContactCountryCodeAtom =
+      Atom(name: '_AppStore.userContactCountryCode', context: context);
+
+  @override
+  String get userContactCountryCode {
+    _$userContactCountryCodeAtom.reportRead();
+    return super.userContactCountryCode;
+  }
+
+  @override
+  set userContactCountryCode(String value) {
+    _$userContactCountryCodeAtom
+        .reportWrite(value, super.userContactCountryCode, () {
+      super.userContactCountryCode = value;
+    });
+  }
+
   late final _$userEmailAtom =
       Atom(name: '_AppStore.userEmail', context: context);
 
@@ -448,6 +465,16 @@ mixin _$AppStore on _AppStore, Store {
         () => super.setUserContactNumber(val, isInitializing: isInitializing));
   }
 
+  late final _$setUserContactCountryCodeAsyncAction =
+      AsyncAction('_AppStore.setUserContactCountryCode', context: context);
+
+  @override
+  Future<void> setUserContactCountryCode(String val,
+      {bool isInitializing = false}) {
+    return _$setUserContactCountryCodeAsyncAction.run(() =>
+        super.setUserContactCountryCode(val, isInitializing: isInitializing));
+  }
+
   late final _$setUserEmailAsyncAction =
       AsyncAction('_AppStore.setUserEmail', context: context);
 
@@ -578,6 +605,7 @@ userType: ${userType},
 userFirstName: ${userFirstName},
 userLastName: ${userLastName},
 userContactNumber: ${userContactNumber},
+userContactCountryCode: ${userContactCountryCode},
 userEmail: ${userEmail},
 userPosition: ${userPosition},
 userEducation: ${userEducation},

@@ -39,6 +39,9 @@ abstract class _AppStore with Store {
   String userContactNumber = '';
 
   @observable
+  String userContactCountryCode = '';
+
+  @observable
   String userEmail = '';
 
   @observable
@@ -141,6 +144,13 @@ abstract class _AppStore with Store {
   }
 
   @action
+  Future<void> setUserContactCountryCode(String val,
+      {bool isInitializing = false}) async {
+    userContactCountryCode = val;
+    if (!isInitializing) await setValue(USER_CONTACT_COUNTRY_CODE, val);
+  }
+
+  @action
   Future<void> setUserEmail(String val, {bool isInitializing = false}) async {
     userEmail = val;
     if (!isInitializing) await setValue(USER_EMAIL, val);
@@ -219,6 +229,8 @@ abstract class _AppStore with Store {
       await setUserId(response?.data?.id ?? -1);
       await setUserFirstName(response?.data?.firstName ?? '');
       await setUserLastName(response?.data?.lastName ?? '');
+      await setUserContactNumber(response?.data?.phone ?? '');
+      await setUserContactCountryCode(response?.data?.countryCode ?? '');
       await setUserEmail(response?.data?.email ?? '');
       await setUserPosition(response?.data?.clientProfile?.position ?? '');
       await setUserAboutMe(response?.data?.clientProfile?.aboutMe ?? '');
@@ -250,6 +262,7 @@ abstract class _AppStore with Store {
     userFirstName = '';
     userLastName = '';
     userContactNumber = '';
+    userContactCountryCode = '';
     userEmail = '';
     userPosition = '';
     userEducation = '';

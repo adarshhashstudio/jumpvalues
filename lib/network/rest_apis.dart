@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:jumpvalues/models/all_comprehensive_response.dart';
 import 'package:jumpvalues/models/base_response.dart';
 import 'package:jumpvalues/models/category_dropdown_response.dart';
+import 'package:jumpvalues/models/client_profile_response_model.dart';
+import 'package:jumpvalues/models/coach_profile_response_model.dart';
 import 'package:jumpvalues/models/global_user_response_model.dart';
 import 'package:jumpvalues/models/login_response.dart';
 import 'package:jumpvalues/models/profile_pic_response.dart';
@@ -162,11 +164,23 @@ Future<ProfilePictureResponse?> updateUserProfilePic(
   return response;
 }
 
-Future<UserDataResponseModel?> getUserDetails(int userId) async {
-  UserDataResponseModel? response;
+Future<ClientProfileResponseModel?> getUserClientDetails(int userId) async {
+  ClientProfileResponseModel? response;
   try {
-    response = UserDataResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse('users/$userId',
+    response = ClientProfileResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('client/profile/$userId',
+            isAuth: true, method: HttpMethodType.get)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<CoachProfileResponseModel?> getUserCoachDetails(int userId) async {
+  CoachProfileResponseModel? response;
+  try {
+    response = CoachProfileResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('coach/profile/$userId',
             isAuth: true, method: HttpMethodType.get)));
   } catch (e) {
     rethrow;

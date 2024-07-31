@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/all_comprehensive_response.dart';
-import 'package:jumpvalues/models/user_data_response_model.dart';
+import 'package:jumpvalues/models/client_profile_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -22,7 +22,7 @@ class _SelectScreenState extends State<SelectScreen> {
   Set<ComprehensiveValues> selectedTones = {}; // Changed to Set<String>
   bool selectedToneError = false;
   bool loader = false;
-  UserDataResponseModel? userData;
+  ClientProfileResponseModel? userData;
 
   @override
   void initState() {
@@ -106,21 +106,21 @@ class _SelectScreenState extends State<SelectScreen> {
       loader = true;
     });
     try {
-      var response = await getUserDetails(appStore.userId ?? -1);
-      if (response?.statusCode == 200) {
+      var response = await getUserClientDetails(appStore.userId ?? -1);
+      if (response?.status == true) {
         setState(() {
           userData = response;
         });
-        if (userData != null && userData?.data?.comprensiveListings != null) {
+        if (userData != null && userData?.data?.coreValues != null) {
           // Clear selectedTones before adding new values
           selectedTones.clear();
           // Convert List<ComprensiveListing> to Set<ComprehensiveValues>
-          var convertedValues = userData?.data?.comprensiveListings
+          var convertedValues = userData?.data?.coreValues
               ?.map((listing) => ComprehensiveValues(
                     id: listing.id,
                     name: listing.name,
                     createdAt: listing.createdAt,
-                    updatedAt: listing.updatedAt,
+                    updatedAt: listing.createdAt, //it was udpated at
                   ))
               .toSet();
           // Add converted values to selectedTones

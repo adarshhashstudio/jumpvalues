@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jumpvalues/main.dart';
+import 'package:jumpvalues/models/client_profile_response_model.dart';
+import 'package:jumpvalues/models/coach_profile_response_model.dart';
 import 'package:jumpvalues/models/user_data_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/client_screens/select_screen.dart';
@@ -55,6 +57,7 @@ class _CommonProfileState extends State<CommonProfile> {
   TextEditingController nicheController = TextEditingController();
 
   // Declare focus nodes
+  FocusNode phoneNumberFocusNode = FocusNode();
   FocusNode educationFocusNode = FocusNode();
   FocusNode preferViaFocusNode = FocusNode();
   FocusNode philosophyFocusNode = FocusNode();
@@ -72,6 +75,8 @@ class _CommonProfileState extends State<CommonProfile> {
   var email = '';
   String? profilePic;
   UserDataResponseModel? userData;
+  ClientProfileResponseModel? clientProfileResponseModel;
+  CoachProfileResponseModel? coachProfileResponseModel;
 
   File? _image;
   final picker = ImagePicker();
@@ -80,7 +85,11 @@ class _CommonProfileState extends State<CommonProfile> {
   void initState() {
     isTokenAvailable(context);
     loadUserData();
-    getUser();
+    if (appStore.userTypeCoach) {
+      getCoachUser();
+    } else {
+      getClientUser();
+    }
     super.initState();
   }
 
@@ -175,6 +184,8 @@ class _CommonProfileState extends State<CommonProfile> {
     lastNameController = TextEditingController(text: appStore.userLastName);
     positionController = TextEditingController(text: appStore.userPosition);
     aboutController = TextEditingController(text: appStore.userAboutMe);
+    positionController = TextEditingController(text: appStore.userPosition);
+    aboutController = TextEditingController(text: appStore.userAboutMe);
     setState(() {
       userName = '${appStore.userFullName}';
       email = appStore.userEmail;
@@ -183,16 +194,18 @@ class _CommonProfileState extends State<CommonProfile> {
 
     // ----- Additional
 
-    phoneNumberController = TextEditingController(text: '9988776655');
-    educationController =
-        TextEditingController(text: 'Saint Francis University');
-    preferViaController = TextEditingController(text: 'Phone');
-    philosophyController =
-        TextEditingController(text: 'Client has the answers');
-    certificationController = TextEditingController(text: 'ICF-PCC');
-    industriesServedController = TextEditingController(text: 'FMCG, Financial');
-    coachingYearsController = TextEditingController(text: '8.0');
-    nicheController = TextEditingController(text: 'Corporate');
+    phoneNumberController =
+        TextEditingController(text: '${appStore.userContactNumber}');
+    educationController = TextEditingController(text: appStore.userEducation);
+    preferViaController = TextEditingController(text: appStore.userPreferVia);
+    philosophyController = TextEditingController(text: appStore.userPhilosophy);
+    certificationController =
+        TextEditingController(text: appStore.userCertifications);
+    industriesServedController =
+        TextEditingController(text: appStore.userIndustriesServed);
+    coachingYearsController =
+        TextEditingController(text: appStore.userExperiance.toString());
+    nicheController = TextEditingController(text: appStore.userNiche);
 
     debugPrint('Profile Pic: $baseUrl$profilePic');
   }
@@ -314,17 +327,91 @@ class _CommonProfileState extends State<CommonProfile> {
     }
   }
 
-  Future<void> getUser() async {
+  Future<void> getClientUser() async {
     setState(() {
       loader = true;
     });
     try {
-      var response = await getUserDetails(appStore.userId ?? -1);
-      if (response?.statusCode == 200) {
+      var response = await getUserClientDetails(appStore.userId ?? -1);
+      if (response?.status == true) {
         setState(() {
-          userData = response;
+          clientProfileResponseModel = response;
+          if (clientProfileResponseModel != null) {
+            appStore.setUserId(clientProfileResponseModel?.data?.id);
+            appStore.setUserFirstName(
+                clientProfileResponseModel?.data?.firstName ?? '');
+            appStore.setUserLastName(
+                clientProfileResponseModel?.data?.lastName ?? '');
+            appStore
+                .setUserEmail(clientProfileResponseModel?.data?.email ?? '');
+            appStore.setUserContactCountryCode(
+                clientProfileResponseModel?.data?.countryCode ?? '+91');
+            appStore.setUserContactNumber(
+                clientProfileResponseModel?.data?.phone ?? '');
+            appStore
+                .setUserProfilePic(clientProfileResponseModel?.data?.dp ?? '');
+          }
+          loadUserData();
         });
-        setState(() {});
+      } else {
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
+      }
+    } catch (e) {
+      debugPrint('getUser Error: $e');
+    } finally {
+      setState(() {
+        loader = false;
+      });
+    }
+  }
+
+  Future<void> getCoachUser() async {
+    setState(() {
+      loader = true;
+    });
+    try {
+      var response = await getUserCoachDetails(appStore.userId ?? -1);
+      if (response?.status == true) {
+        setState(() {
+          coachProfileResponseModel = response;
+          if (coachProfileResponseModel != null) {
+            appStore.setUserId(coachProfileResponseModel?.data?.id);
+            appStore.setUserFirstName(
+                coachProfileResponseModel?.data?.firstName ?? '');
+            appStore.setUserLastName(
+                coachProfileResponseModel?.data?.lastName ?? '');
+            appStore.setUserEmail(coachProfileResponseModel?.data?.email ?? '');
+            appStore.setUserContactCountryCode(
+                coachProfileResponseModel?.data?.countryCode ?? '+91');
+            appStore.setUserContactNumber(
+                coachProfileResponseModel?.data?.phone ?? '');
+            appStore
+                .setUserProfilePic(coachProfileResponseModel?.data?.dp ?? '');
+            appStore.setUserEducation(
+                coachProfileResponseModel?.data?.coachProfile?.education ?? '');
+            appStore.setUserPreferVia(
+                coachProfileResponseModel?.data?.coachProfile?.preferVia == 2
+                    ? 'Phone'
+                    : 'Email');
+            appStore.setUserPhilosophy(
+                coachProfileResponseModel?.data?.coachProfile?.philosophy ??
+                    '');
+            appStore.setUserCertifications(
+                coachProfileResponseModel?.data?.coachProfile?.certifications ??
+                    '');
+            appStore.setUserIndustriesServed(coachProfileResponseModel
+                    ?.data?.coachProfile?.industriesServed ??
+                '');
+            appStore.setUserExperiance(
+                coachProfileResponseModel?.data?.coachProfile?.experience ?? 0);
+            appStore.setUserNiche(
+                coachProfileResponseModel?.data?.coachProfile?.niche ?? '');
+          }
+          loadUserData();
+        });
       } else {
         if (response?.message != null) {
           SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
@@ -343,7 +430,11 @@ class _CommonProfileState extends State<CommonProfile> {
   Future<void> refreshData() async {
     isTokenAvailable(context);
     await loadUserData();
-    await getUser();
+    if (appStore.userTypeCoach) {
+      await getCoachUser();
+    } else {
+      await getClientUser();
+    }
   }
 
   @override
@@ -363,9 +454,8 @@ class _CommonProfileState extends State<CommonProfile> {
                             buildProfilePicWidget(context),
                             personalDetails(context)
                                 .paddingSymmetric(horizontal: 20, vertical: 10),
-                            if (appStore.userTypeCoach)
-                              additionalDetails(context)
-                                  .paddingSymmetric(horizontal: 20),
+                            additionalDetails(context)
+                                .paddingSymmetric(horizontal: 20),
                           ],
                         ),
                       ),
@@ -437,16 +527,18 @@ class _CommonProfileState extends State<CommonProfile> {
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.02,
             ),
-            labelContainer(
-                label: 'Sponsor',
-                width: MediaQuery.of(context).size.width * 1,
-                height: MediaQuery.of(context).size.height * 0.05,
-                labelTextBoxSpace: 8,
-                text: appStore.sponsorName,
-                alignment: Alignment.centerLeft),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.02,
-            ),
+            if (!appStore.userTypeCoach)
+              labelContainer(
+                  label: 'Sponsor',
+                  width: MediaQuery.of(context).size.width * 1,
+                  height: MediaQuery.of(context).size.height * 0.05,
+                  labelTextBoxSpace: 8,
+                  text: appStore.sponsorName,
+                  alignment: Alignment.centerLeft),
+            if (!appStore.userTypeCoach)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.02,
+              ),
             Row(
               children: [
                 SizedBox(
@@ -487,10 +579,6 @@ class _CommonProfileState extends State<CommonProfile> {
               height: MediaQuery.of(context).size.height * 0.02,
             ),
             if (!appStore.userTypeCoach)
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.02,
-              ),
-            if (!appStore.userTypeCoach)
               textFormField(
                 controller: positionController,
                 label: 'Position',
@@ -504,19 +592,21 @@ class _CommonProfileState extends State<CommonProfile> {
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.02,
               ),
-            textFormField(
-              controller: aboutController,
-              label: 'About',
-              focusNode: aboutFocusNode,
-              errorText: fieldErrors['aboutMe'],
-              labelTextBoxSpace: 8,
-              keyboardType: TextInputType.name,
-              hintText: 'Enter your bio',
-              maxLines: 3,
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.02,
-            ),
+            if (!appStore.userTypeCoach)
+              textFormField(
+                controller: aboutController,
+                label: 'About',
+                focusNode: aboutFocusNode,
+                errorText: fieldErrors['aboutMe'],
+                labelTextBoxSpace: 8,
+                keyboardType: TextInputType.name,
+                hintText: 'Enter your bio',
+                maxLines: 3,
+              ),
+            if (!appStore.userTypeCoach)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.02,
+              ),
             Container(
               decoration: BoxDecoration(
                   border: Border.all(
@@ -558,14 +648,16 @@ class _CommonProfileState extends State<CommonProfile> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Additional Details :',
-              style: boldTextStyle(color: primaryColor),
-            ).paddingOnly(bottom: 10, top: 10),
-            divider(),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.02,
-            ),
+            if (appStore.userTypeCoach)
+              Text(
+                'Additional Details :',
+                style: boldTextStyle(color: primaryColor),
+              ).paddingOnly(bottom: 10, top: 10),
+            if (appStore.userTypeCoach) divider(),
+            if (appStore.userTypeCoach)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.02,
+              ),
             intlPhoneField(
               label: 'Phone Number',
               controller: phoneNumberController,
@@ -585,90 +677,104 @@ class _CommonProfileState extends State<CommonProfile> {
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.02,
             ),
-            textFormField(
-              controller: educationController,
-              label: 'Education',
-              focusNode: educationFocusNode,
-              errorText: fieldErrors['education'],
-              labelTextBoxSpace: 8,
-              keyboardType: TextInputType.name,
-              hintText: 'Enter Education',
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.02,
-            ),
-            textFormField(
-              controller: preferViaController,
-              label: 'Prefer Via',
-              focusNode: preferViaFocusNode,
-              errorText: fieldErrors['preferVia'],
-              labelTextBoxSpace: 8,
-              keyboardType: TextInputType.name,
-              hintText: 'Eg. Phone, Email',
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.02,
-            ),
-            textFormField(
-              controller: philosophyController,
-              label: 'Philosophy',
-              focusNode: philosophyFocusNode,
-              errorText: fieldErrors['philosophy'],
-              labelTextBoxSpace: 8,
-              keyboardType: TextInputType.name,
-              hintText: 'Enter Philosophy',
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.02,
-            ),
-            textFormField(
-              controller: certificationController,
-              label: 'Certification',
-              focusNode: certificationFocusNode,
-              errorText: fieldErrors['philosophy'],
-              labelTextBoxSpace: 8,
-              keyboardType: TextInputType.name,
-              hintText: 'Enter Certifications',
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.02,
-            ),
-            textFormField(
-              controller: industriesServedController,
-              label: 'Industries Served',
-              focusNode: industriesServedFocusNode,
-              errorText: fieldErrors['industriesServed'],
-              labelTextBoxSpace: 8,
-              keyboardType: TextInputType.name,
-              hintText: 'Enter Industries Served',
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.02,
-            ),
-            textFormField(
-              controller: coachingYearsController,
-              label: 'Coaching Experience (In Years)',
-              focusNode: coachingYearsFocusNode,
-              errorText: fieldErrors['coachingYears'],
-              labelTextBoxSpace: 8,
-              keyboardType: TextInputType.name,
-              hintText: 'Enter experience',
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.02,
-            ),
-            textFormField(
-              controller: nicheController,
-              label: 'Niche',
-              focusNode: nicheFocusNode,
-              errorText: fieldErrors['niche'],
-              labelTextBoxSpace: 8,
-              keyboardType: TextInputType.name,
-              hintText: 'Enter Niche',
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.02,
-            ),
+            if (appStore.userTypeCoach)
+              textFormField(
+                controller: educationController,
+                label: 'Education',
+                focusNode: educationFocusNode,
+                errorText: fieldErrors['education'],
+                labelTextBoxSpace: 8,
+                keyboardType: TextInputType.name,
+                hintText: 'Enter Education',
+              ),
+            if (appStore.userTypeCoach)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.02,
+              ),
+            if (appStore.userTypeCoach)
+              textFormField(
+                controller: preferViaController,
+                label: 'Prefer Via',
+                focusNode: preferViaFocusNode,
+                errorText: fieldErrors['preferVia'],
+                labelTextBoxSpace: 8,
+                keyboardType: TextInputType.name,
+                hintText: 'Eg. Phone, Email',
+              ),
+            if (appStore.userTypeCoach)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.02,
+              ),
+            if (appStore.userTypeCoach)
+              textFormField(
+                controller: philosophyController,
+                label: 'Philosophy',
+                focusNode: philosophyFocusNode,
+                errorText: fieldErrors['philosophy'],
+                labelTextBoxSpace: 8,
+                keyboardType: TextInputType.name,
+                hintText: 'Enter Philosophy',
+              ),
+            if (appStore.userTypeCoach)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.02,
+              ),
+            if (appStore.userTypeCoach)
+              textFormField(
+                controller: certificationController,
+                label: 'Certification',
+                focusNode: certificationFocusNode,
+                errorText: fieldErrors['philosophy'],
+                labelTextBoxSpace: 8,
+                keyboardType: TextInputType.name,
+                hintText: 'Enter Certifications',
+              ),
+            if (appStore.userTypeCoach)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.02,
+              ),
+            if (appStore.userTypeCoach)
+              textFormField(
+                controller: industriesServedController,
+                label: 'Industries Served',
+                focusNode: industriesServedFocusNode,
+                errorText: fieldErrors['industriesServed'],
+                labelTextBoxSpace: 8,
+                keyboardType: TextInputType.name,
+                hintText: 'Enter Industries Served',
+              ),
+            if (appStore.userTypeCoach)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.02,
+              ),
+            if (appStore.userTypeCoach)
+              textFormField(
+                controller: coachingYearsController,
+                label: 'Coaching Experience (In Years)',
+                focusNode: coachingYearsFocusNode,
+                errorText: fieldErrors['coachingYears'],
+                labelTextBoxSpace: 8,
+                keyboardType: TextInputType.name,
+                hintText: 'Enter experience',
+              ),
+            if (appStore.userTypeCoach)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.02,
+              ),
+            if (appStore.userTypeCoach)
+              textFormField(
+                controller: nicheController,
+                label: 'Niche',
+                focusNode: nicheFocusNode,
+                errorText: fieldErrors['niche'],
+                labelTextBoxSpace: 8,
+                keyboardType: TextInputType.name,
+                hintText: 'Enter Niche',
+              ),
+            if (appStore.userTypeCoach)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.02,
+              ),
           ],
         ),
       );
