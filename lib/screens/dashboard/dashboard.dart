@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
-import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/dashboard/client_fragments/client_all_coaches.dart';
 import 'package:jumpvalues/screens/dashboard/client_fragments/client_dashbaord.dart';
 import 'package:jumpvalues/screens/dashboard/client_fragments/client_sessions.dart';
@@ -99,24 +98,26 @@ class DashboardState extends State<Dashboard> {
     setState(() {
       loader = true;
     });
-    try {
-      var response = await logoutUser();
-      if (response?.status == true) {
-        await appStore.clearData();
+    // try {
+    //   var response = await logoutUser();
+    //   if (response?.status == true) {
+    //     await appStore.clearData();
+    //     isTokenAvailable(context);
+    //   } else {
+    //     if (response?.message != null) {
+    //       SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+    //           response?.message ?? errorSomethingWentWrong);
+    //     }
+    //   }
+    // } catch (e) {
+    //   debugPrint('logoutUser Error: $e');
+    // } finally {
+    //   setState(() {
+    //     loader = false;
+    //   });
+    // }
+    await appStore.clearData();
         isTokenAvailable(context);
-      } else {
-        if (response?.message != null) {
-          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-              response?.message ?? errorSomethingWentWrong);
-        }
-      }
-    } catch (e) {
-      debugPrint('logoutUser Error: $e');
-    } finally {
-      setState(() {
-        loader = false;
-      });
-    }
   }
 
   @override

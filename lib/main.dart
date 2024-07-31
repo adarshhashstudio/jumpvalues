@@ -65,14 +65,13 @@ Future<void> main() async {
 
   if (appStore.isLoggedIn) {
     await appStore.setUserId(getIntAsync(USER_ID), isInitializing: true);
-    await appStore.setFirstName(getStringAsync(FIRST_NAME),
+    await appStore.setUserFirstName(getStringAsync(USER_FIRST_NAME),
         isInitializing: true);
-    await appStore.setLastName(getStringAsync(LAST_NAME), isInitializing: true);
+    await appStore.setUserLastName(getStringAsync(USER_LAST_NAME),
+        isInitializing: true);
     await appStore.setUserEmail(getStringAsync(USER_EMAIL),
         isInitializing: true);
-    await appStore.setContactNumber(getStringAsync(CONTACT_NUMBER),
-        isInitializing: true);
-    await appStore.setUserCompany(getStringAsync(USER_COMPANY),
+    await appStore.setUserContactNumber(getStringAsync(USER_CONTACT_NUMBER),
         isInitializing: true);
     await appStore.setUserPosition(getStringAsync(USER_POSITION),
         isInitializing: true);
@@ -87,9 +86,6 @@ Future<void> main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(GoalsDataAdapter());
   goalsBox = await Hive.openBox<GoalsData>('goalsBox');
-
-  appStore.setLoggedIn(true);
-  appStore.setUserType(USERTYPE_COACH);
 
   runApp(const MyApp());
 }

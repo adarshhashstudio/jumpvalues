@@ -1,4 +1,4 @@
-import 'package:jumpvalues/models/login_response.dart';
+import 'package:jumpvalues/models/global_user_response_model.dart';
 import 'package:jumpvalues/utils/constants.dart';
 import 'package:mobx/mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -15,10 +15,19 @@ abstract class _AppStore with Store {
   String token = '';
 
   @observable
-  String userType = '';
+  int id = -1;
 
   @observable
   int? userId = -1;
+
+  @observable
+  int? sponsorId = -1;
+
+  @observable
+  String sponsorName = '';
+
+  @observable
+  String userType = '';
 
   @observable
   String userFirstName = '';
@@ -33,10 +42,28 @@ abstract class _AppStore with Store {
   String userEmail = '';
 
   @observable
-  String userCompany = '';
+  String userPosition = '';
 
   @observable
-  String userPosition = '';
+  String userEducation = '';
+
+  @observable
+  String userPreferVia = '';
+
+  @observable
+  String userPhilosophy = '';
+
+  @observable
+  String userCertifications = '';
+
+  @observable
+  String userIndustriesServed = '';
+
+  @observable
+  int userExperiance = 0;
+
+  @observable
+  String userNiche = '';
 
   @observable
   String userProfilePic = '';
@@ -63,34 +90,54 @@ abstract class _AppStore with Store {
   }
 
   @action
+  Future<void> setId(int val, {bool isInitializing = false}) async {
+    id = val;
+    if (!isInitializing) await setValue(ID, val);
+  }
+
+  @action
+  Future<void> setUserId(int? val, {bool isInitializing = false}) async {
+    userId = val;
+    if (!isInitializing) await setValue(USER_ID, val);
+  }
+
+  @action
+  Future<void> setSponsorId(int? val, {bool isInitializing = false}) async {
+    sponsorId = val;
+    if (!isInitializing) await setValue(SPONSOR_ID, val);
+  }
+
+  @action
+  Future<void> setSponsorName(String val, {bool isInitializing = false}) async {
+    sponsorName = val;
+    if (!isInitializing) await setValue(SPONSOR_NAME, val);
+  }
+
+  @action
   Future<void> setUserType(String val, {bool isInitializing = false}) async {
     userType = val;
     if (!isInitializing) await setValue(USER_TYPE, val);
   }
 
   @action
-  Future<void> setUserId(int val, {bool isInitializing = false}) async {
-    userId = val;
-    if (!isInitializing) await setValue(USER_ID, val);
-  }
-
-  @action
-  Future<void> setFirstName(String val, {bool isInitializing = false}) async {
+  Future<void> setUserFirstName(String val,
+      {bool isInitializing = false}) async {
     userFirstName = val;
-    if (!isInitializing) await setValue(FIRST_NAME, val);
+    if (!isInitializing) await setValue(USER_FIRST_NAME, val);
   }
 
   @action
-  Future<void> setLastName(String val, {bool isInitializing = false}) async {
+  Future<void> setUserLastName(String val,
+      {bool isInitializing = false}) async {
     userLastName = val;
-    if (!isInitializing) await setValue(LAST_NAME, val);
+    if (!isInitializing) await setValue(USER_LAST_NAME, val);
   }
 
   @action
-  Future<void> setContactNumber(String val,
+  Future<void> setUserContactNumber(String val,
       {bool isInitializing = false}) async {
     userContactNumber = val;
-    if (!isInitializing) await setValue(CONTACT_NUMBER, val);
+    if (!isInitializing) await setValue(USER_CONTACT_NUMBER, val);
   }
 
   @action
@@ -100,16 +147,57 @@ abstract class _AppStore with Store {
   }
 
   @action
-  Future<void> setUserCompany(String val, {bool isInitializing = false}) async {
-    userCompany = val;
-    if (!isInitializing) await setValue(USER_COMPANY, val);
-  }
-
-  @action
   Future<void> setUserPosition(String val,
       {bool isInitializing = false}) async {
     userPosition = val;
     if (!isInitializing) await setValue(USER_POSITION, val);
+  }
+
+  @action
+  Future<void> setUserEducation(String val,
+      {bool isInitializing = false}) async {
+    userEducation = val;
+    if (!isInitializing) await setValue(USER_EDUCATION, val);
+  }
+
+  @action
+  Future<void> setUserPreferVia(String val,
+      {bool isInitializing = false}) async {
+    userPreferVia = val;
+    if (!isInitializing) await setValue(USER_PREFER_VIA, val);
+  }
+
+  @action
+  Future<void> setUserPhilosophy(String val,
+      {bool isInitializing = false}) async {
+    userPhilosophy = val;
+    if (!isInitializing) await setValue(USER_PHILOSOPHY, val);
+  }
+
+  @action
+  Future<void> setUserCertifications(String val,
+      {bool isInitializing = false}) async {
+    userCertifications = val;
+    if (!isInitializing) await setValue(USER_CERTIFICATIONS, val);
+  }
+
+  @action
+  Future<void> setUserIndustriesServed(String val,
+      {bool isInitializing = false}) async {
+    userIndustriesServed = val;
+    if (!isInitializing) await setValue(USER_INDUSTRIES_SERVED, val);
+  }
+
+  @action
+  Future<void> setUserExperiance(int val, {bool isInitializing = false}) async {
+    userExperiance = val;
+    if (!isInitializing) await setValue(USER_EXPERIANCE, val);
+  }
+
+  @action
+  Future<void> setUserNiche(String val, {bool isInitializing = false}) async {
+    userNiche = val;
+    if (!isInitializing) await setValue(USER_NICHE, val);
   }
 
   @action
@@ -126,21 +214,27 @@ abstract class _AppStore with Store {
   }
 
   @action
-  Future<void> setUserData(LoginResponseModel response) async {
-    if (response.data != null) {
-      await setUserId(response.data?.id ?? -1);
-      await setFirstName(response.data?.firstName ?? '');
-      await setLastName(response.data?.lastName ?? '');
-      await setUserEmail(response.data?.email ?? '');
-      await setUserCompany(response.data?.company ?? '');
-      await setUserPosition(response.data?.positions ?? '');
-      await setUserAboutMe(response.data?.aboutMe ?? '');
-      await setUserProfilePic(response.data?.profilePic ?? '');
-      await setLoggedIn(true);
-      await setToken(response.token ?? '');
-      await setUserType(response.data?.email == 'coach@yopmail.com'
-          ? USERTYPE_COACH
-          : USERTYPE_CLIENT);
+  Future<void> setUserData(GlobalUserResponseModel? response) async {
+    if (response?.data != null) {
+      await setUserId(response?.data?.id ?? -1);
+      await setUserFirstName(response?.data?.firstName ?? '');
+      await setUserLastName(response?.data?.lastName ?? '');
+      await setUserEmail(response?.data?.email ?? '');
+      await setUserPosition(response?.data?.clientProfile?.position ?? '');
+      await setUserAboutMe(response?.data?.clientProfile?.aboutMe ?? '');
+      await setUserProfilePic(response?.data?.dp ?? '');
+      await setUserEducation(response?.data?.coachProfile?.education ?? '');
+      await setUserPreferVia(
+          response?.data?.coachProfile?.preferVia?.toString() ?? '');
+      await setUserPhilosophy(response?.data?.coachProfile?.philosophy ?? '');
+      await setUserCertifications(
+          response?.data?.coachProfile?.certifications ?? '');
+      await setUserIndustriesServed(
+          response?.data?.coachProfile?.industriesServed ?? '');
+      await setUserExperiance(response?.data?.coachProfile?.experience ?? 0);
+      await setUserNiche(response?.data?.coachProfile?.niche ?? '');
+      await setSponsorId(response?.data?.clientProfile?.sponsorId ?? -1);
+      await setSponsorName(response?.data?.clientProfile?.sponsor?.name ?? '');
     }
   }
 
@@ -148,14 +242,23 @@ abstract class _AppStore with Store {
   Future<void> clearData() async {
     isLoggedIn = false;
     token = '';
-    userType = '';
+    id = -1;
     userId = -1;
+    sponsorId = -1;
+    sponsorName = '';
+    userType = '';
     userFirstName = '';
     userLastName = '';
     userContactNumber = '';
     userEmail = '';
-    userCompany = '';
     userPosition = '';
+    userEducation = '';
+    userPreferVia = '';
+    userPhilosophy = '';
+    userCertifications = '';
+    userIndustriesServed = '';
+    userExperiance = 0;
+    userNiche = '';
     userProfilePic = '';
     userAboutMe = '';
 

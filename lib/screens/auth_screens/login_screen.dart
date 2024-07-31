@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
+import 'package:jumpvalues/models/global_user_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/auth_screens/forgot_password_screen.dart';
 import 'package:jumpvalues/screens/auth_screens/generate_otp_screen.dart';
 import 'package:jumpvalues/screens/dashboard/dashboard.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
 import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/constants.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -25,6 +27,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool showPassword = false;
   bool _obscureText = true;
   bool loader = false;
+
+  GlobalUserResponseModel? _globalUserResponseModel;
 
   @override
   void initState() {
@@ -53,6 +57,17 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> globalUserDetails() async {
+    try {
+      _globalUserResponseModel = await getGlobalUserDetails();
+      setState(() {});
+    } catch (e) {
+      debugPrint('globalUserDetials Error: $e');
+    } finally {
+      loader = false;
+    }
+  }
+
   Future<void> login() async {
     setState(() {
       loader = true;
@@ -70,31 +85,41 @@ class _LoginScreenState extends State<LoginScreen> {
         loader = false;
       });
 
-      if (response != null) {
-        if (response.responseCode != null && response.responseCode == 200) {
+      if (response?.status == true) {
+        if (response?.data != null) {
           // Save user data in AppStore
-          await appStore.setUserData(response);
+          await appStore.setLoggedIn(true);
+          await appStore.setUserType((response?.data?.role == 'Coach') ? USERTYPE_COACH : USERTYPE_CLIENT);
+          await appStore.setToken(response?.data?.token ?? '');
+        }
 
+        if (appStore.isLoggedIn && appStore.token != '') {
+          await globalUserDetails().then((v) async {
+            await appStore.setUserData(_globalUserResponseModel);
+          });
           // Navigate to Dashboard
           await Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => Dashboard()));
-        } else {
-          // Handle missing token
-          // if (response.message != null) {
-          //   SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-          //       response.message ?? errorSomethingWentWrong);
-          // }
-          // if user already registered but not verified yet
+        }
+      } else {
+        // if user already registered but not verified yet
+        if (response?.flag == 'Bad Request') {
           SnackBarHelper.showStatusSnackBar(
             context,
-            StatusIndicator.success,
-            response.message ?? '',
+            StatusIndicator.warning,
+            response?.message ?? '',
           );
           await Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => GenerateOtpScreen(
-                  email:emailController?.text ?? ''),
+              builder: (context) =>
+                  GenerateOtpScreen(email: emailController?.text ?? ''),
             ),
+          );
+        } else {
+          SnackBarHelper.showStatusSnackBar(
+            context,
+            StatusIndicator.error,
+            response?.message ?? '',
           );
         }
       }

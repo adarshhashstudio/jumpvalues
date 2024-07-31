@@ -64,7 +64,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       var req = <String, dynamic>{
         'firstName': firstNameController?.text ?? appStore.userFirstName,
         'lastName': lastNameController?.text ?? appStore.userLastName,
-        'company': companyController?.text ?? appStore.userCompany,
+        'company': companyController?.text ?? '',
         'positions': positionController?.text ?? appStore.userPosition,
         'aboutMe': aboutController?.text ?? appStore.userAboutMe
       };
@@ -160,7 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> loadUserData() async {
     firstNameController = TextEditingController(text: appStore.userFirstName);
     lastNameController = TextEditingController(text: appStore.userLastName);
-    companyController = TextEditingController(text: appStore.userCompany);
+    companyController = TextEditingController(text: '');
     emailController = TextEditingController(text: appStore.userEmail);
     positionController = TextEditingController(text: appStore.userPosition);
     aboutController = TextEditingController(text: appStore.userAboutMe);
@@ -174,9 +174,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> setUserData() async {
-    await appStore.setFirstName(firstNameController?.text ?? '');
-    await appStore.setLastName(lastNameController?.text ?? '');
-    await appStore.setUserCompany(companyController?.text ?? '');
+    await appStore.setUserFirstName(firstNameController?.text ?? '');
+    await appStore.setUserLastName(lastNameController?.text ?? '');
     await appStore.setUserPosition(positionController?.text ?? '');
     await appStore.setUserAboutMe(aboutController?.text ?? '');
 

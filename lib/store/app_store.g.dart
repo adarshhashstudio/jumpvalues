@@ -55,19 +55,18 @@ mixin _$AppStore on _AppStore, Store {
     });
   }
 
-  late final _$userTypeAtom =
-      Atom(name: '_AppStore.userType', context: context);
+  late final _$idAtom = Atom(name: '_AppStore.id', context: context);
 
   @override
-  String get userType {
-    _$userTypeAtom.reportRead();
-    return super.userType;
+  int get id {
+    _$idAtom.reportRead();
+    return super.id;
   }
 
   @override
-  set userType(String value) {
-    _$userTypeAtom.reportWrite(value, super.userType, () {
-      super.userType = value;
+  set id(int value) {
+    _$idAtom.reportWrite(value, super.id, () {
+      super.id = value;
     });
   }
 
@@ -83,6 +82,54 @@ mixin _$AppStore on _AppStore, Store {
   set userId(int? value) {
     _$userIdAtom.reportWrite(value, super.userId, () {
       super.userId = value;
+    });
+  }
+
+  late final _$sponsorIdAtom =
+      Atom(name: '_AppStore.sponsorId', context: context);
+
+  @override
+  int? get sponsorId {
+    _$sponsorIdAtom.reportRead();
+    return super.sponsorId;
+  }
+
+  @override
+  set sponsorId(int? value) {
+    _$sponsorIdAtom.reportWrite(value, super.sponsorId, () {
+      super.sponsorId = value;
+    });
+  }
+
+  late final _$sponsorNameAtom =
+      Atom(name: '_AppStore.sponsorName', context: context);
+
+  @override
+  String get sponsorName {
+    _$sponsorNameAtom.reportRead();
+    return super.sponsorName;
+  }
+
+  @override
+  set sponsorName(String value) {
+    _$sponsorNameAtom.reportWrite(value, super.sponsorName, () {
+      super.sponsorName = value;
+    });
+  }
+
+  late final _$userTypeAtom =
+      Atom(name: '_AppStore.userType', context: context);
+
+  @override
+  String get userType {
+    _$userTypeAtom.reportRead();
+    return super.userType;
+  }
+
+  @override
+  set userType(String value) {
+    _$userTypeAtom.reportWrite(value, super.userType, () {
+      super.userType = value;
     });
   }
 
@@ -150,22 +197,6 @@ mixin _$AppStore on _AppStore, Store {
     });
   }
 
-  late final _$userCompanyAtom =
-      Atom(name: '_AppStore.userCompany', context: context);
-
-  @override
-  String get userCompany {
-    _$userCompanyAtom.reportRead();
-    return super.userCompany;
-  }
-
-  @override
-  set userCompany(String value) {
-    _$userCompanyAtom.reportWrite(value, super.userCompany, () {
-      super.userCompany = value;
-    });
-  }
-
   late final _$userPositionAtom =
       Atom(name: '_AppStore.userPosition', context: context);
 
@@ -179,6 +210,119 @@ mixin _$AppStore on _AppStore, Store {
   set userPosition(String value) {
     _$userPositionAtom.reportWrite(value, super.userPosition, () {
       super.userPosition = value;
+    });
+  }
+
+  late final _$userEducationAtom =
+      Atom(name: '_AppStore.userEducation', context: context);
+
+  @override
+  String get userEducation {
+    _$userEducationAtom.reportRead();
+    return super.userEducation;
+  }
+
+  @override
+  set userEducation(String value) {
+    _$userEducationAtom.reportWrite(value, super.userEducation, () {
+      super.userEducation = value;
+    });
+  }
+
+  late final _$userPreferViaAtom =
+      Atom(name: '_AppStore.userPreferVia', context: context);
+
+  @override
+  String get userPreferVia {
+    _$userPreferViaAtom.reportRead();
+    return super.userPreferVia;
+  }
+
+  @override
+  set userPreferVia(String value) {
+    _$userPreferViaAtom.reportWrite(value, super.userPreferVia, () {
+      super.userPreferVia = value;
+    });
+  }
+
+  late final _$userPhilosophyAtom =
+      Atom(name: '_AppStore.userPhilosophy', context: context);
+
+  @override
+  String get userPhilosophy {
+    _$userPhilosophyAtom.reportRead();
+    return super.userPhilosophy;
+  }
+
+  @override
+  set userPhilosophy(String value) {
+    _$userPhilosophyAtom.reportWrite(value, super.userPhilosophy, () {
+      super.userPhilosophy = value;
+    });
+  }
+
+  late final _$userCertificationsAtom =
+      Atom(name: '_AppStore.userCertifications', context: context);
+
+  @override
+  String get userCertifications {
+    _$userCertificationsAtom.reportRead();
+    return super.userCertifications;
+  }
+
+  @override
+  set userCertifications(String value) {
+    _$userCertificationsAtom.reportWrite(value, super.userCertifications, () {
+      super.userCertifications = value;
+    });
+  }
+
+  late final _$userIndustriesServedAtom =
+      Atom(name: '_AppStore.userIndustriesServed', context: context);
+
+  @override
+  String get userIndustriesServed {
+    _$userIndustriesServedAtom.reportRead();
+    return super.userIndustriesServed;
+  }
+
+  @override
+  set userIndustriesServed(String value) {
+    _$userIndustriesServedAtom.reportWrite(value, super.userIndustriesServed,
+        () {
+      super.userIndustriesServed = value;
+    });
+  }
+
+  late final _$userExperianceAtom =
+      Atom(name: '_AppStore.userExperiance', context: context);
+
+  @override
+  int get userExperiance {
+    _$userExperianceAtom.reportRead();
+    return super.userExperiance;
+  }
+
+  @override
+  set userExperiance(int value) {
+    _$userExperianceAtom.reportWrite(value, super.userExperiance, () {
+      super.userExperiance = value;
+    });
+  }
+
+  late final _$userNicheAtom =
+      Atom(name: '_AppStore.userNiche', context: context);
+
+  @override
+  String get userNiche {
+    _$userNicheAtom.reportRead();
+    return super.userNiche;
+  }
+
+  @override
+  set userNiche(String value) {
+    _$userNicheAtom.reportWrite(value, super.userNiche, () {
+      super.userNiche = value;
     });
   }
 
@@ -232,6 +376,42 @@ mixin _$AppStore on _AppStore, Store {
         .run(() => super.setToken(val, isInitializing: isInitializing));
   }
 
+  late final _$setIdAsyncAction =
+      AsyncAction('_AppStore.setId', context: context);
+
+  @override
+  Future<void> setId(int val, {bool isInitializing = false}) {
+    return _$setIdAsyncAction
+        .run(() => super.setId(val, isInitializing: isInitializing));
+  }
+
+  late final _$setUserIdAsyncAction =
+      AsyncAction('_AppStore.setUserId', context: context);
+
+  @override
+  Future<void> setUserId(int? val, {bool isInitializing = false}) {
+    return _$setUserIdAsyncAction
+        .run(() => super.setUserId(val, isInitializing: isInitializing));
+  }
+
+  late final _$setSponsorIdAsyncAction =
+      AsyncAction('_AppStore.setSponsorId', context: context);
+
+  @override
+  Future<void> setSponsorId(int? val, {bool isInitializing = false}) {
+    return _$setSponsorIdAsyncAction
+        .run(() => super.setSponsorId(val, isInitializing: isInitializing));
+  }
+
+  late final _$setSponsorNameAsyncAction =
+      AsyncAction('_AppStore.setSponsorName', context: context);
+
+  @override
+  Future<void> setSponsorName(String val, {bool isInitializing = false}) {
+    return _$setSponsorNameAsyncAction
+        .run(() => super.setSponsorName(val, isInitializing: isInitializing));
+  }
+
   late final _$setUserTypeAsyncAction =
       AsyncAction('_AppStore.setUserType', context: context);
 
@@ -241,40 +421,31 @@ mixin _$AppStore on _AppStore, Store {
         .run(() => super.setUserType(val, isInitializing: isInitializing));
   }
 
-  late final _$setUserIdAsyncAction =
-      AsyncAction('_AppStore.setUserId', context: context);
+  late final _$setUserFirstNameAsyncAction =
+      AsyncAction('_AppStore.setUserFirstName', context: context);
 
   @override
-  Future<void> setUserId(int val, {bool isInitializing = false}) {
-    return _$setUserIdAsyncAction
-        .run(() => super.setUserId(val, isInitializing: isInitializing));
+  Future<void> setUserFirstName(String val, {bool isInitializing = false}) {
+    return _$setUserFirstNameAsyncAction
+        .run(() => super.setUserFirstName(val, isInitializing: isInitializing));
   }
 
-  late final _$setFirstNameAsyncAction =
-      AsyncAction('_AppStore.setFirstName', context: context);
+  late final _$setUserLastNameAsyncAction =
+      AsyncAction('_AppStore.setUserLastName', context: context);
 
   @override
-  Future<void> setFirstName(String val, {bool isInitializing = false}) {
-    return _$setFirstNameAsyncAction
-        .run(() => super.setFirstName(val, isInitializing: isInitializing));
+  Future<void> setUserLastName(String val, {bool isInitializing = false}) {
+    return _$setUserLastNameAsyncAction
+        .run(() => super.setUserLastName(val, isInitializing: isInitializing));
   }
 
-  late final _$setLastNameAsyncAction =
-      AsyncAction('_AppStore.setLastName', context: context);
+  late final _$setUserContactNumberAsyncAction =
+      AsyncAction('_AppStore.setUserContactNumber', context: context);
 
   @override
-  Future<void> setLastName(String val, {bool isInitializing = false}) {
-    return _$setLastNameAsyncAction
-        .run(() => super.setLastName(val, isInitializing: isInitializing));
-  }
-
-  late final _$setContactNumberAsyncAction =
-      AsyncAction('_AppStore.setContactNumber', context: context);
-
-  @override
-  Future<void> setContactNumber(String val, {bool isInitializing = false}) {
-    return _$setContactNumberAsyncAction
-        .run(() => super.setContactNumber(val, isInitializing: isInitializing));
+  Future<void> setUserContactNumber(String val, {bool isInitializing = false}) {
+    return _$setUserContactNumberAsyncAction.run(
+        () => super.setUserContactNumber(val, isInitializing: isInitializing));
   }
 
   late final _$setUserEmailAsyncAction =
@@ -286,15 +457,6 @@ mixin _$AppStore on _AppStore, Store {
         .run(() => super.setUserEmail(val, isInitializing: isInitializing));
   }
 
-  late final _$setUserCompanyAsyncAction =
-      AsyncAction('_AppStore.setUserCompany', context: context);
-
-  @override
-  Future<void> setUserCompany(String val, {bool isInitializing = false}) {
-    return _$setUserCompanyAsyncAction
-        .run(() => super.setUserCompany(val, isInitializing: isInitializing));
-  }
-
   late final _$setUserPositionAsyncAction =
       AsyncAction('_AppStore.setUserPosition', context: context);
 
@@ -302,6 +464,71 @@ mixin _$AppStore on _AppStore, Store {
   Future<void> setUserPosition(String val, {bool isInitializing = false}) {
     return _$setUserPositionAsyncAction
         .run(() => super.setUserPosition(val, isInitializing: isInitializing));
+  }
+
+  late final _$setUserEducationAsyncAction =
+      AsyncAction('_AppStore.setUserEducation', context: context);
+
+  @override
+  Future<void> setUserEducation(String val, {bool isInitializing = false}) {
+    return _$setUserEducationAsyncAction
+        .run(() => super.setUserEducation(val, isInitializing: isInitializing));
+  }
+
+  late final _$setUserPreferViaAsyncAction =
+      AsyncAction('_AppStore.setUserPreferVia', context: context);
+
+  @override
+  Future<void> setUserPreferVia(String val, {bool isInitializing = false}) {
+    return _$setUserPreferViaAsyncAction
+        .run(() => super.setUserPreferVia(val, isInitializing: isInitializing));
+  }
+
+  late final _$setUserPhilosophyAsyncAction =
+      AsyncAction('_AppStore.setUserPhilosophy', context: context);
+
+  @override
+  Future<void> setUserPhilosophy(String val, {bool isInitializing = false}) {
+    return _$setUserPhilosophyAsyncAction.run(
+        () => super.setUserPhilosophy(val, isInitializing: isInitializing));
+  }
+
+  late final _$setUserCertificationsAsyncAction =
+      AsyncAction('_AppStore.setUserCertifications', context: context);
+
+  @override
+  Future<void> setUserCertifications(String val,
+      {bool isInitializing = false}) {
+    return _$setUserCertificationsAsyncAction.run(
+        () => super.setUserCertifications(val, isInitializing: isInitializing));
+  }
+
+  late final _$setUserIndustriesServedAsyncAction =
+      AsyncAction('_AppStore.setUserIndustriesServed', context: context);
+
+  @override
+  Future<void> setUserIndustriesServed(String val,
+      {bool isInitializing = false}) {
+    return _$setUserIndustriesServedAsyncAction.run(() =>
+        super.setUserIndustriesServed(val, isInitializing: isInitializing));
+  }
+
+  late final _$setUserExperianceAsyncAction =
+      AsyncAction('_AppStore.setUserExperiance', context: context);
+
+  @override
+  Future<void> setUserExperiance(int val, {bool isInitializing = false}) {
+    return _$setUserExperianceAsyncAction.run(
+        () => super.setUserExperiance(val, isInitializing: isInitializing));
+  }
+
+  late final _$setUserNicheAsyncAction =
+      AsyncAction('_AppStore.setUserNiche', context: context);
+
+  @override
+  Future<void> setUserNiche(String val, {bool isInitializing = false}) {
+    return _$setUserNicheAsyncAction
+        .run(() => super.setUserNiche(val, isInitializing: isInitializing));
   }
 
   late final _$setUserProfilePicAsyncAction =
@@ -326,7 +553,7 @@ mixin _$AppStore on _AppStore, Store {
       AsyncAction('_AppStore.setUserData', context: context);
 
   @override
-  Future<void> setUserData(LoginResponseModel response) {
+  Future<void> setUserData(GlobalUserResponseModel? response) {
     return _$setUserDataAsyncAction.run(() => super.setUserData(response));
   }
 
@@ -343,14 +570,23 @@ mixin _$AppStore on _AppStore, Store {
     return '''
 isLoggedIn: ${isLoggedIn},
 token: ${token},
-userType: ${userType},
+id: ${id},
 userId: ${userId},
+sponsorId: ${sponsorId},
+sponsorName: ${sponsorName},
+userType: ${userType},
 userFirstName: ${userFirstName},
 userLastName: ${userLastName},
 userContactNumber: ${userContactNumber},
 userEmail: ${userEmail},
-userCompany: ${userCompany},
 userPosition: ${userPosition},
+userEducation: ${userEducation},
+userPreferVia: ${userPreferVia},
+userPhilosophy: ${userPhilosophy},
+userCertifications: ${userCertifications},
+userIndustriesServed: ${userIndustriesServed},
+userExperiance: ${userExperiance},
+userNiche: ${userNiche},
 userProfilePic: ${userProfilePic},
 userAboutMe: ${userAboutMe},
 userFullName: ${userFullName},

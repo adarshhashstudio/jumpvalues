@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:jumpvalues/models/all_comprehensive_response.dart';
 import 'package:jumpvalues/models/base_response.dart';
 import 'package:jumpvalues/models/category_dropdown_response.dart';
+import 'package:jumpvalues/models/global_user_response_model.dart';
 import 'package:jumpvalues/models/login_response.dart';
 import 'package:jumpvalues/models/profile_pic_response.dart';
 import 'package:jumpvalues/models/signup_response_model.dart';
@@ -195,6 +196,18 @@ Future<BaseResponseModel?> addUserComprehensiveListing(
             request: request,
             isAuth: true,
             method: HttpMethodType.patch)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<GlobalUserResponseModel?> getGlobalUserDetails() async {
+  GlobalUserResponseModel? response;
+  try {
+    response = GlobalUserResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('user/me',
+            isAuth: true, method: HttpMethodType.get)));
   } catch (e) {
     rethrow;
   }

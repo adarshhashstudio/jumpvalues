@@ -32,14 +32,12 @@ class _CommonProfileState extends State<CommonProfile> {
   // Declare controllers
   TextEditingController? firstNameController;
   TextEditingController? lastNameController;
-  TextEditingController? companyController;
   TextEditingController? positionController;
   TextEditingController? aboutController;
 
   // Declare focus nodes
   final FocusNode firstNameFocusNode = FocusNode();
   final FocusNode lastNameFocusNode = FocusNode();
-  final FocusNode companyFocusNode = FocusNode();
   final FocusNode positionFocusNode = FocusNode();
   final FocusNode aboutFocusNode = FocusNode();
 
@@ -91,7 +89,6 @@ class _CommonProfileState extends State<CommonProfile> {
     // Dispose controllers
     firstNameController?.dispose();
     lastNameController?.dispose();
-    companyController?.dispose();
     positionController?.dispose();
     aboutController?.dispose();
     phoneNumberController.dispose();
@@ -106,7 +103,6 @@ class _CommonProfileState extends State<CommonProfile> {
     // Dispose focus nodes
     firstNameFocusNode.dispose();
     lastNameFocusNode.dispose();
-    companyFocusNode.dispose();
     positionFocusNode.dispose();
     aboutFocusNode.dispose();
     educationFocusNode.dispose();
@@ -130,7 +126,6 @@ class _CommonProfileState extends State<CommonProfile> {
       var req = <String, dynamic>{
         'firstName': firstNameController?.text ?? appStore.userFirstName,
         'lastName': lastNameController?.text ?? appStore.userLastName,
-        'company': companyController?.text ?? appStore.userCompany,
         'positions': positionController?.text ?? appStore.userPosition,
         'aboutMe': aboutController?.text ?? appStore.userAboutMe
       };
@@ -157,8 +152,6 @@ class _CommonProfileState extends State<CommonProfile> {
             FocusScope.of(context).requestFocus(firstNameFocusNode);
           } else if (fieldErrors.containsKey('lastName')) {
             FocusScope.of(context).requestFocus(lastNameFocusNode);
-          } else if (fieldErrors.containsKey('company')) {
-            FocusScope.of(context).requestFocus(companyFocusNode);
           } else if (fieldErrors.containsKey('positions')) {
             FocusScope.of(context).requestFocus(positionFocusNode);
           } else if (fieldErrors.containsKey('aboutMe')) {
@@ -180,7 +173,6 @@ class _CommonProfileState extends State<CommonProfile> {
   Future<void> loadUserData() async {
     firstNameController = TextEditingController(text: appStore.userFirstName);
     lastNameController = TextEditingController(text: appStore.userLastName);
-    companyController = TextEditingController(text: appStore.userCompany);
     positionController = TextEditingController(text: appStore.userPosition);
     aboutController = TextEditingController(text: appStore.userAboutMe);
     setState(() {
@@ -206,9 +198,8 @@ class _CommonProfileState extends State<CommonProfile> {
   }
 
   Future<void> setUserData() async {
-    await appStore.setFirstName(firstNameController?.text ?? '');
-    await appStore.setLastName(lastNameController?.text ?? '');
-    await appStore.setUserCompany(companyController?.text ?? '');
+    await appStore.setUserFirstName(firstNameController?.text ?? '');
+    await appStore.setUserLastName(lastNameController?.text ?? '');
     await appStore.setUserPosition(positionController?.text ?? '');
     await appStore.setUserAboutMe(aboutController?.text ?? '');
 
@@ -328,7 +319,7 @@ class _CommonProfileState extends State<CommonProfile> {
       loader = true;
     });
     try {
-      var response = await getUserDetails(appStore.userId??-1);
+      var response = await getUserDetails(appStore.userId ?? -1);
       if (response?.statusCode == 200) {
         setState(() {
           userData = response;
@@ -446,6 +437,16 @@ class _CommonProfileState extends State<CommonProfile> {
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.02,
             ),
+            labelContainer(
+                label: 'Sponsor',
+                width: MediaQuery.of(context).size.width * 1,
+                height: MediaQuery.of(context).size.height * 0.05,
+                labelTextBoxSpace: 8,
+                text: appStore.sponsorName,
+                alignment: Alignment.centerLeft),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.02,
+            ),
             Row(
               children: [
                 SizedBox(
@@ -485,16 +486,6 @@ class _CommonProfileState extends State<CommonProfile> {
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.02,
             ),
-            if (!appStore.userTypeCoach)
-              textFormField(
-                controller: companyController,
-                label: 'Company',
-                focusNode: companyFocusNode,
-                errorText: fieldErrors['company'],
-                labelTextBoxSpace: 8,
-                keyboardType: TextInputType.name,
-                hintText: 'Enter Company Name',
-              ),
             if (!appStore.userTypeCoach)
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.02,

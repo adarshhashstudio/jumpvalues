@@ -192,20 +192,21 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
                 GridView.builder(
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 15,
-                        mainAxisExtent: 50),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 15,
+                            mainAxisExtent: 50),
                     itemCount: selectedTimeSlots.length,
                     itemBuilder: (context, index) {
                       final slot = selectedTimeSlots[index];
                       return FilterChip(
                           label: Text(
                             '${slot.startTime.format(context)} - ${slot.endTime.format(context)}',
-                            style: TextStyle(fontSize: 14),
+                            style: const TextStyle(fontSize: 14),
                           ),
-                          deleteIcon: Icon(
+                          deleteIcon: const Icon(
                             Icons.cancel,
                             color: redColor,
                             size: 20,
@@ -240,8 +241,8 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
 
       if (pickedEndTime != null) {
         // Calculate number of 1-hour slots between pickedStartTime and pickedEndTime
-        final List<TimeSlot> slots = [];
-        DateTime currentSlotStart = DateTime(
+        final slots = <TimeSlot>[];
+        var currentSlotStart = DateTime(
           DateTime.now().year,
           DateTime.now().month,
           DateTime.now().day,
@@ -256,7 +257,7 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
           pickedEndTime.hour,
           pickedEndTime.minute,
         ))) {
-          final currentSlotEnd = currentSlotStart.add(Duration(hours: 1));
+          final currentSlotEnd = currentSlotStart.add(const Duration(hours: 1));
           slots.add(TimeSlot(
             startTime: TimeOfDay.fromDateTime(currentSlotStart),
             endTime: TimeOfDay.fromDateTime(currentSlotEnd),
@@ -296,8 +297,7 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
 }
 
 class TimeSlot {
+  TimeSlot({required this.startTime, required this.endTime});
   final TimeOfDay startTime;
   final TimeOfDay endTime;
-
-  TimeSlot({required this.startTime, required this.endTime});
 }
