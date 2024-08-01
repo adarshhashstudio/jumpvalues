@@ -7,9 +7,7 @@ import 'package:jumpvalues/models/client_profile_response_model.dart';
 import 'package:jumpvalues/models/coach_profile_response_model.dart';
 import 'package:jumpvalues/models/global_user_response_model.dart';
 import 'package:jumpvalues/models/login_response.dart';
-import 'package:jumpvalues/models/profile_pic_response.dart';
 import 'package:jumpvalues/models/signup_response_model.dart';
-import 'package:jumpvalues/models/user_data_response_model.dart';
 import 'package:jumpvalues/network/network_utils.dart';
 
 Future<Map<String, dynamic>> handleResponse(Response response) async {
@@ -136,12 +134,12 @@ Future<BaseResponseModel> verifyOtp(Map<String, dynamic> request) async {
   return response;
 }
 
-Future<UserDataResponseModel?> updateUserProfile(
-    Map<String, dynamic> request, String userId) async {
-  UserDataResponseModel? response;
+Future<BaseResponseModel?> updateUserProfile(
+    Map<String, dynamic> request, String endPoint) async {
+  BaseResponseModel? response;
   try {
-    response = UserDataResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse('users/update_user/$userId',
+    response = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(endPoint,
             request: request, isAuth: true, method: HttpMethodType.patch)));
   } catch (e) {
     rethrow;
@@ -149,15 +147,15 @@ Future<UserDataResponseModel?> updateUserProfile(
   return response;
 }
 
-Future<ProfilePictureResponse?> updateUserProfilePic(
+Future<BaseResponseModel?> updateUserProfilePic(
     {Map? request, String? userId, File? image}) async {
-  ProfilePictureResponse? response;
+  BaseResponseModel? response;
   try {
     // Construct the URL for the upload endpoint
     var url = buildBaseUrl('user/updateProfilePic/$userId');
     // Upload the image with the constructed URL and the request parameter
-    response = ProfilePictureResponse.fromJson(
-        await handleResponse(await uploadImage(url, image??File(''), isAuth: true)));
+    response = BaseResponseModel.fromJson(await handleResponse(
+        await uploadImage(url, image ?? File(''), isAuth: true)));
   } catch (e) {
     rethrow;
   }

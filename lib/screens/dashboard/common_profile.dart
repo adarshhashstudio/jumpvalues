@@ -73,6 +73,8 @@ class _CommonProfileState extends State<CommonProfile> {
   String sCountryCode = '';
   String sCountryIsoCode = 'US';
 
+  String? selectedPreferVia = 'Phone';
+
   bool loader = false;
   var userName = '';
   var email = '';
@@ -132,50 +134,96 @@ class _CommonProfileState extends State<CommonProfile> {
   Future<void> updateProfile() async {
     setState(() {
       loader = true;
-      fieldErrors.clear(); // Clear previous errors
+      fieldErrors.clear();
     });
 
+    var request = <String, dynamic>{};
+
+    void addIfNotEmpty(String key, String? value) {
+      // if (value != null && value.isNotEmpty) {
+      request[key] = value;
+      // }
+    }
+
+    addIfNotEmpty('first_name', firstNameController?.text);
+    addIfNotEmpty('last_name', lastNameController?.text);
+    addIfNotEmpty('country_code', sCountryCode);
+    addIfNotEmpty('phone', phoneNumberController.text);
+    addIfNotEmpty('education', educationController.text);
+    addIfNotEmpty('philosophy', philosophyController.text);
+    addIfNotEmpty('certifications', certificationController.text);
+    addIfNotEmpty('industries_served', industriesServedController.text);
+    addIfNotEmpty('experiance', coachingYearsController.text);
+    addIfNotEmpty('niche', nicheController.text);
+    addIfNotEmpty('position', positionController?.text);
+    addIfNotEmpty('about_me', aboutController?.text);
+
+    if (appStore.userTypeCoach) {
+      request['prefer_via'] = selectedPreferVia == 'Phone' ? 2 : 1;
+    }
+
+    var endPoint = appStore.userTypeCoach
+        ? 'coach/update/${appStore.userId}'
+        : 'client/update/${appStore.userId}';
+
     try {
-      var req = <String, dynamic>{
-        'firstName': firstNameController?.text ?? appStore.userFirstName,
-        'lastName': lastNameController?.text ?? appStore.userLastName,
-        'positions': positionController?.text ?? appStore.userPosition,
-        'aboutMe': aboutController?.text ?? appStore.userAboutMe
-      };
-      var userId = appStore.userId;
-      var response = await updateUserProfile(req, userId.toString());
+      var response = await updateUserProfile(request, endPoint);
 
-      if (response?.statusCode == 200) {
-        await setUserData();
+      setState(() {
+        loader = false;
+      });
 
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
-            response?.message ?? 'Profile Updated Successfully.');
-      } else {
-        if (response?.error?.length == 1) {
-          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-              response?.error?[0].message ?? 'Unexpected Error Occurred.');
-        } else {
-          // Set field errors and focus on the first error field
-          response?.error?.forEach((e) {
-            fieldErrors[e.field!] = e.message!;
+      if (response?.status == true) {
+        if (response?.flag == 'SUCCESS') {
+          await refreshData().then((v) {
+            SnackBarHelper.showStatusSnackBar(
+              context,
+              StatusIndicator.success,
+              response?.message ?? '',
+            );
           });
-
-          // Focus on the first error field
-          if (fieldErrors.containsKey('firstName')) {
+        }
+      } else {
+        if (response?.errors?.isNotEmpty ?? false) {
+          // Set field errors and focus on the first error field
+          response?.errors?.forEach((e) {
+            fieldErrors[e.field ?? '0'] = e.message ?? '0';
+          });
+          // Focus on the first error
+          if (fieldErrors.containsKey('first_name')) {
             FocusScope.of(context).requestFocus(firstNameFocusNode);
-          } else if (fieldErrors.containsKey('lastName')) {
+          } else if (fieldErrors.containsKey('last_name')) {
             FocusScope.of(context).requestFocus(lastNameFocusNode);
-          } else if (fieldErrors.containsKey('positions')) {
+          } else if (fieldErrors.containsKey('phone')) {
+            FocusScope.of(context).requestFocus(phoneNumberFocusNode);
+          } else if (fieldErrors.containsKey('education')) {
+            FocusScope.of(context).requestFocus(educationFocusNode);
+          } else if (fieldErrors.containsKey('philosophy')) {
+            FocusScope.of(context).requestFocus(philosophyFocusNode);
+          } else if (fieldErrors.containsKey('certifications')) {
+            FocusScope.of(context).requestFocus(certificationFocusNode);
+          } else if (fieldErrors.containsKey('industries_served')) {
+            FocusScope.of(context).requestFocus(industriesServedFocusNode);
+          } else if (fieldErrors.containsKey('experiance')) {
+            FocusScope.of(context).requestFocus(coachingYearsFocusNode);
+          } else if (fieldErrors.containsKey('niche')) {
+            FocusScope.of(context).requestFocus(nicheFocusNode);
+          } else if (fieldErrors.containsKey('position')) {
             FocusScope.of(context).requestFocus(positionFocusNode);
-          } else if (fieldErrors.containsKey('aboutMe')) {
+          } else if (fieldErrors.containsKey('about_me')) {
             FocusScope.of(context).requestFocus(aboutFocusNode);
           }
-
-          setState(() {});
+        } else {
+          // Handle other errors
+          SnackBarHelper.showStatusSnackBar(
+            context,
+            StatusIndicator.error,
+            response?.message ?? 'Something went wrong, Try after sometime.',
+          );
         }
       }
     } catch (e) {
-      debugPrint('updateProfile Error: $e');
+      debugPrint('signup Error: $e');
     } finally {
       setState(() {
         loader = false;
@@ -184,28 +232,33 @@ class _CommonProfileState extends State<CommonProfile> {
   }
 
   Future<void> loadUserData() async {
-    // ----- Client Data
-    sponsorName = appStore.sponsorName;
-    positionController = TextEditingController(text: appStore.userPosition);
-    aboutController = TextEditingController(text: appStore.userAboutMe);
-
-    // ----- Coach Data
-    educationController = TextEditingController(text: appStore.userEducation);
-    preferViaController = TextEditingController(text: appStore.userPreferVia);
-    philosophyController = TextEditingController(text: appStore.userPhilosophy);
-    certificationController =
-        TextEditingController(text: appStore.userCertifications);
-    industriesServedController =
-        TextEditingController(text: appStore.userIndustriesServed);
-    coachingYearsController =
-        TextEditingController(text: appStore.userExperiance.toString());
-    nicheController = TextEditingController(text: appStore.userNiche);
+    if (appStore.userTypeCoach) {
+      // ----- Coach Data
+      educationController = TextEditingController(text: appStore.userEducation);
+      preferViaController = TextEditingController(text: appStore.userPreferVia);
+      philosophyController =
+          TextEditingController(text: appStore.userPhilosophy);
+      certificationController =
+          TextEditingController(text: appStore.userCertifications);
+      industriesServedController =
+          TextEditingController(text: appStore.userIndustriesServed);
+      coachingYearsController =
+          TextEditingController(text: appStore.userExperiance.toString());
+      nicheController = TextEditingController(text: appStore.userNiche);
+      selectedPreferVia = appStore.userPreferVia;
+    } else {
+      // ----- Client Data
+      sponsorName = appStore.sponsorName;
+      positionController = TextEditingController(text: appStore.userPosition);
+      aboutController = TextEditingController(text: appStore.userAboutMe);
+    }
 
     // ----- Common Data - Client/Coach
     firstNameController = TextEditingController(text: appStore.userFirstName);
     lastNameController = TextEditingController(text: appStore.userLastName);
     phoneNumberController =
         TextEditingController(text: '${appStore.userContactNumber}');
+    sCountryCode = appStore.userContactCountryCode;
     sCountryIsoCode = appStore.userContactCountryIsoCode;
 
     setState(() {
@@ -213,6 +266,8 @@ class _CommonProfileState extends State<CommonProfile> {
       email = appStore.userEmail;
       profilePic = appStore.userProfilePic;
     });
+
+    setState(() {});
 
     debugPrint('Profile Pic: $domainUrl/$profilePic');
   }
@@ -253,7 +308,7 @@ class _CommonProfileState extends State<CommonProfile> {
             coachProfileResponseModel?.data?.coachProfile?.niche ?? '');
         try {
           final phoneNumberType = phoneNumberParser.PhoneNumber.parse(
-              '${appStore.userContactCountryCode} ${appStore.userContactNumber}');
+              '${appStore.userContactCountryCode}${appStore.userContactNumber}');
           await appStore
               .setUserContactCountryIsoCode('${phoneNumberType.isoCode.name}');
         } catch (e) {
@@ -262,6 +317,11 @@ class _CommonProfileState extends State<CommonProfile> {
       }
     } else {
       if (clientProfileResponseModel != null) {
+        await appStore.setSponsorId(
+            clientProfileResponseModel?.data?.clientProfile?.sponsorId);
+        await appStore.setSponsorName(
+            clientProfileResponseModel?.data?.clientProfile?.sponsor?.name ??
+                '');
         await appStore.setUserId(clientProfileResponseModel?.data?.id);
         await appStore.setUserFirstName(
             clientProfileResponseModel?.data?.firstName ?? '');
@@ -277,7 +337,7 @@ class _CommonProfileState extends State<CommonProfile> {
             .setUserProfilePic(clientProfileResponseModel?.data?.dp ?? '');
         try {
           final phoneNumberType = phoneNumberParser.PhoneNumber.parse(
-              '${appStore.userContactCountryCode} ${appStore.userContactNumber}');
+              '${appStore.userContactCountryCode}${appStore.userContactNumber}');
           await appStore
               .setUserContactCountryIsoCode('${phoneNumberType.isoCode.name}');
         } catch (e) {
@@ -285,6 +345,7 @@ class _CommonProfileState extends State<CommonProfile> {
         }
       }
     }
+    setState(() {});
   }
 
   //Image Picker function to get image from gallery
@@ -368,16 +429,14 @@ class _CommonProfileState extends State<CommonProfile> {
       var response =
           await updateUserProfilePic(userId: userId.toString(), image: _image);
 
-      if (response?.statusCode == 200) {
-        await appStore.setUserProfilePic(response?.data ?? '');
-        setState(() {
-          profilePic = appStore.userProfilePic;
+      if (response?.status == true) {
+        await refreshData().then((v) {
+          SnackBarHelper.showStatusSnackBar(
+            context,
+            StatusIndicator.success,
+            response?.message ?? 'Profile Pic Uploaded Successfully.',
+          );
         });
-        SnackBarHelper.showStatusSnackBar(
-          context,
-          StatusIndicator.success,
-          response?.message ?? 'Profile Pic Uploaded Successfully.',
-        );
       } else {
         if (response?.message != null) {
           SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
@@ -400,11 +459,11 @@ class _CommonProfileState extends State<CommonProfile> {
     try {
       var response = await getUserClientDetails(appStore.userId ?? -1);
       if (response?.status == true) {
-        setState(() async {
+        setState(() {
           clientProfileResponseModel = response;
-          await setUserData();
-          await loadUserData();
         });
+        await setUserData();
+        await loadUserData();
       } else {
         if (response?.message != null) {
           SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
@@ -412,7 +471,7 @@ class _CommonProfileState extends State<CommonProfile> {
         }
       }
     } catch (e) {
-      debugPrint('getUser Error: $e');
+      debugPrint('getClientUser Error: $e');
     } finally {
       setState(() {
         loader = false;
@@ -427,11 +486,11 @@ class _CommonProfileState extends State<CommonProfile> {
     try {
       var response = await getUserCoachDetails(appStore.userId ?? -1);
       if (response?.status == true) {
-        setState(() async {
+        setState(() {
           coachProfileResponseModel = response;
-          await setUserData();
-          await loadUserData();
         });
+        await setUserData();
+        await loadUserData();
       } else {
         if (response?.message != null) {
           SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
@@ -439,7 +498,7 @@ class _CommonProfileState extends State<CommonProfile> {
         }
       }
     } catch (e) {
-      debugPrint('getUser Error: $e');
+      debugPrint('getCoachUser Error: $e');
     } finally {
       setState(() {
         loader = false;
@@ -448,6 +507,8 @@ class _CommonProfileState extends State<CommonProfile> {
   }
 
   Future<void> refreshData() async {
+    hideKeyboard(context);
+    fieldErrors.clear();
     isTokenAvailable(context);
     await loadUserData();
     if (appStore.userTypeCoach) {
@@ -487,6 +548,7 @@ class _CommonProfileState extends State<CommonProfile> {
                     child: button(context, onPressed: () async {
                       if (loader) {
                       } else {
+                        hideKeyboard(context);
                         await updateProfile();
                       }
                     }, text: 'Update Profile'),
@@ -569,7 +631,7 @@ class _CommonProfileState extends State<CommonProfile> {
                       label: 'First Name',
                       labelTextBoxSpace: 8,
                       focusNode: firstNameFocusNode,
-                      errorText: fieldErrors['firstName'],
+                      errorText: fieldErrors['first_name'],
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
                       ],
@@ -586,7 +648,7 @@ class _CommonProfileState extends State<CommonProfile> {
                       controller: lastNameController,
                       label: 'Last Name',
                       focusNode: lastNameFocusNode,
-                      errorText: fieldErrors['lastName'],
+                      errorText: fieldErrors['last_name'],
                       labelTextBoxSpace: 8,
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
@@ -604,7 +666,7 @@ class _CommonProfileState extends State<CommonProfile> {
                 controller: positionController,
                 label: 'Position',
                 focusNode: positionFocusNode,
-                errorText: fieldErrors['positions'],
+                errorText: fieldErrors['position'],
                 labelTextBoxSpace: 8,
                 keyboardType: TextInputType.name,
                 hintText: 'Enter Position',
@@ -618,7 +680,7 @@ class _CommonProfileState extends State<CommonProfile> {
                 controller: aboutController,
                 label: 'About',
                 focusNode: aboutFocusNode,
-                errorText: fieldErrors['aboutMe'],
+                errorText: fieldErrors['about_me'],
                 labelTextBoxSpace: 8,
                 keyboardType: TextInputType.name,
                 hintText: 'Enter your bio',
@@ -693,6 +755,8 @@ class _CommonProfileState extends State<CommonProfile> {
                 });
               },
               initialCountryCode: sCountryIsoCode,
+              focusNode: phoneNumberFocusNode,
+              errorText: fieldErrors['phone'],
               validator: (phoneNumber) {
                 if (phoneNumber == null || phoneNumber.number.isEmpty) {
                   return 'Phone number is required';
@@ -718,14 +782,42 @@ class _CommonProfileState extends State<CommonProfile> {
                 height: MediaQuery.of(context).size.height * 0.02,
               ),
             if (appStore.userTypeCoach)
-              textFormField(
-                controller: preferViaController,
+              labelContainer(
                 label: 'Prefer Via',
-                focusNode: preferViaFocusNode,
-                errorText: fieldErrors['preferVia'],
                 labelTextBoxSpace: 8,
-                keyboardType: TextInputType.name,
-                hintText: 'Eg. Phone, Email',
+                width: MediaQuery.of(context).size.width * 1,
+                height: MediaQuery.of(context).size.height * 0.06,
+                child: DropdownButton<String>(
+                  value: selectedPreferVia,
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  hint: Text(
+                    'Select Preference',
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 15,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 15,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w400,
+                  ),
+                  items: ['Phone', 'Email']
+                      .map((String value) => DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedPreferVia = value;
+                    });
+                  },
+                ),
               ),
             if (appStore.userTypeCoach)
               SizedBox(
@@ -750,7 +842,7 @@ class _CommonProfileState extends State<CommonProfile> {
                 controller: certificationController,
                 label: 'Certification',
                 focusNode: certificationFocusNode,
-                errorText: fieldErrors['philosophy'],
+                errorText: fieldErrors['certifications'],
                 labelTextBoxSpace: 8,
                 keyboardType: TextInputType.name,
                 hintText: 'Enter Certifications',
@@ -764,7 +856,7 @@ class _CommonProfileState extends State<CommonProfile> {
                 controller: industriesServedController,
                 label: 'Industries Served',
                 focusNode: industriesServedFocusNode,
-                errorText: fieldErrors['industriesServed'],
+                errorText: fieldErrors['industries_served'],
                 labelTextBoxSpace: 8,
                 keyboardType: TextInputType.name,
                 hintText: 'Enter Industries Served',
@@ -778,7 +870,7 @@ class _CommonProfileState extends State<CommonProfile> {
                 controller: coachingYearsController,
                 label: 'Coaching Experience (In Years)',
                 focusNode: coachingYearsFocusNode,
-                errorText: fieldErrors['coachingYears'],
+                errorText: fieldErrors['experiance'],
                 labelTextBoxSpace: 8,
                 keyboardType: TextInputType.name,
                 hintText: 'Enter experience',

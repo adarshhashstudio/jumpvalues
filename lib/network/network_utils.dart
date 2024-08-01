@@ -92,7 +92,9 @@ Future<Response<dynamic>> buildHttpResponse(
         statusCode: StatusCode.defaultError,
         requestOptions: RequestOptions(path: endPoint),
         data: {
-          'error': {'message': e.toString()}// TODO: change as something went wrong
+          'error': {
+            'message': e.toString()
+          } // TODO: change as something went wrong
         },
       );
     }
