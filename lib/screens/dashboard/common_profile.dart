@@ -73,9 +73,10 @@ class _CommonProfileState extends State<CommonProfile> {
   String sCountryCode = '';
   String sCountryIsoCode = 'US';
 
-  String? selectedPreferVia = 'Phone';
+  String? selectedPreferVia;
 
   bool loader = false;
+  bool loadingUserData = false;
   var userName = '';
   var email = '';
   String? profilePic;
@@ -155,11 +156,12 @@ class _CommonProfileState extends State<CommonProfile> {
     addIfNotEmpty('industries_served', industriesServedController.text);
     addIfNotEmpty('experiance', coachingYearsController.text);
     addIfNotEmpty('niche', nicheController.text);
-    addIfNotEmpty('position', positionController?.text);
-    addIfNotEmpty('about_me', aboutController?.text);
 
     if (appStore.userTypeCoach) {
       request['prefer_via'] = selectedPreferVia == 'Phone' ? 2 : 1;
+    } else {
+      addIfNotEmpty('position', positionController?.text);
+      addIfNotEmpty('about_me', aboutController?.text);
     }
 
     var endPoint = appStore.userTypeCoach
@@ -174,15 +176,13 @@ class _CommonProfileState extends State<CommonProfile> {
       });
 
       if (response?.status == true) {
-        if (response?.flag == 'SUCCESS') {
-          await refreshData().then((v) {
-            SnackBarHelper.showStatusSnackBar(
-              context,
-              StatusIndicator.success,
-              response?.message ?? '',
-            );
-          });
-        }
+        await refreshData().then((v) {
+          SnackBarHelper.showStatusSnackBar(
+            context,
+            StatusIndicator.success,
+            response?.message ?? '',
+          );
+        });
       } else {
         if (response?.errors?.isNotEmpty ?? false) {
           // Set field errors and focus on the first error field
@@ -231,7 +231,12 @@ class _CommonProfileState extends State<CommonProfile> {
     }
   }
 
-  Future<void> loadUserData() async {
+  Future<void> loadUserData({bool loading = false}) async {
+    if (loading) {
+      setState(() {
+        loadingUserData = true;
+      });
+    }
     if (appStore.userTypeCoach) {
       // ----- Coach Data
       educationController = TextEditingController(text: appStore.userEducation);
@@ -245,7 +250,10 @@ class _CommonProfileState extends State<CommonProfile> {
       coachingYearsController =
           TextEditingController(text: appStore.userExperiance.toString());
       nicheController = TextEditingController(text: appStore.userNiche);
-      selectedPreferVia = appStore.userPreferVia;
+      // selectedPreferVia = appStore.userPreferVia;
+      selectedPreferVia = ['Phone', 'Email'].contains(appStore.userPreferVia)
+          ? appStore.userPreferVia
+          : 'Phone'; // Default to 'Phone' if the value is not valid
     } else {
       // ----- Client Data
       sponsorName = appStore.sponsorName;
@@ -267,7 +275,9 @@ class _CommonProfileState extends State<CommonProfile> {
       profilePic = appStore.userProfilePic;
     });
 
-    setState(() {});
+    setState(() {
+      loadingUserData = false;
+    });
 
     debugPrint('Profile Pic: $domainUrl/$profilePic');
   }
@@ -529,16 +539,20 @@ class _CommonProfileState extends State<CommonProfile> {
                   Expanded(
                     child: SingleChildScrollView(
                       child: SafeArea(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            buildProfilePicWidget(context),
-                            personalDetails(context)
-                                .paddingSymmetric(horizontal: 20, vertical: 10),
-                            additionalDetails(context)
-                                .paddingSymmetric(horizontal: 20),
-                          ],
-                        ),
+                        child: loadingUserData
+                            ? const CircularProgressIndicator()
+                                .center()
+                                .paddingTop(100)
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  buildProfilePicWidget(context),
+                                  personalDetails(context).paddingSymmetric(
+                                      horizontal: 20, vertical: 10),
+                                  additionalDetails(context)
+                                      .paddingSymmetric(horizontal: 20),
+                                ],
+                              ),
                       ),
                     ),
                   ),
