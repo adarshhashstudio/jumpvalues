@@ -198,6 +198,23 @@ mixin _$AppStore on _AppStore, Store {
     });
   }
 
+  late final _$userContactCountryIsoCodeAtom =
+      Atom(name: '_AppStore.userContactCountryIsoCode', context: context);
+
+  @override
+  String get userContactCountryIsoCode {
+    _$userContactCountryIsoCodeAtom.reportRead();
+    return super.userContactCountryIsoCode;
+  }
+
+  @override
+  set userContactCountryIsoCode(String value) {
+    _$userContactCountryIsoCodeAtom
+        .reportWrite(value, super.userContactCountryIsoCode, () {
+      super.userContactCountryIsoCode = value;
+    });
+  }
+
   late final _$userEmailAtom =
       Atom(name: '_AppStore.userEmail', context: context);
 
@@ -475,6 +492,16 @@ mixin _$AppStore on _AppStore, Store {
         super.setUserContactCountryCode(val, isInitializing: isInitializing));
   }
 
+  late final _$setUserContactCountryIsoCodeAsyncAction =
+      AsyncAction('_AppStore.setUserContactCountryIsoCode', context: context);
+
+  @override
+  Future<void> setUserContactCountryIsoCode(String val,
+      {bool isInitializing = false}) {
+    return _$setUserContactCountryIsoCodeAsyncAction.run(() => super
+        .setUserContactCountryIsoCode(val, isInitializing: isInitializing));
+  }
+
   late final _$setUserEmailAsyncAction =
       AsyncAction('_AppStore.setUserEmail', context: context);
 
@@ -606,6 +633,7 @@ userFirstName: ${userFirstName},
 userLastName: ${userLastName},
 userContactNumber: ${userContactNumber},
 userContactCountryCode: ${userContactCountryCode},
+userContactCountryIsoCode: ${userContactCountryIsoCode},
 userEmail: ${userEmail},
 userPosition: ${userPosition},
 userEducation: ${userEducation},

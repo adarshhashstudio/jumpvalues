@@ -154,10 +154,10 @@ Future<ProfilePictureResponse?> updateUserProfilePic(
   ProfilePictureResponse? response;
   try {
     // Construct the URL for the upload endpoint
-    var url = buildBaseUrl('users/update_profile_pic/$userId');
+    var url = buildBaseUrl('user/updateProfilePic/$userId');
     // Upload the image with the constructed URL and the request parameter
     response = ProfilePictureResponse.fromJson(
-        await handleResponse(await uploadImage(url, image!, isAuth: true)));
+        await handleResponse(await uploadImage(url, image??File(''), isAuth: true)));
   } catch (e) {
     rethrow;
   }

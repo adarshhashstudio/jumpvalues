@@ -60,7 +60,7 @@ Future<Response<dynamic>> buildHttpResponse(
     late Response response;
     var dio = Dio();
 
-    dio.options.connectTimeout = const Duration(milliseconds: 700);
+    dio.options.connectTimeout = const Duration(seconds: 10);
 
     try {
       response = await dio.request(
@@ -92,7 +92,7 @@ Future<Response<dynamic>> buildHttpResponse(
         statusCode: StatusCode.defaultError,
         requestOptions: RequestOptions(path: endPoint),
         data: {
-          'error': {'message': 'Unknown error occurred'}
+          'error': {'message': e.toString()}// TODO: change as something went wrong
         },
       );
     }
@@ -164,11 +164,11 @@ Map<String, String> buildHeaderTokens({
 Future<Response<dynamic>> uploadImage(Uri url, File imageFile,
     {Map<String, String>? fields, bool isAuth = false}) async {
   late Response<dynamic> response;
-
+  var dio = Dio();
+  var formData = FormData();
   try {
-    var dio = Dio();
-    var formData = FormData.fromMap({
-      'profile_pic': await MultipartFile.fromFile(
+    formData = FormData.fromMap({
+      'dp': await MultipartFile.fromFile(
         imageFile.path,
         filename: imageFile.path.split('/').last,
       ),
@@ -178,10 +178,7 @@ Future<Response<dynamic>> uploadImage(Uri url, File imageFile,
       dio.options.headers['Authorization'] = 'Bearer ${appStore.token}';
     }
 
-    response = await dio.patch(
-      url.toString(),
-      data: formData,
-    );
+    response = await dio.patch(url.toString(), data: formData);
   } on DioException catch (e) {
     response = Response(
       statusCode: StatusCode.defaultError,
@@ -194,11 +191,12 @@ Future<Response<dynamic>> uploadImage(Uri url, File imageFile,
 
   apidebugPrint(
     url: url.toString(),
-    hasRequest: true,
-    headers: response.requestOptions.headers.toString(),
-    responseBody: jsonEncode(response.data),
-    request: response.requestOptions.data.toString(),
+    headers: jsonEncode(dio.options.headers),
+    hasRequest: false,
+    request: jsonEncode(formData.fields),
     statusCode: response.statusCode!,
+    responseBody: jsonEncode(response.data),
+    methodtype: 'PATCH',
   );
 
   return response;
@@ -217,6 +215,6 @@ String handleDioError(DioException error) {
     case DioExceptionType.unknown:
       return 'Unknown error occurred';
     default:
-      return 'Something went wrong';
+      return error.message ?? 'Something went wrong, Try after sometime.';
   }
 }

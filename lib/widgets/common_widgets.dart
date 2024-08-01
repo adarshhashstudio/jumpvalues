@@ -72,6 +72,7 @@ Widget placeHolderWidget(
 Widget labelContainer(
         {bool isLabel = true,
         bool isError = false,
+        bool isDisable = false,
         required String label,
         required double width,
         required double? height,
@@ -111,7 +112,8 @@ Widget labelContainer(
             padding: padding ?? const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               borderRadius: borderRadius ?? BorderRadius.circular(20),
-              color: color ?? secondaryColor,
+              color: color ??
+                  (isDisable ? black.withOpacity(0.1) : secondaryColor),
               border: isError
                   ? Border.all(color: Colors.red)
                   : Border.all(

@@ -40,7 +40,6 @@ class Data {
   factory Data.fromJson(Map<String, dynamic> json) {
     var rolesList = json['roles'] as List?;
     var categoriesList = json['categories'] as List?;
-    var coreValuesList = json['core_values'] as List?;
 
     return Data(
       id: json['id'],

@@ -16,6 +16,8 @@ import 'package:jumpvalues/utils/images.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart'
+    as phoneNumberParser;
 
 class CommonProfile extends StatefulWidget {
   const CommonProfile({super.key});
@@ -69,11 +71,13 @@ class _CommonProfileState extends State<CommonProfile> {
   // Variables for storing phone number and country code
   String sPhoneNumber = '';
   String sCountryCode = '';
+  String sCountryIsoCode = 'US';
 
   bool loader = false;
   var userName = '';
   var email = '';
   String? profilePic;
+  String? sponsorName;
   UserDataResponseModel? userData;
   ClientProfileResponseModel? clientProfileResponseModel;
   CoachProfileResponseModel? coachProfileResponseModel;
@@ -180,22 +184,12 @@ class _CommonProfileState extends State<CommonProfile> {
   }
 
   Future<void> loadUserData() async {
-    firstNameController = TextEditingController(text: appStore.userFirstName);
-    lastNameController = TextEditingController(text: appStore.userLastName);
+    // ----- Client Data
+    sponsorName = appStore.sponsorName;
     positionController = TextEditingController(text: appStore.userPosition);
     aboutController = TextEditingController(text: appStore.userAboutMe);
-    positionController = TextEditingController(text: appStore.userPosition);
-    aboutController = TextEditingController(text: appStore.userAboutMe);
-    setState(() {
-      userName = '${appStore.userFullName}';
-      email = appStore.userEmail;
-      profilePic = appStore.userProfilePic;
-    });
 
-    // ----- Additional
-
-    phoneNumberController =
-        TextEditingController(text: '${appStore.userContactNumber}');
+    // ----- Coach Data
     educationController = TextEditingController(text: appStore.userEducation);
     preferViaController = TextEditingController(text: appStore.userPreferVia);
     philosophyController = TextEditingController(text: appStore.userPhilosophy);
@@ -207,18 +201,90 @@ class _CommonProfileState extends State<CommonProfile> {
         TextEditingController(text: appStore.userExperiance.toString());
     nicheController = TextEditingController(text: appStore.userNiche);
 
-    debugPrint('Profile Pic: $baseUrl$profilePic');
-  }
-
-  Future<void> setUserData() async {
-    await appStore.setUserFirstName(firstNameController?.text ?? '');
-    await appStore.setUserLastName(lastNameController?.text ?? '');
-    await appStore.setUserPosition(positionController?.text ?? '');
-    await appStore.setUserAboutMe(aboutController?.text ?? '');
+    // ----- Common Data - Client/Coach
+    firstNameController = TextEditingController(text: appStore.userFirstName);
+    lastNameController = TextEditingController(text: appStore.userLastName);
+    phoneNumberController =
+        TextEditingController(text: '${appStore.userContactNumber}');
+    sCountryIsoCode = appStore.userContactCountryIsoCode;
 
     setState(() {
       userName = '${appStore.userFullName}';
+      email = appStore.userEmail;
+      profilePic = appStore.userProfilePic;
     });
+
+    debugPrint('Profile Pic: $domainUrl/$profilePic');
+  }
+
+  Future<void> setUserData() async {
+    if (appStore.userTypeCoach) {
+      if (coachProfileResponseModel != null) {
+        await appStore.setUserId(coachProfileResponseModel?.data?.id);
+        await appStore
+            .setUserFirstName(coachProfileResponseModel?.data?.firstName ?? '');
+        await appStore
+            .setUserLastName(coachProfileResponseModel?.data?.lastName ?? '');
+        await appStore
+            .setUserEmail(coachProfileResponseModel?.data?.email ?? '');
+        await appStore.setUserContactCountryCode(
+            coachProfileResponseModel?.data?.countryCode ?? '+1');
+        await appStore
+            .setUserContactNumber(coachProfileResponseModel?.data?.phone ?? '');
+        await appStore
+            .setUserProfilePic(coachProfileResponseModel?.data?.dp ?? '');
+        await appStore.setUserEducation(
+            coachProfileResponseModel?.data?.coachProfile?.education ?? '');
+        await appStore.setUserPreferVia(
+            coachProfileResponseModel?.data?.coachProfile?.preferVia == 2
+                ? 'Phone'
+                : 'Email');
+        await appStore.setUserPhilosophy(
+            coachProfileResponseModel?.data?.coachProfile?.philosophy ?? '');
+        await appStore.setUserCertifications(
+            coachProfileResponseModel?.data?.coachProfile?.certifications ??
+                '');
+        await appStore.setUserIndustriesServed(
+            coachProfileResponseModel?.data?.coachProfile?.industriesServed ??
+                '');
+        await appStore.setUserExperiance(
+            coachProfileResponseModel?.data?.coachProfile?.experience ?? 0);
+        await appStore.setUserNiche(
+            coachProfileResponseModel?.data?.coachProfile?.niche ?? '');
+        try {
+          final phoneNumberType = phoneNumberParser.PhoneNumber.parse(
+              '${appStore.userContactCountryCode} ${appStore.userContactNumber}');
+          await appStore
+              .setUserContactCountryIsoCode('${phoneNumberType.isoCode.name}');
+        } catch (e) {
+          rethrow;
+        }
+      }
+    } else {
+      if (clientProfileResponseModel != null) {
+        await appStore.setUserId(clientProfileResponseModel?.data?.id);
+        await appStore.setUserFirstName(
+            clientProfileResponseModel?.data?.firstName ?? '');
+        await appStore
+            .setUserLastName(clientProfileResponseModel?.data?.lastName ?? '');
+        await appStore
+            .setUserEmail(clientProfileResponseModel?.data?.email ?? '');
+        await appStore.setUserContactCountryCode(
+            clientProfileResponseModel?.data?.countryCode ?? '+1');
+        await appStore.setUserContactNumber(
+            clientProfileResponseModel?.data?.phone ?? '');
+        await appStore
+            .setUserProfilePic(clientProfileResponseModel?.data?.dp ?? '');
+        try {
+          final phoneNumberType = phoneNumberParser.PhoneNumber.parse(
+              '${appStore.userContactCountryCode} ${appStore.userContactNumber}');
+          await appStore
+              .setUserContactCountryIsoCode('${phoneNumberType.isoCode.name}');
+        } catch (e) {
+          rethrow;
+        }
+      }
+    }
   }
 
   //Image Picker function to get image from gallery
@@ -334,24 +400,10 @@ class _CommonProfileState extends State<CommonProfile> {
     try {
       var response = await getUserClientDetails(appStore.userId ?? -1);
       if (response?.status == true) {
-        setState(() {
+        setState(() async {
           clientProfileResponseModel = response;
-          if (clientProfileResponseModel != null) {
-            appStore.setUserId(clientProfileResponseModel?.data?.id);
-            appStore.setUserFirstName(
-                clientProfileResponseModel?.data?.firstName ?? '');
-            appStore.setUserLastName(
-                clientProfileResponseModel?.data?.lastName ?? '');
-            appStore
-                .setUserEmail(clientProfileResponseModel?.data?.email ?? '');
-            appStore.setUserContactCountryCode(
-                clientProfileResponseModel?.data?.countryCode ?? '+91');
-            appStore.setUserContactNumber(
-                clientProfileResponseModel?.data?.phone ?? '');
-            appStore
-                .setUserProfilePic(clientProfileResponseModel?.data?.dp ?? '');
-          }
-          loadUserData();
+          await setUserData();
+          await loadUserData();
         });
       } else {
         if (response?.message != null) {
@@ -375,42 +427,10 @@ class _CommonProfileState extends State<CommonProfile> {
     try {
       var response = await getUserCoachDetails(appStore.userId ?? -1);
       if (response?.status == true) {
-        setState(() {
+        setState(() async {
           coachProfileResponseModel = response;
-          if (coachProfileResponseModel != null) {
-            appStore.setUserId(coachProfileResponseModel?.data?.id);
-            appStore.setUserFirstName(
-                coachProfileResponseModel?.data?.firstName ?? '');
-            appStore.setUserLastName(
-                coachProfileResponseModel?.data?.lastName ?? '');
-            appStore.setUserEmail(coachProfileResponseModel?.data?.email ?? '');
-            appStore.setUserContactCountryCode(
-                coachProfileResponseModel?.data?.countryCode ?? '+91');
-            appStore.setUserContactNumber(
-                coachProfileResponseModel?.data?.phone ?? '');
-            appStore
-                .setUserProfilePic(coachProfileResponseModel?.data?.dp ?? '');
-            appStore.setUserEducation(
-                coachProfileResponseModel?.data?.coachProfile?.education ?? '');
-            appStore.setUserPreferVia(
-                coachProfileResponseModel?.data?.coachProfile?.preferVia == 2
-                    ? 'Phone'
-                    : 'Email');
-            appStore.setUserPhilosophy(
-                coachProfileResponseModel?.data?.coachProfile?.philosophy ??
-                    '');
-            appStore.setUserCertifications(
-                coachProfileResponseModel?.data?.coachProfile?.certifications ??
-                    '');
-            appStore.setUserIndustriesServed(coachProfileResponseModel
-                    ?.data?.coachProfile?.industriesServed ??
-                '');
-            appStore.setUserExperiance(
-                coachProfileResponseModel?.data?.coachProfile?.experience ?? 0);
-            appStore.setUserNiche(
-                coachProfileResponseModel?.data?.coachProfile?.niche ?? '');
-          }
-          loadUserData();
+          await setUserData();
+          await loadUserData();
         });
       } else {
         if (response?.message != null) {
@@ -532,8 +552,9 @@ class _CommonProfileState extends State<CommonProfile> {
                   label: 'Sponsor',
                   width: MediaQuery.of(context).size.width * 1,
                   height: MediaQuery.of(context).size.height * 0.05,
+                  isDisable: true,
                   labelTextBoxSpace: 8,
-                  text: appStore.sponsorName,
+                  text: sponsorName,
                   alignment: Alignment.centerLeft),
             if (!appStore.userTypeCoach)
               SizedBox(
@@ -638,6 +659,10 @@ class _CommonProfileState extends State<CommonProfile> {
                 ],
               ),
             ),
+            if (!appStore.userTypeCoach)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.01,
+              ),
           ],
         ),
       );
@@ -667,6 +692,7 @@ class _CommonProfileState extends State<CommonProfile> {
                   sCountryCode = phoneNumber.countryCode;
                 });
               },
+              initialCountryCode: sCountryIsoCode,
               validator: (phoneNumber) {
                 if (phoneNumber == null || phoneNumber.number.isEmpty) {
                   return 'Phone number is required';
@@ -800,7 +826,7 @@ class _CommonProfileState extends State<CommonProfile> {
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(360),
                             child: CachedNetworkImage(
-                              imageUrl: '$baseUrl$profilePic',
+                              imageUrl: '$domainUrl/$profilePic',
                               fit: BoxFit.cover,
                               placeholder: (context, _) => Center(
                                 child: Icon(

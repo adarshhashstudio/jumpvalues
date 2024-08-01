@@ -27,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool showPassword = false;
   bool _obscureText = true;
   bool loader = false;
+  Map<String, dynamic> fieldErrors = {};
 
   GlobalUserResponseModel? _globalUserResponseModel;
 
@@ -89,7 +90,9 @@ class _LoginScreenState extends State<LoginScreen> {
         if (response?.data != null) {
           // Save user data in AppStore
           await appStore.setLoggedIn(true);
-          await appStore.setUserType((response?.data?.role == 'Coach') ? USERTYPE_COACH : USERTYPE_CLIENT);
+          await appStore.setUserType((response?.data?.role == 'Coach')
+              ? USERTYPE_COACH
+              : USERTYPE_CLIENT);
           await appStore.setToken(response?.data?.token ?? '');
         }
 
@@ -116,11 +119,19 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
         } else {
-          SnackBarHelper.showStatusSnackBar(
-            context,
-            StatusIndicator.error,
-            response?.message ?? '',
-          );
+          if (response?.errors != null) {
+            response?.errors?.forEach((e) {
+              fieldErrors[e.field ?? '0'] = e.message ?? '0';
+            });
+
+            if (fieldErrors.containsKey('email')) {
+              SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+                  fieldErrors['email'] ?? errorSomethingWentWrong);
+            }
+          } else {
+            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+                response?.message ?? errorSomethingWentWrong);
+          }
         }
       }
     } catch (e) {

@@ -2,6 +2,7 @@ import 'package:jumpvalues/models/global_user_response_model.dart';
 import 'package:jumpvalues/utils/constants.dart';
 import 'package:mobx/mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 
 part 'app_store.g.dart';
 
@@ -40,6 +41,9 @@ abstract class _AppStore with Store {
 
   @observable
   String userContactCountryCode = '';
+
+  @observable
+  String userContactCountryIsoCode = 'US';
 
   @observable
   String userEmail = '';
@@ -151,6 +155,13 @@ abstract class _AppStore with Store {
   }
 
   @action
+  Future<void> setUserContactCountryIsoCode(String val,
+      {bool isInitializing = false}) async {
+    userContactCountryIsoCode = val;
+    if (!isInitializing) await setValue(USER_CONTACT_COUNTRY_CODE, val);
+  }
+
+  @action
   Future<void> setUserEmail(String val, {bool isInitializing = false}) async {
     userEmail = val;
     if (!isInitializing) await setValue(USER_EMAIL, val);
@@ -247,6 +258,13 @@ abstract class _AppStore with Store {
       await setUserNiche(response?.data?.coachProfile?.niche ?? '');
       await setSponsorId(response?.data?.clientProfile?.sponsorId ?? -1);
       await setSponsorName(response?.data?.clientProfile?.sponsor?.name ?? '');
+      try {
+        final phoneNumberType = PhoneNumber.parse(
+            '${response?.data?.countryCode ?? '+1'} ${response?.data?.phone ?? ''}');
+        await setUserContactCountryIsoCode('${phoneNumberType.isoCode.name}');
+      } catch (e) {
+        rethrow;
+      }
     }
   }
 
@@ -274,6 +292,7 @@ abstract class _AppStore with Store {
     userNiche = '';
     userProfilePic = '';
     userAboutMe = '';
+    userContactCountryIsoCode = 'US';
 
     await sharedPreferences.clear();
   }

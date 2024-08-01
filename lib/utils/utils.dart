@@ -76,7 +76,7 @@ class SnackBarHelper {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
         backgroundColor: backgroundColor,
         content: Text(
           text,

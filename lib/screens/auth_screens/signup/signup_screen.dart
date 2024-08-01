@@ -208,9 +208,9 @@ class _SignupScreenState extends State<SignupScreen>
     //     positionController!.text.isNotEmpty &&
     //     aboutController!.text.isNotEmpty &&
     //     acceptTerms) {
-    //   setState(() {
-    submitButtonEnabled = true;
-    //   });
+    setState(() {
+      submitButtonEnabled = true;
+    });
     // } else {
     //   setState(() {
     //     submitButtonEnabled = false;
@@ -311,40 +311,54 @@ class _SignupScreenState extends State<SignupScreen>
 
     var request = <String, dynamic>{};
     var selectedCategoriesId = <int>[];
-    selectedCategoriesId.addAll(
-        selectedCategories.map((elemente) => elemente.id ?? -1).toList());
+    selectedCategoriesId
+        .addAll(selectedCategories.map((element) => element.id ?? -1).toList());
+
+    void addIfNotEmpty(String key, String? value) {
+      if (value != null && value.isNotEmpty) {
+        request[key] = value;
+      }
+    }
+
+    void addIfNotEmptyInt(String key, int? value) {
+      if (value != null) {
+        request[key] = value;
+      }
+    }
+
+    void addIfNotEmptyList(String key, List<int>? value) {
+      if (value != null && value.isNotEmpty) {
+        request[key] = value;
+      }
+    }
 
     if (isCoach) {
-      request = {
-        'first_name': firstNameController?.text,
-        'last_name': lastNameController?.text,
-        'email': emailController?.text,
-        'password': passwordController?.text,
-        'role': 'coach',
-        'country_code': sCountryCode,
-        'phone': sPhoneNumber,
-        'education': educationController?.text,
-        'prefer_via': selectedPreferVia == 'Phone' ? 2 : 1,
-        'philosophy': philosophyController?.text,
-        'certifications': certificationsController?.text,
-        'industries_served': industriesServedController?.text,
-        'experiance': experianceController?.text,
-        'niche': nicheController?.text,
-        'categoryIds': selectedCategoriesId
-      };
+      addIfNotEmpty('first_name', firstNameController?.text);
+      addIfNotEmpty('last_name', lastNameController?.text);
+      addIfNotEmpty('email', emailController?.text);
+      addIfNotEmpty('password', passwordController?.text);
+      request['role'] = 'coach';
+      addIfNotEmpty('country_code', sCountryCode);
+      addIfNotEmpty('phone', sPhoneNumber);
+      addIfNotEmpty('education', educationController?.text);
+      request['prefer_via'] = selectedPreferVia == 'Phone' ? 2 : 1;
+      addIfNotEmpty('philosophy', philosophyController?.text);
+      addIfNotEmpty('certifications', certificationsController?.text);
+      addIfNotEmpty('industries_served', industriesServedController?.text);
+      addIfNotEmpty('experiance', experianceController?.text);
+      addIfNotEmpty('niche', nicheController?.text);
+      addIfNotEmptyList('categoryIds', selectedCategoriesId);
     } else {
-      request = {
-        'first_name': firstNameControllerClient?.text,
-        'last_name': lastNameControllerClient?.text,
-        'email': emailControllerClient?.text,
-        'password': passwordControllerClient?.text,
-        'country_code': sCountryCodeClient,
-        'phone': sPhoneNumberClient,
-        'role': 'client',
-        'position': positionControllerClient?.text,
-        'about_me': aboutControllerClient?.text,
-        'sponsor_id': selectedSponsorId?.id,
-      };
+      addIfNotEmpty('first_name', firstNameControllerClient?.text);
+      addIfNotEmpty('last_name', lastNameControllerClient?.text);
+      addIfNotEmpty('email', emailControllerClient?.text);
+      addIfNotEmpty('password', passwordControllerClient?.text);
+      addIfNotEmpty('country_code', sCountryCodeClient);
+      addIfNotEmpty('phone', sPhoneNumberClient);
+      request['role'] = 'client';
+      addIfNotEmpty('position', positionControllerClient?.text);
+      addIfNotEmpty('about_me', aboutControllerClient?.text);
+      addIfNotEmptyInt('sponsor_id', selectedSponsorId?.id);
     }
 
     var endPoint = isCoach ? 'auth/coach/register' : 'auth/client/register';
@@ -650,7 +664,11 @@ class _SignupScreenState extends State<SignupScreen>
                           setState(() {
                             acceptTerms = v ?? false;
                           });
-                          enableSubmitButton();
+                          if (acceptTerms) {
+                            submitButtonEnabled = true;
+                          } else {
+                            submitButtonEnabled = false;
+                          }
                         }),
                     Expanded(
                       child: Text.rich(
@@ -669,7 +687,11 @@ class _SignupScreenState extends State<SignupScreen>
                                     setState(() {
                                       acceptTerms = !acceptTerms;
                                     });
-                                    enableSubmitButton();
+                                    if (acceptTerms) {
+                                      submitButtonEnabled = true;
+                                    } else {
+                                      submitButtonEnabled = false;
+                                    }
                                   }),
                             TextSpan(
                               text: 'Terms & Privacy Policy',
