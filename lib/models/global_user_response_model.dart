@@ -82,8 +82,8 @@ class Data {
   final bool? verified;
   final int? otp;
   final String? dp;
-  final String? createdBy;
-  final String? updatedBy;
+  final int? createdBy;
+  final int? updatedBy;
   final String? deletedAt;
   final String? createdAt;
   final String? updatedAt;
@@ -143,7 +143,7 @@ class ClientProfile {
   final int? sponsorId;
   final String? position;
   final String? aboutMe;
-  final String? updatedBy;
+  final int? updatedBy;
   final String? deletedAt;
   final String? createdAt;
   final String? updatedAt;
@@ -220,7 +220,7 @@ class CoachProfile {
   final String? industriesServed;
   final int? experience;
   final String? niche;
-  final String? updatedBy;
+  final int? updatedBy;
   final String? deletedAt;
   final String? createdAt;
   final String? updatedAt;
