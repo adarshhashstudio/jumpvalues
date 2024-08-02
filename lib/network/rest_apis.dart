@@ -51,6 +51,20 @@ Future<CategoryDropdownResponse?> sponsorDropdown() async {
   return response;
 }
 
+Future<CategoryDropdownResponse?> categoryBySponsorDropdown(
+    String sponsorId) async {
+  CategoryDropdownResponse? response;
+  try {
+    response = CategoryDropdownResponse.fromJson(await handleResponse(
+      await buildHttpResponse('category/get_dropdown_by_Sponsor_id/$sponsorId',
+          isAuth: false, method: HttpMethodType.get),
+    ));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
 Future<SignupResponseModel> signupUser(
     Map<String, dynamic> request, String endPoint) async {
   SignupResponseModel response;

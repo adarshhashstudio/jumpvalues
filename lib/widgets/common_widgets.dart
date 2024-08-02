@@ -84,6 +84,7 @@ Widget labelContainer(
         double? labelContainerSpace = 16,
         String? text,
         double labelTextBoxSpace = 16,
+        String? errorText,
         Widget? child}) =>
     Column(
       children: [
@@ -135,6 +136,15 @@ Widget labelContainer(
                     : child),
           ),
         ),
+        if (errorText != null)
+          Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.only(left: 16, top: 8),
+              child: Text(
+                errorText,
+                textAlign: TextAlign.left,
+                style: TextStyle(color: Color(0xffff3333), fontSize: 12),
+              )),
       ],
     );
 

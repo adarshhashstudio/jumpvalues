@@ -98,6 +98,10 @@ class _SignupScreenState extends State<SignupScreen>
   String? selectedPreferVia = 'Phone';
 
   Category? selectedSponsorId;
+  final FocusNode selectedSponsorIdFocusNode = FocusNode();
+  List<Category> categoriesBySponsorIds = [];
+  List<Category> selectedCategoryBySponsorId = [];
+  bool selectCategoriesBySponsorError = false;
 
   @override
   void initState() {
@@ -302,6 +306,32 @@ class _SignupScreenState extends State<SignupScreen>
     }
   }
 
+  Future<void> getCategoryBySponsorDropdown(String sponsorId) async {
+    setState(() {
+      initialLoader = true;
+    });
+
+    try {
+      var response = await categoryBySponsorDropdown(sponsorId);
+      if (response?.status == true) {
+        setState(() {
+          categoriesBySponsorIds = response?.data ?? [];
+        });
+      } else {
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
+      }
+    } catch (e) {
+      debugPrint('sponsorsDropdown Error: $e');
+    } finally {
+      setState(() {
+        initialLoader = false;
+      });
+    }
+  }
+
   Future<void> signup({required bool isCoach}) async {
     setState(() {
       loader = true;
@@ -313,6 +343,11 @@ class _SignupScreenState extends State<SignupScreen>
     var selectedCategoriesId = <int>[];
     selectedCategoriesId
         .addAll(selectedCategories.map((element) => element.id ?? -1).toList());
+
+    var requestSelectedCategoryBySponsorId = <int>[];
+    requestSelectedCategoryBySponsorId.addAll(selectedCategoryBySponsorId
+        .map((element) => element.id ?? -1)
+        .toList());
 
     void addIfNotEmpty(String key, String? value) {
       if (value != null && value.isNotEmpty) {
@@ -359,6 +394,7 @@ class _SignupScreenState extends State<SignupScreen>
       addIfNotEmpty('position', positionControllerClient?.text);
       addIfNotEmpty('about_me', aboutControllerClient?.text);
       addIfNotEmptyInt('sponsor_id', selectedSponsorId?.id);
+      addIfNotEmptyList('categoryIds', requestSelectedCategoryBySponsorId);
     }
 
     var endPoint = isCoach ? 'auth/coach/register' : 'auth/client/register';
@@ -440,6 +476,8 @@ class _SignupScreenState extends State<SignupScreen>
               FocusScope.of(context).requestFocus(positionClientFocusNode);
             } else if (fieldClientErrors.containsKey('about_me')) {
               FocusScope.of(context).requestFocus(aboutMeClientFocusNode);
+            } else if (fieldClientErrors.containsKey('sponsor_id')) {
+              FocusScope.of(context).requestFocus(selectedSponsorIdFocusNode);
             }
           }
         } else {
@@ -581,10 +619,13 @@ class _SignupScreenState extends State<SignupScreen>
                       labelTextBoxSpace: 8,
                       width: MediaQuery.of(context).size.width * 1,
                       height: MediaQuery.of(context).size.height * 0.06,
+                      isError: fieldClientErrors.containsKey('sponsor_id'),
+                      errorText: fieldClientErrors['sponsor_id'],
                       child: DropdownButton<Category>(
                         value: selectedSponsorId,
                         isExpanded: true,
                         underline: const SizedBox(),
+                        focusNode: selectedSponsorIdFocusNode,
                         hint: Text(
                           'Select Sponser',
                           style: TextStyle(
@@ -606,13 +647,102 @@ class _SignupScreenState extends State<SignupScreen>
                                   child: Text(value.name ?? ''),
                                 ))
                             .toList(),
-                        onChanged: (Category? value) {
+                        onChanged: (Category? value) async {
                           setState(() {
                             selectedSponsorId = value;
                           });
+                          categoriesBySponsorIds.clear();
+                          selectedCategoryBySponsorId.clear();
+                          try {
+                            await getCategoryBySponsorDropdown(
+                                selectedSponsorId!.id!.toString());
+                          } catch (e) {
+                            debugPrint(
+                                'on tap sponsor id to get category by sponsor dropdown error: $e');
+                          }
                         },
                       ),
                     ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    labelContainer(
+                      label: 'Categories',
+                      labelTextBoxSpace: 8,
+                      width: MediaQuery.of(context).size.width * 1,
+                      height: MediaQuery.of(context).size.height * 0.06,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      isError: selectCategoriesBySponsorError,
+                      borderRadius: selectedCategoryBySponsorId.isEmpty
+                          ? BorderRadius.circular(20)
+                          : const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
+                            ),
+                      onTap: () {
+                        hideKeyboard(context);
+                        showCategoryDialog(context, categoriesBySponsorIds,
+                            (categoriesFromDialogue) {
+                          setState(() {
+                            selectedCategoryBySponsorId =
+                                categoriesFromDialogue;
+                            selectCategoriesBySponsorError = false;
+                            if (categoriesFromDialogue.isEmpty) {
+                              selectCategoriesBySponsorError = true;
+                            }
+                          });
+                          for (var category in selectedCategoryBySponsorId) {
+                            debugPrint(
+                                'Selected Category By Sponsor: ${category.name} (ID: ${category.id})');
+                          }
+                        });
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Tap to select categories  ${selectedCategoryBySponsorId.isEmpty ? '*' : ''}',
+                            style: TextStyle(
+                                color: selectCategoriesBySponsorError
+                                    ? Colors.red
+                                    : Colors.black),
+                          ),
+                          Icon(
+                            Icons.arrow_drop_down,
+                            color: selectCategoriesBySponsorError
+                                ? Colors.red
+                                : Colors.black,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (selectedCategoryBySponsorId.isNotEmpty)
+                      selectionContainerForAll(
+                        context,
+                        spaceBelowTitle:
+                            MediaQuery.of(context).size.height * 0.02,
+                        borderRadius: selectedCategoryBySponsorId.isNotEmpty
+                            ? const BorderRadius.only(
+                                bottomLeft: Radius.circular(20),
+                                bottomRight: Radius.circular(20),
+                              )
+                            : BorderRadius.circular(20),
+                        children: [
+                          for (var item in selectedCategoryBySponsorId)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 2),
+                              decoration: BoxDecoration(
+                                  color: const Color(0xFF43A146),
+                                  border: Border.all(width: 0.05),
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Text(
+                                item.name ?? '',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                        ],
+                      ),
                     const SizedBox(
                       height: 20,
                     ),
