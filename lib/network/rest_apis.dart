@@ -230,6 +230,19 @@ Future<BaseResponseModel?> addUserComprehensiveListing(
   return response;
 }
 
+Future<BaseResponseModel?> addUserCategoryToProfile(
+    Map<String, dynamic> request) async {
+  BaseResponseModel? response;
+  try {
+    response = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('user/category/sync',
+            request: request, isAuth: true, method: HttpMethodType.post)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
 Future<GlobalUserResponseModel?> getGlobalUserDetails() async {
   GlobalUserResponseModel? response;
   try {

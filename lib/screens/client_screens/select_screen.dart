@@ -31,7 +31,8 @@ class _SelectScreenState extends State<SelectScreen> {
 
   @override
   void initState() {
-    selectedTones = widget.initialSelectedValues.toSet(); // Initialize selectedTones with initial selected values
+    selectedTones = widget.initialSelectedValues
+        .toSet(); // Initialize selectedTones with initial selected values
     getAllComprehensive();
     super.initState();
   }
@@ -89,6 +90,42 @@ class _SelectScreenState extends State<SelectScreen> {
 
       debugPrint('Request Map: $request');
       var response = await addUserComprehensiveListing(request);
+      if (response?.status == true) {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
+            response?.message ?? 'Saved Successfully.');
+        if (widget.isFromProfile) Navigator.of(context).pop(true);
+      } else {
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
+      }
+    } catch (e) {
+      debugPrint('saveSelectedComprehensive Error: $e');
+    } finally {
+      setState(() {
+        loader = false;
+      });
+    }
+  }
+
+  Future<void> saveSelectedCategories() async {
+    setState(() {
+      loader = true;
+    });
+    try {
+      var request = <String, dynamic>{};
+
+      var comprensiveListingIds = <String>[];
+
+      for (var element in selectedTones) {
+        comprensiveListingIds.add('${element.id}');
+      }
+
+      request['categories'] = comprensiveListingIds;
+
+      debugPrint('Request Map: $request');
+      var response = await addUserCategoryToProfile(request);
       if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Saved Successfully.');
@@ -254,13 +291,17 @@ class _SelectScreenState extends State<SelectScreen> {
               child: button(
                 context,
                 onPressed: () async {
-                  // Handle Done button press
-                  if (selectedTones.isEmpty || selectedTones.length > 10) {
-                    setState(() {
-                      selectedToneError = true;
-                    });
+                  if (appStore.userTypeCoach) {
+                    await saveSelectedCategories();
                   } else {
-                    await saveSelectedComprehensive();
+                    // Handle Done button press
+                    if (selectedTones.isEmpty || selectedTones.length > 10) {
+                      setState(() {
+                        selectedToneError = true;
+                      });
+                    } else {
+                      await saveSelectedComprehensive();
+                    }
                   }
                 },
                 text:
