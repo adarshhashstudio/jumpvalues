@@ -1,3 +1,5 @@
+import 'package:jumpvalues/models/corevalues_response_model.dart';
+
 class UserDataResponseModel {
   UserDataResponseModel({
     this.statusCode,
@@ -69,9 +71,9 @@ class UserData {
       });
     }
     if (json['comprensive_listings'] != null) {
-      comprensiveListings = <ComprensiveListing>[];
+      comprensiveListings = <CoreValue>[];
       json['comprensive_listings'].forEach((v) {
-        comprensiveListings!.add(ComprensiveListing.fromJson(v));
+        comprensiveListings!.add(CoreValue.fromJson(v));
       });
     }
   }
@@ -89,7 +91,7 @@ class UserData {
   String? createdAt;
   String? updatedAt;
   List<UserRole>? roles;
-  List<ComprensiveListing>? comprensiveListings;
+  List<CoreValue>? comprensiveListings;
 }
 
 class UserRole {
@@ -106,21 +108,6 @@ class UserRole {
   int? id;
   String? name;
   String? description;
-  String? createdAt;
-  String? updatedAt;
-}
-
-class ComprensiveListing {
-  ComprensiveListing({this.id, this.name, this.createdAt, this.updatedAt});
-
-  ComprensiveListing.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
-  }
-  int? id;
-  String? name;
   String? createdAt;
   String? updatedAt;
 }

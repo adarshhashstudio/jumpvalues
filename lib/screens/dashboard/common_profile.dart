@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/client_profile_response_model.dart';
 import 'package:jumpvalues/models/coach_profile_response_model.dart';
-import 'package:jumpvalues/models/user_data_response_model.dart';
+import 'package:jumpvalues/models/corevalues_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/client_screens/select_screen.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
@@ -583,11 +583,17 @@ class _CommonProfileState extends State<CommonProfile> {
         context,
         goToSelectValues: true,
         onTap: () async {
-          var updated = await Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const SelectScreen(isFromProfile: true,)));
-          if (updated) {
-            await refreshData();
-          } else {}
+          await Navigator.of(context)
+              .push(MaterialPageRoute(
+                  builder: (context) => SelectScreen(
+                      isFromProfile: true,
+                      initialSelectedValues: list,
+                      isCategories: (heading == 'Categories') ? true : false)))
+              .then((updated) async {
+            if (updated) {
+              await refreshData();
+            }
+          });
         },
         spaceBelowTitle: MediaQuery.of(context).size.height * 0.02,
         heading: heading,
@@ -721,19 +727,21 @@ class _CommonProfileState extends State<CommonProfile> {
                 tilePadding: const EdgeInsets.symmetric(horizontal: 10),
                 children: [
                   selectedValuesWidget(context,
-                          heading: appStore.userTypeCoach
-                              ? 'Core Values'
-                              : 'Selected Values',
-                          list: clientProfileResponseModel?.data?.coreValues ??
-                              [])
+                          heading: 'Core Values',
+                          list: appStore.userTypeCoach
+                              ? coachProfileResponseModel?.data?.coreValues ??
+                                  []
+                              : clientProfileResponseModel?.data?.coreValues ??
+                                  [])
                       .paddingAll(10),
-                  
-                    selectedValuesWidget(context,
-                            heading: 'Categories',
-                            list:
-                                clientProfileResponseModel?.data?.categories ??
-                                    [])
-                        .paddingAll(10),
+                  selectedValuesWidget(context,
+                          heading: 'Categories',
+                          list: appStore.userTypeCoach
+                              ? coachProfileResponseModel?.data?.categories ??
+                                  []
+                              : clientProfileResponseModel?.data?.categories ??
+                                  [])
+                      .paddingAll(10),
                 ],
               ),
             ),

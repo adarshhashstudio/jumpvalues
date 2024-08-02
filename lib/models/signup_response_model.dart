@@ -1,9 +1,4 @@
 class SignupResponseModel {
-  bool? status;
-  String? flag;
-  String? message;
-  List<ErrorDetail>? errors;
-
   SignupResponseModel({
     this.status,
     this.flag,
@@ -11,47 +6,43 @@ class SignupResponseModel {
     this.errors,
   });
 
-  factory SignupResponseModel.fromJson(Map<String, dynamic> json) {
-    return SignupResponseModel(
-      status: json['status'] as bool?,
-      flag: json['flag'] as String?,
-      message: json['message'] as String?,
-      errors: (json['errors'] as List<dynamic>?)
-          ?.map((item) => ErrorDetail.fromJson(item as Map<String, dynamic>))
-          .toList(),
-    );
-  }
+  factory SignupResponseModel.fromJson(Map<String, dynamic> json) =>
+      SignupResponseModel(
+        status: json['status'] as bool?,
+        flag: json['flag'] as String?,
+        message: json['message'] as String?,
+        errors: (json['errors'] as List<dynamic>?)
+            ?.map((item) => ErrorDetail.fromJson(item as Map<String, dynamic>))
+            .toList(),
+      );
+  bool? status;
+  String? flag;
+  String? message;
+  List<ErrorDetail>? errors;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'status': status,
-      'flag': flag,
-      'message': message,
-      'errors': errors?.map((e) => e.toJson()).toList(),
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'status': status,
+        'flag': flag,
+        'message': message,
+        'errors': errors?.map((e) => e.toJson()).toList(),
+      };
 }
 
 class ErrorDetail {
-  String? field;
-  String? message;
-
   ErrorDetail({
     this.field,
     this.message,
   });
 
-  factory ErrorDetail.fromJson(Map<String, dynamic> json) {
-    return ErrorDetail(
-      field: json['field'] as String?,
-      message: json['message'] as String?,
-    );
-  }
+  factory ErrorDetail.fromJson(Map<String, dynamic> json) => ErrorDetail(
+        field: json['field'] as String?,
+        message: json['message'] as String?,
+      );
+  String? field;
+  String? message;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'field': field,
-      'message': message,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'field': field,
+        'message': message,
+      };
 }

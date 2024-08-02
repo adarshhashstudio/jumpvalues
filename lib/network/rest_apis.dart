@@ -191,11 +191,11 @@ Future<CoachProfileResponseModel?> getUserCoachDetails(int userId) async {
   return response;
 }
 
-Future<AllComprehensiveValues?> getAllComprehensiveValues() async {
+Future<AllComprehensiveValues?> getAllComprehensiveValues(endPoint) async {
   AllComprehensiveValues? response;
   try {
     response = AllComprehensiveValues.fromJson(await handleResponse(
-        await buildHttpResponse('core_value/dropdown',
+        await buildHttpResponse(endPoint,
             isAuth: true, method: HttpMethodType.get)));
   } catch (e) {
     rethrow;
@@ -208,11 +208,8 @@ Future<BaseResponseModel?> addUserComprehensiveListing(
   BaseResponseModel? response;
   try {
     response = BaseResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse(
-            'client/addOrUpdateCoreValues',
-            request: request,
-            isAuth: true,
-            method: HttpMethodType.post)));
+        await buildHttpResponse('client/addOrUpdateCoreValues',
+            request: request, isAuth: true, method: HttpMethodType.post)));
   } catch (e) {
     rethrow;
   }

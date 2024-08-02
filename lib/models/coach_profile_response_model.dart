@@ -1,3 +1,5 @@
+import 'package:jumpvalues/models/corevalues_response_model.dart';
+
 class CoachProfileResponseModel {
   CoachProfileResponseModel({
     this.status,
@@ -69,13 +71,15 @@ class CoachData {
         createdAt: json['created_at'] as String?,
         updatedAt: json['updated_at'] as String?,
         categories: (json['categories'] as List<dynamic>?)
-            ?.map((e) => Category.fromJson(e as Map<String, dynamic>))
+            ?.map((e) => CoreValue.fromJson(e as Map<String, dynamic>))
             .toList(),
         coachProfile: json['coach_profile'] != null
             ? CoachProfile.fromJson(
                 json['coach_profile'] as Map<String, dynamic>)
             : null,
-        coreValues: json['core_values'] as List<dynamic>?,
+        coreValues: (json['core_values'] as List<dynamic>?)
+            ?.map((e) => CoreValue.fromJson(e as Map<String, dynamic>))
+            .toList(),
       );
   final int? id;
   final String? referenceId;
@@ -93,9 +97,9 @@ class CoachData {
   final String? deletedAt;
   final String? createdAt;
   final String? updatedAt;
-  final List<Category>? categories;
   final CoachProfile? coachProfile;
-  final List<dynamic>? coreValues;
+  final List<CoreValue>? categories;
+  final List<CoreValue>? coreValues;
 
   Map<String, dynamic> toJson() => {
         'id': id,

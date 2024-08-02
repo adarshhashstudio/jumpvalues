@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
-import 'package:jumpvalues/models/all_comprehensive_response.dart';
-import 'package:jumpvalues/models/client_profile_response_model.dart';
+import 'package:jumpvalues/models/corevalues_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -11,23 +10,28 @@ import 'package:nb_utils/nb_utils.dart';
 
 class SelectScreen extends StatefulWidget {
   const SelectScreen(
-      {super.key, required this.isFromProfile});
+      {super.key,
+      required this.isFromProfile,
+      this.isCategories = false,
+      required this.initialSelectedValues});
   final bool isFromProfile;
+  final bool isCategories;
+  final List<CoreValue> initialSelectedValues;
 
   @override
   State<SelectScreen> createState() => _SelectScreenState();
 }
 
 class _SelectScreenState extends State<SelectScreen> {
-  List<ComprehensiveValues> toneList = [];
-  List<ComprehensiveValues> filteredToneList = [];
-  Set<ComprehensiveValues> selectedTones = {}; // Changed to Set<String>
+  List<CoreValue> toneList = [];
+  List<CoreValue> filteredToneList = [];
+  Set<CoreValue> selectedTones = {}; // Changed to Set<String>
   bool selectedToneError = false;
   bool loader = false;
-  ClientProfileResponseModel? userData;
 
   @override
   void initState() {
+    selectedTones = widget.initialSelectedValues.toSet(); // Initialize selectedTones with initial selected values
     getAllComprehensive();
     super.initState();
   }
@@ -37,7 +41,8 @@ class _SelectScreenState extends State<SelectScreen> {
       loader = true;
     });
     try {
-      var response = await getAllComprehensiveValues();
+      var response = await getAllComprehensiveValues(
+          widget.isCategories ? 'category/dropdown' : 'core_value/dropdown');
       if (response?.status == true) {
         setState(() {
           // Clear existing data in toneList before adding new data
@@ -48,7 +53,6 @@ class _SelectScreenState extends State<SelectScreen> {
             toneList.addAll(response?.data ?? []);
           }
         });
-        await getUser();
         filteredToneList = List.from(
             toneList); // Initialize filteredToneList with the same contents as toneList initially
       } else {
@@ -88,7 +92,7 @@ class _SelectScreenState extends State<SelectScreen> {
       if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Saved Successfully.');
-        Navigator.of(context).pop(true);
+        if (widget.isFromProfile) Navigator.of(context).pop(true);
       } else {
         if (response?.message != null) {
           SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
@@ -104,52 +108,10 @@ class _SelectScreenState extends State<SelectScreen> {
     }
   }
 
-  Future<void> getUser() async {
-    setState(() {
-      loader = true;
-    });
-    try {
-      var response = await getUserClientDetails(appStore.userId ?? -1);
-      if (response?.status == true) {
-        setState(() {
-          userData = response;
-        });
-        if (userData != null && userData?.data?.coreValues != null) {
-          // Clear selectedTones before adding new values
-          selectedTones.clear();
-          // Convert List<ComprensiveListing> to Set<ComprehensiveValues>
-          var convertedValues = userData?.data?.coreValues
-              ?.map((listing) => ComprehensiveValues(
-                    id: listing.id,
-                    name: listing.name,
-                    // createdAt: listing.createdAt,
-                    // updatedAt: listing.updatedAt,
-                  ))
-              .toSet();
-          // Add converted values to selectedTones
-          selectedTones.addAll(convertedValues ?? {});
-        }
-        debugPrint('Selected Tones values: $selectedTones');
-        setState(() {});
-      } else {
-        if (response?.message != null) {
-          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-              response?.message ?? errorSomethingWentWrong);
-        }
-      }
-    } catch (e) {
-      debugPrint('getUser Error: $e');
-    } finally {
-      setState(() {
-        loader = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    var selectedTonesList = <ComprehensiveValues>[];
-    var unselectedTonesList = <ComprehensiveValues>[];
+    var selectedTonesList = <CoreValue>[];
+    var unselectedTonesList = <CoreValue>[];
 
     // Split toneList into selected and unselected tones
     for (var tone in toneList) {
@@ -182,7 +144,7 @@ class _SelectScreenState extends State<SelectScreen> {
         ),
         centerTitle: true,
         title: Text(
-          'Select (VALUES)',
+          widget.isCategories ? 'Select (Categories)' : 'Select (Core Values)',
           style: TextStyle(
               fontWeight: FontWeight.w600,
               color: textColor.withOpacity(0.8),
@@ -301,7 +263,8 @@ class _SelectScreenState extends State<SelectScreen> {
                     await saveSelectedComprehensive();
                   }
                 },
-                text: 'Save',
+                text:
+                    'Update ${widget.isCategories ? 'Categories' : 'Core Values'}',
               ),
             ),
           ],
