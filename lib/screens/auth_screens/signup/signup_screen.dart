@@ -208,9 +208,9 @@ class _SignupScreenState extends State<SignupScreen>
     //     positionController!.text.isNotEmpty &&
     //     aboutController!.text.isNotEmpty &&
     //     acceptTerms) {
-    setState(() {
-      submitButtonEnabled = true;
-    });
+    // setState(() {
+    //   submitButtonEnabled = true;
+    // });
     // } else {
     //   setState(() {
     //     submitButtonEnabled = false;

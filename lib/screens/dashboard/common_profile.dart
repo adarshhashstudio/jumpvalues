@@ -81,7 +81,6 @@ class _CommonProfileState extends State<CommonProfile> {
   var email = '';
   String? profilePic;
   String? sponsorName;
-  UserDataResponseModel? userData;
   ClientProfileResponseModel? clientProfileResponseModel;
   CoachProfileResponseModel? coachProfileResponseModel;
 
@@ -579,13 +578,13 @@ class _CommonProfileState extends State<CommonProfile> {
       );
 
   Widget selectedValuesWidget(BuildContext context,
-          {required String heading, required List<ComprensiveListing> list}) =>
+          {required String heading, required List<CoreValue> list}) =>
       selectionContainerForAll(
         context,
         goToSelectValues: true,
         onTap: () async {
           var updated = await Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const SelectScreen()));
+              MaterialPageRoute(builder: (context) => const SelectScreen(isFromProfile: true,)));
           if (updated) {
             await refreshData();
           } else {}
@@ -725,12 +724,15 @@ class _CommonProfileState extends State<CommonProfile> {
                           heading: appStore.userTypeCoach
                               ? 'Core Values'
                               : 'Selected Values',
-                          list: userData?.data?.comprensiveListings ?? [])
+                          list: clientProfileResponseModel?.data?.coreValues ??
+                              [])
                       .paddingAll(10),
-                  if (appStore.userTypeCoach)
+                  
                     selectedValuesWidget(context,
                             heading: 'Categories',
-                            list: userData?.data?.comprensiveListings ?? [])
+                            list:
+                                clientProfileResponseModel?.data?.categories ??
+                                    [])
                         .paddingAll(10),
                 ],
               ),

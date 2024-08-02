@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/all_comprehensive_response.dart';
 import 'package:jumpvalues/models/base_response.dart';
 import 'package:jumpvalues/models/category_dropdown_response.dart';
@@ -9,9 +10,13 @@ import 'package:jumpvalues/models/global_user_response_model.dart';
 import 'package:jumpvalues/models/login_response.dart';
 import 'package:jumpvalues/models/signup_response_model.dart';
 import 'package:jumpvalues/network/network_utils.dart';
+import 'package:jumpvalues/utils/utils.dart';
 
 Future<Map<String, dynamic>> handleResponse(Response response) async {
   if (response.statusCode == 200 || response.statusCode == 201) {
+    return response.data;
+  } else if (response.statusCode == 403) {
+    tokenExpired(NavigationService.navigatorKey.currentState!.context);
     return response.data;
   } else if (response.statusCode != 200 || response.statusCode != 201) {
     return response.data;
@@ -190,7 +195,7 @@ Future<AllComprehensiveValues?> getAllComprehensiveValues() async {
   AllComprehensiveValues? response;
   try {
     response = AllComprehensiveValues.fromJson(await handleResponse(
-        await buildHttpResponse('comprensive/get_all_comprensive',
+        await buildHttpResponse('core_value/dropdown',
             isAuth: true, method: HttpMethodType.get)));
   } catch (e) {
     rethrow;
@@ -204,10 +209,10 @@ Future<BaseResponseModel?> addUserComprehensiveListing(
   try {
     response = BaseResponseModel.fromJson(await handleResponse(
         await buildHttpResponse(
-            'comprensive/update_user_has_comprensiveListing',
+            'client/addOrUpdateCoreValues',
             request: request,
             isAuth: true,
-            method: HttpMethodType.patch)));
+            method: HttpMethodType.post)));
   } catch (e) {
     rethrow;
   }

@@ -10,7 +10,9 @@ import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class SelectScreen extends StatefulWidget {
-  const SelectScreen({super.key});
+  const SelectScreen(
+      {super.key, required this.isFromProfile});
+  final bool isFromProfile;
 
   @override
   State<SelectScreen> createState() => _SelectScreenState();
@@ -36,7 +38,7 @@ class _SelectScreenState extends State<SelectScreen> {
     });
     try {
       var response = await getAllComprehensiveValues();
-      if (response?.statusCode == 200) {
+      if (response?.status == true) {
         setState(() {
           // Clear existing data in toneList before adding new data
           toneList.clear();
@@ -70,7 +72,7 @@ class _SelectScreenState extends State<SelectScreen> {
     });
     try {
       var request = <String, dynamic>{
-        'userId': appStore.userId.toString(),
+        'client_id': appStore.userId.toString(),
       };
 
       var comprensiveListingIds = <String>[];
@@ -79,13 +81,14 @@ class _SelectScreenState extends State<SelectScreen> {
         comprensiveListingIds.add('${element.id}');
       }
 
-      request['comprensiveListingId'] = comprensiveListingIds;
+      request['coreValueIds'] = comprensiveListingIds;
 
       debugPrint('Request Map: $request');
       var response = await addUserComprehensiveListing(request);
       if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Saved Successfully.');
+        Navigator.of(context).pop(true);
       } else {
         if (response?.message != null) {
           SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
@@ -119,8 +122,8 @@ class _SelectScreenState extends State<SelectScreen> {
               ?.map((listing) => ComprehensiveValues(
                     id: listing.id,
                     name: listing.name,
-                    createdAt: listing.createdAt,
-                    updatedAt: listing.createdAt, //it was udpated at
+                    // createdAt: listing.createdAt,
+                    // updatedAt: listing.updatedAt,
                   ))
               .toSet();
           // Add converted values to selectedTones

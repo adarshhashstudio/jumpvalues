@@ -63,12 +63,14 @@ class ClientData {
         verified: json['verified'] as bool?,
         otp: json['otp'] as int?,
         dp: json['dp'] as String?,
-        createdBy: json['created_by'] as String?,
+        createdBy: json['created_by'] as int?,
         updatedBy: json['updated_by'] as int?,
         deletedAt: json['deleted_at'] as String?,
         createdAt: json['created_at'] as String?,
         updatedAt: json['updated_at'] as String?,
-        categories: json['categories'] as List<dynamic>?,
+        categories: (json['categories'] as List<dynamic>?)
+            ?.map((e) => CoreValue.fromJson(e as Map<String, dynamic>))
+            .toList(),
         clientProfile: json['client_profile'] != null
             ? ClientProfile.fromJson(
                 json['client_profile'] as Map<String, dynamic>)
@@ -88,12 +90,12 @@ class ClientData {
   final bool? verified;
   final int? otp;
   final String? dp;
-  final String? createdBy;
+  final int? createdBy;
   final int? updatedBy;
   final String? deletedAt;
   final String? createdAt;
   final String? updatedAt;
-  final List<dynamic>? categories;
+  final List<CoreValue>? categories;
   final ClientProfile? clientProfile;
   final List<CoreValue>? coreValues;
 
