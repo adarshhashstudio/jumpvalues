@@ -23,30 +23,38 @@ class _ClientAddSlotsState extends State<ClientAddSlots> {
   @override
   void initState() {
     super.initState();
-    getAllTimeSlots();
+    getAllTimeSlotsForClient();
+  }
+
+  void clearAllCalender() {
+    setState(() {
+      serverTimeSlotsList.clear();
+      globalMeetings.clear();
+      selectedMeetings.clear();
+    });
   }
 
   void addServerTimeSlotsToCalender() {
     setState(() {
       globalMeetings = serverTimeSlotsList
           .map((slot) => Meeting(
-                slot.title ?? '',
-                DateTime.parse(slot.start!),
-                DateTime.parse(slot.end!),
-                Colors.green, // Assuming a default color for the meeting
-                slot.id??0
-              ))
+              slot.title ?? '',
+              DateTime.parse(slot.start!),
+              DateTime.parse(slot.end!),
+              Colors.green, // Assuming a default color for the meeting
+              slot.id ?? 0))
           .toList();
     });
   }
 
-  Future<void> getAllTimeSlots() async {
+  Future<void> getAllTimeSlotsForClient() async {
     setState(() {
       loader = true;
     });
     try {
-      var response = await getTimeSlots(widget.coachId);
+      var response = await getTimeSlotsForClient(widget.coachId);
       if (response?.status == true) {
+        clearAllCalender();
         setState(() {
           serverTimeSlotsList = response?.data ?? [];
         });
@@ -64,7 +72,7 @@ class _ClientAddSlotsState extends State<ClientAddSlots> {
     }
   }
 
-  Future<void> bookSession(String timeSheetId) async {
+  Future<void> bookSession(int timeSheetId) async {
     setState(() {
       loader = true;
     });
@@ -76,7 +84,7 @@ class _ClientAddSlotsState extends State<ClientAddSlots> {
       if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Slot Booked Successfully');
-        await getAllTimeSlots();
+        await getAllTimeSlotsForClient();
       } else {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
             response?.message ?? 'Something went wrong.');
@@ -180,15 +188,19 @@ class _ClientAddSlotsState extends State<ClientAddSlots> {
                     String selectSlotRemark,
                     List<Meeting> allSlots,
                   ) {},
-                  onSlotBooking: (DateTime selectedDate, DateTime startTime,
-                      DateTime endTime, String bookSlotRemark) {
+                  onSlotBooking: (DateTime selectedDate,
+                      DateTime startTime,
+                      DateTime endTime,
+                      String bookSlotRemark,
+                      int timeSheetId) {
                     if (!loader) {
                       if (!loader) {
                         if (bookSlotRemark.contains('Booked')) {
                           SnackBarHelper.showStatusSnackBar(context,
                               StatusIndicator.warning, 'Already Booked.');
                         } else {
-                          // bookSession();
+                          debugPrint('timesheet id: $timeSheetId');
+                          bookSession(timeSheetId);
                         }
                       }
                     }

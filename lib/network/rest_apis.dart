@@ -271,8 +271,22 @@ Future<BaseResponseModel?> createSingleSlot(
   return response;
 }
 
-Future<TimeSlotsListResponseModel?> getTimeSlots(int coachId) async {
-  TimeSlotsListResponseModel? response;
+Future<TimeSlotsListResponseModel?> getTimeSlotsForCoach(int coachId) async {
+  TimeSlotsListResponseModel?
+      response; // For Booked - 1, default - 0 (Available)
+  try {
+    response = TimeSlotsListResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('time-slot/all-time-slots-list/$coachId',
+            isAuth: true, method: HttpMethodType.get)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<TimeSlotsListResponseModel?> getTimeSlotsForClient(int coachId) async {
+  TimeSlotsListResponseModel?
+      response; // For Booked - 1, default - 0 (Available)
   try {
     response = TimeSlotsListResponseModel.fromJson(await handleResponse(
         await buildHttpResponse('time-slot/time-slots-list/$coachId',
@@ -304,7 +318,7 @@ Future<AvailableCoachesResponseModel?> getAvailableCoaches(
   return response;
 }
 
-Future<RequestedSessionsResponseModel?> getClientRequestedSessions(
+Future<RequestedSessionsResponseModel?> getCoachRequestedSessions(
     {int page = 1, int limit = 10, String? searchData, int? status}) async {
   RequestedSessionsResponseModel? response;
   try {
@@ -325,7 +339,7 @@ Future<RequestedSessionsResponseModel?> getClientRequestedSessions(
   return response;
 }
 
-Future<RequestedSessionsResponseModel?> getCoachRequestedSessions(
+Future<RequestedSessionsResponseModel?> getClientRequestedSessions(
     {int page = 1, int limit = 10, String? searchData, int? status}) async {
   RequestedSessionsResponseModel? response;
   try {

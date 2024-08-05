@@ -24,7 +24,7 @@ class _CoachMySlotsState extends State<CoachMySlots> {
   @override
   void initState() {
     super.initState();
-    getAllTimeSlots();
+    getAllTimeSlotsForCoach();
   }
 
   void addServerTimeSlotsToCalender() {
@@ -40,12 +40,12 @@ class _CoachMySlotsState extends State<CoachMySlots> {
     });
   }
 
-  Future<void> getAllTimeSlots() async {
+  Future<void> getAllTimeSlotsForCoach() async {
     setState(() {
       loader = true;
     });
     try {
-      var response = await getTimeSlots(appStore.userId ?? -1);
+      var response = await getTimeSlotsForCoach(appStore.userId ?? -1);
       if (response?.status == true) {
         setState(() {
           serverTimeSlotsList = response?.data ?? [];
@@ -101,7 +101,7 @@ class _CoachMySlotsState extends State<CoachMySlots> {
       if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Slot Booked Successfully');
-        await getAllTimeSlots();
+        await getAllTimeSlotsForCoach();
       } else {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
             response?.message ?? 'Something went wrong.');
