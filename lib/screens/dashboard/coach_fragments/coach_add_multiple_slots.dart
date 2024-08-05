@@ -23,7 +23,7 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
       DateTime endTime, String remark) {
     setState(() {
       globalMeetings.add(
-        Meeting(remark, startTime, endTime, const Color(0xFF0F8644)),
+        Meeting(remark, startTime, endTime, const Color(0xFF0F8644), 1),
       );
     });
   }
@@ -287,7 +287,7 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
               slot.startTime.hour, slot.startTime.minute);
           final endDateTime = startDateTime.add(const Duration(hours: 1));
           slots.add(Meeting('Available Slot', startDateTime, endDateTime,
-              const Color(0xFF0F8644)));
+              const Color(0xFF0F8644), 1));
         }
       }
     }

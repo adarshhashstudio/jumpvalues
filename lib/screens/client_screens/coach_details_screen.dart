@@ -72,7 +72,8 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
                     child: button(context, onPressed: () async {
                       await Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => const ClientAddSlots(),
+                          builder: (context) => ClientAddSlots(
+                              coachId: widget.coachDetail.id ?? -1),
                         ),
                       );
                     }, text: 'Hire Me'),

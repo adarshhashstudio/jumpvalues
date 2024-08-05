@@ -9,6 +9,7 @@ import 'package:jumpvalues/models/client_profile_response_model.dart';
 import 'package:jumpvalues/models/coach_profile_response_model.dart';
 import 'package:jumpvalues/models/global_user_response_model.dart';
 import 'package:jumpvalues/models/login_response.dart';
+import 'package:jumpvalues/models/requested_sessions_response_model.dart';
 import 'package:jumpvalues/models/signup_response_model.dart';
 import 'package:jumpvalues/models/time_slots_list_response_model.dart';
 import 'package:jumpvalues/network/network_utils.dart';
@@ -270,11 +271,11 @@ Future<BaseResponseModel?> createSingleSlot(
   return response;
 }
 
-Future<TimeSlotsListResponseModel?> getTimeSlots() async {
+Future<TimeSlotsListResponseModel?> getTimeSlots(int coachId) async {
   TimeSlotsListResponseModel? response;
   try {
     response = TimeSlotsListResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse('time-slot/time-slots-list/${appStore.userId}',
+        await buildHttpResponse('time-slot/time-slots-list/$coachId',
             isAuth: true, method: HttpMethodType.get)));
   } catch (e) {
     rethrow;
@@ -297,6 +298,61 @@ Future<AvailableCoachesResponseModel?> getAvailableCoaches(
       await buildHttpResponse('coach/listing-by-clientId/${appStore.userId}',
           isAuth: true, method: HttpMethodType.get, queryParams: queryParams),
     ));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<RequestedSessionsResponseModel?> getClientRequestedSessions(
+    {int page = 1, int limit = 10, String? searchData, int? status}) async {
+  RequestedSessionsResponseModel? response;
+  try {
+    var queryParams = {
+      'page': page,
+      'limit': limit,
+      if (searchData != null) 'searchData': searchData,
+      if (status != null) 'status': status,
+    };
+
+    response = RequestedSessionsResponseModel.fromJson(await handleResponse(
+      await buildHttpResponse('client/requested-session-listing',
+          isAuth: true, method: HttpMethodType.get, queryParams: queryParams),
+    ));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<RequestedSessionsResponseModel?> getCoachRequestedSessions(
+    {int page = 1, int limit = 10, String? searchData, int? status}) async {
+  RequestedSessionsResponseModel? response;
+  try {
+    var queryParams = {
+      'page': page,
+      'limit': limit,
+      if (searchData != null) 'searchData': searchData,
+      if (status != null) 'status': status,
+    };
+
+    response = RequestedSessionsResponseModel.fromJson(await handleResponse(
+      await buildHttpResponse('coach/booked-coaches',
+          isAuth: true, method: HttpMethodType.get, queryParams: queryParams),
+    ));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<BaseResponseModel?> clientBookSession(
+    Map<String, dynamic> request) async {
+  BaseResponseModel? response;
+  try {
+    response = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('session/book-session',
+            request: request, isAuth: true, method: HttpMethodType.post)));
   } catch (e) {
     rethrow;
   }

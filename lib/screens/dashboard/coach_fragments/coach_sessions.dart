@@ -123,7 +123,7 @@ class _CoachSessionsState extends State<CoachSessions> {
                       return BookingItemComponent(
                         showButtons: true,
                         bookingItem: BookingItem(),
-                        serviceResource: _bookingItems[index],
+                        // serviceResource: _bookingItems[index],
                         index: index,
                       );
                     }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),

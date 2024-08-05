@@ -31,11 +31,11 @@ class _CoachMySlotsState extends State<CoachMySlots> {
     setState(() {
       globalMeetings = serverTimeSlotsList
           .map((slot) => Meeting(
-                slot.title ?? '',
-                DateTime.parse(slot.start!),
-                DateTime.parse(slot.end!),
-                Colors.green, // Assuming a default color for the meeting
-              ))
+              slot.title ?? '',
+              DateTime.parse(slot.start!),
+              DateTime.parse(slot.end!),
+              Colors.green, // Assuming a default color for the meeting
+              slot.id ?? -1))
           .toList();
     });
   }
@@ -45,7 +45,7 @@ class _CoachMySlotsState extends State<CoachMySlots> {
       loader = true;
     });
     try {
-      var response = await getTimeSlots();
+      var response = await getTimeSlots(appStore.userId ?? -1);
       if (response?.status == true) {
         setState(() {
           serverTimeSlotsList = response?.data ?? [];

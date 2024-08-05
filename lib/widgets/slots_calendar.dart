@@ -419,22 +419,14 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
               } else {
                 if (meeting == null) {
                   setState(() {
-                    meetings.add(Meeting(
-                      remarkText,
-                      startTime,
-                      endTime,
-                      const Color(0xFF0F8644),
-                    ));
+                    meetings.add(Meeting(remarkText, startTime, endTime,
+                        const Color(0xFF0F8644), -1));
                   });
                 } else {
                   setState(() {
                     final index = meetings.indexOf(meeting);
-                    meetings[index] = Meeting(
-                      remarkText,
-                      startTime,
-                      endTime,
-                      const Color(0xFF0F8644),
-                    );
+                    meetings[index] = Meeting(remarkText, startTime, endTime,
+                        const Color(0xFF0F8644), -1);
                   });
                 }
                 Navigator.of(context).pop();
@@ -489,11 +481,13 @@ class Meeting {
         DateTime.parse(json['from']),
         DateTime.parse(json['to']),
         Color(int.parse(json['background'])),
+        json['timeSheetId'] ?? 0,
       );
-  Meeting(this.remark, this.from, this.to, this.background);
+  Meeting(this.remark, this.from, this.to, this.background, this.timeSheetId);
 
   String remark;
   DateTime from;
   DateTime to;
   Color background;
+  int timeSheetId;
 }

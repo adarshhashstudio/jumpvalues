@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/booking_item_model.dart';
-import 'package:jumpvalues/models/service_resource.dart';
+import 'package:jumpvalues/models/requested_sessions_response_model.dart';
 import 'package:jumpvalues/screens/video_calling_module/video_call_page.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -18,7 +18,7 @@ class BookingItemComponent extends StatelessWidget {
   });
   final bool showButtons;
   final BookingItem bookingItem;
-  final ServiceResource? serviceResource;
+  final RequestedSession? serviceResource;
   final int? index;
 
   @override
@@ -26,37 +26,37 @@ class BookingItemComponent extends StatelessWidget {
 
   Widget buildBookingItem(BuildContext context) {
     // Use data from bookingItem instead of dummy data
-    var status = serviceResource?.status ?? bookingItem.status ?? 'Unknown';
+    var status = serviceResource?.status ?? bookingItem.status ?? 0;
     SessionStatus sessionStatus;
 
-    if (index == 0) {
+    if (status == 0) {
       status = 'pending';
       sessionStatus = SessionStatus.pending;
-    } else if (index == 1) {
+    } else if (status == 1) {
       status = 'pending';
       sessionStatus = SessionStatus.pending;
-    } else if (index == 2) {
+    } else if (status == 2) {
       status = 'accepted';
       sessionStatus = SessionStatus.accepted;
-    } else if (index == 3) {
+    } else if (status == 3) {
       status = 'rejected';
       sessionStatus = SessionStatus.rejected;
-    } else if (index == 4) {
+    } else if (status == 4) {
       status = 'in-progress';
       sessionStatus = SessionStatus.inProgress;
-    } else if (index == 5) {
+    } else if (status == 5) {
       status = 'in-progress';
       sessionStatus = SessionStatus.inProgress;
-    } else if (index == 6) {
+    } else if (status == 6) {
       status = 'in-progress';
       sessionStatus = SessionStatus.inProgress;
-    } else if (index == 7) {
+    } else if (status == 7) {
       status = 'completed';
       sessionStatus = SessionStatus.completed;
-    } else if (index == 8) {
+    } else if (status == 8) {
       status = 'completed';
       sessionStatus = SessionStatus.completed;
-    } else if (index == 9) {
+    } else if (status == 9) {
       status = 'completed';
       sessionStatus = SessionStatus.completed;
     } else {
@@ -64,20 +64,17 @@ class BookingItemComponent extends StatelessWidget {
       sessionStatus = SessionStatus.expired;
     }
 
-    var imageUrl = serviceResource?.avatar ??
-        bookingItem.imageUrl ??
-        'https://picsum.photos/200/300';
+    var imageUrl = getImageUrl(serviceResource?.userDp);
     var bookingId = serviceResource?.id ?? bookingItem.bookingId ?? 'N/A';
     var serviceName =
-        serviceResource?.firstName ?? bookingItem.serviceName ?? 'Service';
+        serviceResource?.name ?? bookingItem.serviceName ?? 'Service';
     var date = DateFormat('yyyy-MM-dd').format(DateTime.now()).toString();
     var time = DateFormat.jms().format(DateTime.now());
     var customerName =
-        serviceResource?.lastName ?? bookingItem.customerName ?? 'Customer';
-    var description = serviceResource?.email ??
+        serviceResource?.name ?? bookingItem.customerName ?? 'Customer';
+    var description = serviceResource?.remark ??
         bookingItem.description ??
         'No description available';
-    
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -153,7 +150,7 @@ class BookingItemComponent extends StatelessWidget {
           if (description.isNotEmpty)
             buildDescriptionSection(
                 context, date, time, customerName, description),
-          if (showButtons) buildButtons(context, status)
+          if (showButtons) buildButtons(context, sessionStatus)
         ],
       ),
     ).onTap(() {
@@ -218,9 +215,9 @@ class BookingItemComponent extends StatelessWidget {
         ),
       );
 
-  Widget buildButtons(BuildContext context, String status) => Row(
+  Widget buildButtons(BuildContext context, SessionStatus status) => Row(
         children: [
-          if (status == 'pending')
+          if (status == SessionStatus.pending)
             Row(
               children: [
                 if (appStore.userTypeCoach)
@@ -244,7 +241,7 @@ class BookingItemComponent extends StatelessWidget {
                 ).expand(),
               ],
             ).expand(),
-          if (status == 'accepted')
+          if (status == SessionStatus.accepted)
             Row(
               children: [
                 AppButton(
@@ -256,7 +253,7 @@ class BookingItemComponent extends StatelessWidget {
                 ).expand(),
               ],
             ).expand(),
-          if (status == 'rejected')
+          if (status == SessionStatus.rejected)
             Row(
               children: [
                 AppButton(
@@ -267,7 +264,7 @@ class BookingItemComponent extends StatelessWidget {
                 ).expand(),
               ],
             ).expand(),
-          if (status == 'in-progress')
+          if (status == SessionStatus.inProgress)
             Row(
               children: [
                 AppButton(

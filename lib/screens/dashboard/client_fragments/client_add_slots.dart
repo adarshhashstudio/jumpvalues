@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/network/dummy.dart';
+import 'package:jumpvalues/models/time_slots_list_response_model.dart';
+import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/dashboard/dashboard.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/slots_calendar.dart';
 
 class ClientAddSlots extends StatefulWidget {
-  const ClientAddSlots({super.key});
+  const ClientAddSlots({super.key, required this.coachId});
+  final int coachId;
 
   @override
   State<ClientAddSlots> createState() => _ClientAddSlotsState();
@@ -16,58 +18,106 @@ class _ClientAddSlotsState extends State<ClientAddSlots> {
   bool loader = true;
   List<Meeting> globalMeetings = [];
   List<Meeting> selectedMeetings = [];
+  List<TimeSlotListItem> serverTimeSlotsList = [];
 
   @override
   void initState() {
     super.initState();
-    fetchSlots();
+    getAllTimeSlots();
   }
 
-  void fetchSlots() async {
+  void addServerTimeSlotsToCalender() {
+    setState(() {
+      globalMeetings = serverTimeSlotsList
+          .map((slot) => Meeting(
+                slot.title ?? '',
+                DateTime.parse(slot.start!),
+                DateTime.parse(slot.end!),
+                Colors.green, // Assuming a default color for the meeting
+                slot.id??0
+              ))
+          .toList();
+    });
+  }
+
+  Future<void> getAllTimeSlots() async {
+    setState(() {
+      loader = true;
+    });
     try {
-      await fetchMeetings().then((meetings) {
+      var response = await getTimeSlots(widget.coachId);
+      if (response?.status == true) {
         setState(() {
-          globalMeetings = meetings;
-          loader = false;
+          serverTimeSlotsList = response?.data ?? [];
         });
-      });
+        addServerTimeSlotsToCalender();
+      } else {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+            response?.message ?? 'Something went wrong.');
+      }
     } catch (e) {
+      debugPrint('getAllTimeSlots error: $e');
+    } finally {
       setState(() {
-        globalMeetings = [];
         loader = false;
       });
-      SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error, '$e');
+    }
+  }
+
+  Future<void> bookSession(String timeSheetId) async {
+    setState(() {
+      loader = true;
+    });
+    try {
+      var request = {'coach_id': widget.coachId, 'time_sheet_id': timeSheetId};
+
+      var response = await clientBookSession(request);
+
+      if (response?.status == true) {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
+            response?.message ?? 'Slot Booked Successfully');
+        await getAllTimeSlots();
+      } else {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+            response?.message ?? 'Something went wrong.');
+      }
+    } catch (e) {
+      debugPrint('createSingleTimeSlot error: $e');
+    } finally {
+      setState(() {
+        loader = false;
+      });
     }
   }
 
   // Method to update a meeting based on selected slot
-  void updateMeeting(DateTime startTime, DateTime endTime, String title) {
-    setState(() {
-      // Find the meeting to be updated
-      var index = globalMeetings.indexWhere((meeting) {
-        debugPrint('${meeting.remark} == $title');
-        debugPrint('${meeting.from} == $startTime');
-        debugPrint('${meeting.to} == $endTime');
-        return meeting.from == startTime &&
-            meeting.to == endTime &&
-            meeting.remark == title;
-      });
+  // void updateMeeting(DateTime startTime, DateTime endTime, String title) {
+  //   setState(() {
+  //     // Find the meeting to be updated
+  //     var index = globalMeetings.indexWhere((meeting) {
+  //       debugPrint('${meeting.remark} == $title');
+  //       debugPrint('${meeting.from} == $startTime');
+  //       debugPrint('${meeting.to} == $endTime');
+  //       return meeting.from == startTime &&
+  //           meeting.to == endTime &&
+  //           meeting.remark == title;
+  //     });
 
-      if (index != -1) {
-        // Update the meeting details
-        globalMeetings[index] = Meeting(
-            'Booked - $title', startTime, endTime, const Color(0xFF55560C));
+  //     if (index != -1) {
+  //       // Update the meeting details
+  //       globalMeetings[index] = Meeting(
+  //           'Booked - $title', startTime, endTime, const Color(0xFF55560C));
 
-        selectedMeetings.add(globalMeetings[index]);
+  //       selectedMeetings.add(globalMeetings[index]);
 
-        // Optionally, you can sort the meetings by startTime if needed
-        globalMeetings.sort((a, b) => a.from.compareTo(b.from));
+  //       // Optionally, you can sort the meetings by startTime if needed
+  //       globalMeetings.sort((a, b) => a.from.compareTo(b.from));
 
-        SnackBarHelper.showStatusSnackBar(
-            context, StatusIndicator.success, 'Slot Booked Successfully.');
-      }
-    });
-  }
+  //       SnackBarHelper.showStatusSnackBar(
+  //           context, StatusIndicator.success, 'Slot Booked Successfully.');
+  //     }
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -138,7 +188,7 @@ class _ClientAddSlotsState extends State<ClientAddSlots> {
                           SnackBarHelper.showStatusSnackBar(context,
                               StatusIndicator.warning, 'Already Booked.');
                         } else {
-                          updateMeeting(startTime, endTime, bookSlotRemark);
+                          // bookSession();
                         }
                       }
                     }

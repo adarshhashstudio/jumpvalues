@@ -7,7 +7,7 @@ import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
-class ClientAllCoaches extends StatefulWidget {
+class ClientAllCoaches extends StatefulWidget { 
   const ClientAllCoaches({super.key});
 
   @override
@@ -44,25 +44,13 @@ class _ClientAllCoachesState extends State<ClientAllCoaches> {
     super.dispose();
   }
 
-  List<AvailableCoaches> _filterCoachItems() {
-    var filteredItems = availableCoachList;
-    if (searchController.text.isNotEmpty) {
-      filteredItems = filteredItems
-          .where((item) => item.firstName!
-              .toLowerCase()
-              .contains(searchController.text.toLowerCase()))
-          .toList();
-    }
-    return filteredItems;
-  }
-
   Future<void> _refreshCoachItems() async {
     setState(() {
       _currentPage = 1;
       availableCoachList.clear();
       _hasMoreData = true;
     });
-    await availableCoaches();
+    await availableCoaches(searchData: searchController.text);
   }
 
   Future<void> availableCoaches({

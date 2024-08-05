@@ -114,7 +114,7 @@ class _CoachDashboardState extends State<CoachDashboard> {
                         ),
                         itemBuilder: (context, index) => BookingItemComponent(
                           showButtons: false,
-                          serviceResource: _bookingItems[index],
+                          // serviceResource: _bookingItems[index],
                           bookingItem: BookingItem(),
                           index: index,
                         ),

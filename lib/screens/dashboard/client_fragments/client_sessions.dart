@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/models/booking_item_model.dart';
+import 'package:jumpvalues/models/requested_sessions_response_model.dart';
 import 'package:jumpvalues/models/service_resource.dart';
+import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/dashboard/booking_item_component.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -23,7 +25,7 @@ class _ClientSessionsState extends State<ClientSessions> {
   bool isSearching = false;
 
   final ScrollController _scrollController = ScrollController();
-  final List<ServiceResource> _bookingItems = [];
+  final List<RequestedSession> requestedSessions = [];
   int _currentPage = 1;
   bool _isLoading = false;
   bool _hasMoreData = true;
@@ -31,11 +33,11 @@ class _ClientSessionsState extends State<ClientSessions> {
   @override
   void initState() {
     super.initState();
-    fetchSessionBookings();
+    clientRequestedSessions();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        fetchSessionBookings();
+        clientRequestedSessions();
       }
     });
   }
@@ -46,27 +48,36 @@ class _ClientSessionsState extends State<ClientSessions> {
     super.dispose();
   }
 
-  void fetchSessionBookings() async {
+  Future<void> clientRequestedSessions({
+    String? searchData,
+    int? status,
+  }) async {
     if (_isLoading || !_hasMoreData) return;
+
     setState(() {
       _isLoading = true;
     });
-    try {
-      // futureBookingItems = fetchBookingItems();
-      var dio = Dio();
-      var response = await dio.get('https://reqres.in/api/users',
-          queryParameters: {'page': _currentPage});
-      debugPrint('${response.data}');
-      var pagination = ServiceResourcePagination.fromJson(response.data);
 
-      setState(() {
-        _bookingItems.addAll(pagination.data ?? []);
-        _currentPage++;
-        _hasMoreData = _currentPage <= pagination.totalPages!;
-      });
+    try {
+      var response = await getClientRequestedSessions(
+        page: _currentPage,
+        searchData: searchData,
+        status: status,
+      );
+
+      if (response?.status == true) {
+        setState(() {
+          requestedSessions.addAll(response?.data ?? []);
+          _currentPage++;
+          _hasMoreData = (response?.pageDetails?.noOfRecords ?? 0) >
+              (requestedSessions.length);
+        });
+      } else {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+            response?.message ?? 'Something went wrong');
+      }
     } catch (e) {
-      SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error, '$e');
-      debugPrint('Error: $e');
+      debugPrint('availableCoaches error: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -96,10 +107,10 @@ class _ClientSessionsState extends State<ClientSessions> {
   Future<void> _refreshBookingItems() async {
     setState(() {
       _currentPage = 1;
-      _bookingItems.clear();
+      requestedSessions.clear();
       _hasMoreData = true;
     });
-    fetchSessionBookings();
+    await clientRequestedSessions();
   }
 
   @override
@@ -107,7 +118,7 @@ class _ClientSessionsState extends State<ClientSessions> {
         children: [
           RefreshIndicator(
             onRefresh: _refreshBookingItems,
-            child: (!_isLoading && _bookingItems.isEmpty)
+            child: (!_isLoading && requestedSessions.isEmpty)
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -146,12 +157,12 @@ class _ClientSessionsState extends State<ClientSessions> {
                   ).center()
                 : ListView.separated(
                     controller: _scrollController,
-                    itemCount: _bookingItems.length + 1,
+                    itemCount: requestedSessions.length + 1,
                     separatorBuilder: (context, index) => SizedBox(
                           height: MediaQuery.of(context).size.height * 0.03,
                         ),
                     itemBuilder: (context, index) {
-                      if (index == _bookingItems.length) {
+                      if (index == requestedSessions.length) {
                         return _isLoading
                             ? const Center(child: CircularProgressIndicator())
                             : const SizedBox.shrink();
@@ -159,7 +170,7 @@ class _ClientSessionsState extends State<ClientSessions> {
                       return BookingItemComponent(
                         showButtons: true,
                         bookingItem: BookingItem(),
-                        serviceResource: _bookingItems[index],
+                        serviceResource: requestedSessions[index],
                         index: index,
                       );
                     }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),
