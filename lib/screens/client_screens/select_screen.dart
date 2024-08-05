@@ -291,7 +291,7 @@ class _SelectScreenState extends State<SelectScreen> {
               child: button(
                 context,
                 onPressed: () async {
-                  if (appStore.userTypeCoach) {
+                  if (widget.isCategories) {
                     await saveSelectedCategories();
                   } else {
                     // Handle Done button press

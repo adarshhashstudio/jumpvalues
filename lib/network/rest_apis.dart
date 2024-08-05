@@ -9,6 +9,7 @@ import 'package:jumpvalues/models/coach_profile_response_model.dart';
 import 'package:jumpvalues/models/global_user_response_model.dart';
 import 'package:jumpvalues/models/login_response.dart';
 import 'package:jumpvalues/models/signup_response_model.dart';
+import 'package:jumpvalues/models/time_slots_list_response_model.dart';
 import 'package:jumpvalues/network/network_utils.dart';
 import 'package:jumpvalues/utils/utils.dart';
 
@@ -248,6 +249,31 @@ Future<GlobalUserResponseModel?> getGlobalUserDetails() async {
   try {
     response = GlobalUserResponseModel.fromJson(await handleResponse(
         await buildHttpResponse('user/me',
+            isAuth: true, method: HttpMethodType.get)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<BaseResponseModel?> createSingleSlot(
+    Map<String, dynamic> request) async {
+  BaseResponseModel? response;
+  try {
+    response = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('time-slot/create',
+            request: request, isAuth: true, method: HttpMethodType.post)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<TimeSlotsListResponseModel?> getTimeSlots() async {
+  TimeSlotsListResponseModel? response;
+  try {
+    response = TimeSlotsListResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('time-slot/time-slots-list/${appStore.userId}',
             isAuth: true, method: HttpMethodType.get)));
   } catch (e) {
     rethrow;

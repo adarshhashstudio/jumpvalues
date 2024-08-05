@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -139,3 +140,14 @@ class Debouncer {
     _timer = Timer(Duration(milliseconds: milliseconds), action);
   }
 }
+
+/// Common method to format DateTime to 'yyyy/MM/dd'
+///
+/// 2024-08-05 13:00:00.000 -> 2024/08/02
+String formatDate(DateTime dateTime) =>
+    DateFormat('yyyy/MM/dd').format(dateTime);
+
+/// Common method to format DateTime to 'HH:mm'
+///
+/// 2024-08-05 13:00:00.000 -> 13:00
+String formatTime(DateTime dateTime) => DateFormat('HH:mm').format(dateTime);
