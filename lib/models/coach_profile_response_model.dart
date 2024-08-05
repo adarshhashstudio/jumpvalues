@@ -65,8 +65,8 @@ class CoachData {
         verified: json['verified'] as bool?,
         otp: json['otp'] as int?,
         dp: json['dp'] as String?,
-        createdBy: json['created_by'] as String?,
-        updatedBy: json['updated_by'] as String?,
+        createdBy: json['created_by'] as int?,
+        updatedBy: json['updated_by'] as int?,
         deletedAt: json['deleted_at'] as String?,
         createdAt: json['created_at'] as String?,
         updatedAt: json['updated_at'] as String?,
@@ -92,8 +92,8 @@ class CoachData {
   final bool? verified;
   final int? otp;
   final String? dp;
-  final String? createdBy;
-  final String? updatedBy;
+  final int? createdBy;
+  final int? updatedBy;
   final String? deletedAt;
   final String? createdAt;
   final String? updatedAt;
@@ -182,7 +182,7 @@ class CoachProfile {
         industriesServed: json['industries_served'] as String?,
         experience: json['experiance'] as int?,
         niche: json['niche'] as String?,
-        updateBy: json['update_by'] as String?,
+        updateBy: json['update_by'] as int?,
         deletedAt: json['deleted_at'] as String?,
         createdAt: json['created_at'] as String?,
         updatedAt: json['updated_at'] as String?,
@@ -196,7 +196,7 @@ class CoachProfile {
   final String? industriesServed;
   final int? experience;
   final String? niche;
-  final String? updateBy;
+  final int? updateBy;
   final String? deletedAt;
   final String? createdAt;
   final String? updatedAt;

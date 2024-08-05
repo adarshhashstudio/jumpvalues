@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/all_comprehensive_response.dart';
+import 'package:jumpvalues/models/available_coaches_response_model.dart';
 import 'package:jumpvalues/models/base_response.dart';
 import 'package:jumpvalues/models/category_dropdown_response.dart';
 import 'package:jumpvalues/models/client_profile_response_model.dart';
@@ -275,6 +276,27 @@ Future<TimeSlotsListResponseModel?> getTimeSlots() async {
     response = TimeSlotsListResponseModel.fromJson(await handleResponse(
         await buildHttpResponse('time-slot/time-slots-list/${appStore.userId}',
             isAuth: true, method: HttpMethodType.get)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<AvailableCoachesResponseModel?> getAvailableCoaches(
+    {int page = 1, int limit = 10, String? searchData, int? status}) async {
+  AvailableCoachesResponseModel? response;
+  try {
+    var queryParams = {
+      'page': page,
+      'limit': limit,
+      if (searchData != null) 'searchData': searchData,
+      if (status != null) 'status': status,
+    };
+
+    response = AvailableCoachesResponseModel.fromJson(await handleResponse(
+      await buildHttpResponse('coach/listing-by-clientId/${appStore.userId}',
+          isAuth: true, method: HttpMethodType.get, queryParams: queryParams),
+    ));
   } catch (e) {
     rethrow;
   }

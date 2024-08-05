@@ -1,8 +1,10 @@
 // Function to show all selected values when the button is clicked
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/models/service_resource.dart';
+import 'package:jumpvalues/models/available_coaches_response_model.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/images.dart';
+import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 Widget selectionContainerForAll(BuildContext context,
@@ -155,88 +157,102 @@ class TotalWidget extends StatelessWidget {
 class CoachItemComponent extends StatelessWidget {
   CoachItemComponent({this.coachDetail, this.index, this.onTap});
 
-  final ServiceResource? coachDetail;
+  final AvailableCoaches? coachDetail;
   final int? index;
   final void Function()? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    var imageUrl = coachDetail?.avatar;
-    var firstName = coachDetail?.firstName;
-    var lastName = coachDetail?.lastName;
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      width: MediaQuery.of(context).size.width,
-      decoration: boxDecorationDefault(
-          borderRadius: radius(), color: context.cardColor),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CachedImageWidget(
-                url: imageUrl ?? 'https://picsum.photos/200/300',
-                height: 70,
-                width: 70,
-                fit: BoxFit.cover,
-                radius: BorderRadius.circular(12),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$firstName $lastName',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: textSecondaryColor,
-                        fontSize: 17,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(12),
+        width: MediaQuery.of(context).size.width,
+        decoration: boxDecorationDefault(
+            borderRadius: radius(), color: context.cardColor),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(width: 0.1),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.01,
-                    ),
-                    Text.rich(
-                      TextSpan(
-                        text: 'Years of Experience: ',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.normal,
-                          color: textSecondaryColor,
+                    child: CachedNetworkImage(
+                      imageUrl: getImageUrl(coachDetail?.dp),
+                      fit: BoxFit.cover,
+                      height: 70,
+                      width: 70,
+                      placeholder: (context, _) => Center(
+                        child: Icon(
+                          Icons.person,
+                          size: 40,
+                          color: Colors.grey.shade400,
                         ),
-                        children: [
-                          TextSpan(
-                            text: '${(index ?? 0) + 2}',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: textSecondaryColor,
-                            ),
-                          ),
-                        ],
+                      ),
+                      errorWidget: (context, url, error) => Center(
+                        child: Icon(
+                          Icons.person,
+                          size: 40,
+                          color: Colors.grey.shade400,
+                        ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.01,
-          ),
-          buildDescriptionSection(context,
-              certificate:
-                  'Certified Professional in Training Management (CPTM)',
-              philosophy:
-                  'Personal development, Be Yourself, Integrity, Mutual respect, Take accountability, Leadership'),
-        ],
-      ),
-    ).onTap(onTap ?? () {});
-  }
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${coachDetail?.firstName} ${coachDetail?.lastName}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: textSecondaryColor,
+                          fontSize: 17,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.01,
+                      ),
+                      Text.rich(
+                        TextSpan(
+                          text: 'Years of Experience: ',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                            color: textSecondaryColor,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: (coachDetail?.experience ?? 0).toString(),
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: textSecondaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.01,
+            ),
+            buildDescriptionSection(context,
+                certificate: coachDetail?.certifications ?? 'N/A',
+                philosophy: coachDetail?.philosophy ?? 'N/A'),
+          ],
+        ),
+      ).onTap(onTap ?? () {});
 
   Widget buildDescriptionSection(BuildContext context,
           {String? certificate, String? philosophy}) =>

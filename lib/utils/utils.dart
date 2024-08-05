@@ -151,3 +151,5 @@ String formatDate(DateTime dateTime) =>
 ///
 /// 2024-08-05 13:00:00.000 -> 13:00
 String formatTime(DateTime dateTime) => DateFormat('HH:mm').format(dateTime);
+
+String getImageUrl(String? imageUrl) => '$domainUrl/${imageUrl ?? ''}';

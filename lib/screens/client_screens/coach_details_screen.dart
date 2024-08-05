@@ -1,9 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/main.dart';
+import 'package:jumpvalues/models/available_coaches_response_model.dart';
 import 'package:jumpvalues/models/client_profile_response_model.dart';
-import 'package:jumpvalues/models/service_resource.dart';
-import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/dashboard/client_fragments/client_add_slots.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/utils.dart';
@@ -12,7 +10,7 @@ import 'package:nb_utils/nb_utils.dart';
 
 class CoachDetailsScreen extends StatefulWidget {
   const CoachDetailsScreen({super.key, required this.coachDetail});
-  final ServiceResource coachDetail;
+  final AvailableCoaches coachDetail;
 
   @override
   State<CoachDetailsScreen> createState() => _CoachDetailsScreenState();
@@ -20,38 +18,6 @@ class CoachDetailsScreen extends StatefulWidget {
 
 class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
   ClientProfileResponseModel? userData;
-  bool loader = false;
-  final preferVia = 'phone';
-
-  Future<void> getUser() async {
-    setState(() {
-      loader = true;
-    });
-    try {
-      var response = await getUserClientDetails(appStore.userId ?? -1);
-      if (response?.status == true) {
-        setState(() {
-          userData = response;
-        });
-        setState(() {});
-      } else {
-        if (response?.message != null) {
-          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-              response?.message ?? errorSomethingWentWrong);
-        }
-      }
-    } catch (e) {
-      debugPrint('getUser Error: $e');
-    } finally {
-      setState(() {
-        loader = false;
-      });
-    }
-  }
-
-  Future<void> refreshData() async {
-    await getUser();
-  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -84,45 +50,35 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
         body: SafeArea(
           child: Stack(
             children: [
-              RefreshIndicator(
-                onRefresh: refreshData,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: SafeArea(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              buildProfilePicWidget(context),
-                              additionalDetails(context)
-                                  .paddingSymmetric(horizontal: 20),
-                            ],
-                          ),
+              Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: SafeArea(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            buildProfilePicWidget(context),
+                            additionalDetails(context)
+                                .paddingSymmetric(horizontal: 20),
+                          ],
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
-                      child: button(context, onPressed: () async {
-                        if (loader) {
-                        } else {
-                          await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const ClientAddSlots(),
-                            ),
-                          );
-                        }
-                      }, text: 'Hire Me'),
-                    ),
-                  ],
-                ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
+                    child: button(context, onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ClientAddSlots(),
+                        ),
+                      );
+                    }, text: 'Hire Me'),
+                  ),
+                ],
               ),
-              if (loader)
-                Container(
-                    color: Colors.transparent,
-                    child: const Center(child: CircularProgressIndicator()))
             ],
           ),
         ),
@@ -144,8 +100,7 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(360),
                   child: CachedNetworkImage(
-                    imageUrl: widget.coachDetail.avatar ??
-                        'https://picsum.photos/200/300',
+                    imageUrl: getImageUrl(widget.coachDetail.dp),
                     fit: BoxFit.cover,
                     placeholder: (context, _) => Center(
                       child: Icon(
@@ -180,20 +135,20 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (preferVia == 'email')
+                    if (widget.coachDetail.preferVia == 1)
                       const Icon(
                         Icons.check_circle,
                         color: greenColor,
                         size: 20,
                       ),
-                    if (preferVia == 'email')
+                    if (widget.coachDetail.preferVia == 1)
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.02,
                       ),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: Text(
-                        '${widget.coachDetail.email}',
+                        '${widget.coachDetail.email ?? 'N/A'}',
                         style: const TextStyle(fontSize: 14),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -206,20 +161,20 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
                 ),
                 Row(
                   children: [
-                    if (preferVia == 'phone')
+                    if (widget.coachDetail.preferVia == 2)
                       const Icon(
                         Icons.check_circle,
                         color: greenColor,
                         size: 20,
                       ),
-                    if (preferVia == 'phone')
+                    if (widget.coachDetail.preferVia == 2)
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.02,
                       ),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: Text(
-                        '+1-404-724-1937',
+                        '${widget.coachDetail.countryCode ?? ''} ${widget.coachDetail.phone ?? 'N/A'}',
                         style: TextStyle(fontSize: 14, color: primaryColor),
                       ),
                     ),
@@ -238,32 +193,29 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
             height: MediaQuery.of(context).size.height * 0.02,
           ),
           singleDetailWidget(context, 'Certifications',
-              'Certified Professional in Training Management (CPTM)'),
+              '${widget.coachDetail.certifications ?? 'N/A'}'),
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,
           ),
           singleDetailWidget(context, 'Philosophy',
-              'Personal development, Be Yourself, Integrity, Mutual respect, Take accountability, Leadership'),
+              '${widget.coachDetail.philosophy ?? 'N/A'}'),
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,
           ),
           singleDetailWidget(
-              context, 'Bio', 'Expert In Personality Development'),
+              context, 'Education', '${widget.coachDetail.education ?? 'N/A'}'),
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,
           ),
-          singleDetailWidget(context, 'Education', 'Phd'),
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.02,
-          ),
-          singleDetailWidget(context, 'Prefer Via', '$preferVia'),
+          singleDetailWidget(context, 'Prefer Via',
+              '${widget.coachDetail.preferVia == 2 ? 'Phone' : 'Email'}'),
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,
           ),
           singleDetailWidget(
             context,
             'Industries Served',
-            'Sports',
+            '${widget.coachDetail.industriesServed ?? 'N/A'}',
           ),
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,
@@ -271,7 +223,7 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
           singleDetailWidget(
             context,
             'Year of Coaching',
-            '8',
+            '${widget.coachDetail.experience ?? '0'}',
           ),
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,
@@ -279,7 +231,7 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
           singleDetailWidget(
             context,
             'Niche',
-            'N/A',
+            '${widget.coachDetail.niche ?? 'N/A'}',
           ),
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,

@@ -43,7 +43,7 @@ Future<Response<dynamic>> buildHttpResponse(
   String endPoint, {
   HttpMethodType method = HttpMethodType.get,
   Map<String, dynamic>? request,
-  Map<String, dynamic>? extraKeys,
+  Map<String, dynamic>? queryParams,
   bool isAuth = false,
   bool isJsonEncode = false,
 }) async {
@@ -66,6 +66,7 @@ Future<Response<dynamic>> buildHttpResponse(
       response = await dio.request(
         url.toString(),
         data: request,
+        queryParameters: queryParams,
         options: Options(
           method: method.name,
           headers: headers,
