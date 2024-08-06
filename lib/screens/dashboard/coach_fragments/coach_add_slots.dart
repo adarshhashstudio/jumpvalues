@@ -84,13 +84,23 @@ class _CoachMySlotsState extends State<CoachMySlots> {
       debugPrint('End Time: $rEndTime');
       debugPrint('Remark: $remark');
 
-      if (!isUpdating) {
-        // Only Delete
-        await deleteSingleTimeSlot(timeSheetId ?? -1);
+      if (timeSheetId == 0 || timeSheetId == -1) {
+        // Create
+        await createAndUpdateSingleTimeSlot(
+            rDate, rStartTime, rEndTime, remark, null);
       } else {
-        // Create or Update
-        await createAndUpdateSingleTimeSlot(rDate, rStartTime, rEndTime, remark,
-            timeSheetId == 0 ? null : timeSheetId);
+        if (!isUpdating) {
+          // Only Delete
+          await deleteSingleTimeSlot(timeSheetId ?? 0);
+        } else {
+          // Update
+          await createAndUpdateSingleTimeSlot(
+              rDate,
+              rStartTime,
+              rEndTime,
+              remark,
+              (timeSheetId == 0 || timeSheetId == -1) ? null : timeSheetId);
+        }
       }
     } catch (e) {
       debugPrint('handleSingleTimeSlotBooking error: $e');
@@ -162,6 +172,8 @@ class _CoachMySlotsState extends State<CoachMySlots> {
             meetings: globalMeetings,
             onSlotSelected: (sDate, sSTime, sETime, sRemark, sMeeting,
                 sTimeSheetId, sIsUpdating) {
+              debugPrint(
+                  'TimeSheetId: -------------------------------- $sTimeSheetId');
               handleSingleTimeSlotBooking(
                   sDate, sSTime, sETime, sRemark, sTimeSheetId, sIsUpdating);
             },
