@@ -76,6 +76,7 @@ class _SignupScreenState extends State<SignupScreen>
   bool submitButtonEnabled = false;
   bool coachSubmitButtonEnabled = false;
   bool selectCategoriesError = false;
+  bool selectCoreValuesError = false;
 
   String sPhoneNumber = '';
   String sCountryCode = '';
@@ -85,6 +86,9 @@ class _SignupScreenState extends State<SignupScreen>
 
   List<Category> selectedCategories = [];
   List<Category> categories = [];
+
+  List<Category> selectedCoreValues = [];
+  List<Category> coreValues = [];
 
   List<Category> sponsors = [];
 
@@ -129,8 +133,9 @@ class _SignupScreenState extends State<SignupScreen>
 
     super.initState();
     Future.wait([
-      getCategoriesDropdown(),
       getSponsorDropdown(),
+      getCategoriesDropdown(),
+      getCoreValuesDropdown(),
     ]);
   }
 
@@ -279,6 +284,33 @@ class _SignupScreenState extends State<SignupScreen>
     }
   }
 
+  Future<void> getCoreValuesDropdown() async {
+    setState(() {
+      initialLoader = true;
+    });
+
+    try {
+      var response = await coreValuesDropdown();
+      if (response?.status == true) {
+        setState(() {
+          coreValues.clear();
+          coreValues = response?.data ?? [];
+        });
+      } else {
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
+      }
+    } catch (e) {
+      debugPrint('getCoreValuesDropdown Error: $e');
+    } finally {
+      setState(() {
+        initialLoader = false;
+      });
+    }
+  }
+
   Future<void> getSponsorDropdown() async {
     setState(() {
       initialLoader = true;
@@ -344,6 +376,10 @@ class _SignupScreenState extends State<SignupScreen>
     selectedCategoriesId
         .addAll(selectedCategories.map((element) => element.id ?? -1).toList());
 
+    var selectedCoreValuesId = <int>[];
+    selectedCoreValuesId
+        .addAll(selectedCoreValues.map((element) => element.id ?? -1).toList());
+
     var requestSelectedCategoryBySponsorId = <int>[];
     requestSelectedCategoryBySponsorId.addAll(selectedCategoryBySponsorId
         .map((element) => element.id ?? -1)
@@ -383,6 +419,7 @@ class _SignupScreenState extends State<SignupScreen>
       addIfNotEmpty('experiance', experianceController?.text);
       addIfNotEmpty('niche', nicheController?.text);
       addIfNotEmptyList('categoryIds', selectedCategoriesId);
+      addIfNotEmptyList('coreValueIds', selectedCoreValuesId);
     } else {
       addIfNotEmpty('first_name', firstNameControllerClient?.text);
       addIfNotEmpty('last_name', lastNameControllerClient?.text);
@@ -455,6 +492,20 @@ class _SignupScreenState extends State<SignupScreen>
               FocusScope.of(context).requestFocus(experianceFocusNode);
             } else if (fieldErrors.containsKey('niche')) {
               FocusScope.of(context).requestFocus(nicheFocusNode);
+            } else if (fieldErrors.containsKey('categoryIds')) {
+              selectCategoriesError = true;
+              SnackBarHelper.showStatusSnackBar(
+                context,
+                StatusIndicator.error,
+                fieldErrors['categoryIds'] ?? 'Categories have some problem.',
+              );
+            } else if (fieldErrors.containsKey('coreValueIds')) {
+              selectCoreValuesError = true;
+              SnackBarHelper.showStatusSnackBar(
+                context,
+                StatusIndicator.error,
+                fieldErrors['coreValueIds'] ?? 'Core Values have some problem.',
+              );
             }
           } else {
             // Set field errors and focus on the first error field
@@ -1126,6 +1177,7 @@ class _SignupScreenState extends State<SignupScreen>
                       height: MediaQuery.of(context).size.height * 0.06,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       isError: selectCategoriesError,
+                      errorText: fieldErrors['categoryIds'],
                       borderRadius: selectedCategories.isEmpty
                           ? BorderRadius.circular(20)
                           : const BorderRadius.only(
@@ -1154,7 +1206,7 @@ class _SignupScreenState extends State<SignupScreen>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Tap to select categories  ${selectedCategories.isEmpty ? '*' : ''}',
+                            'Tap to select categories',
                             style: TextStyle(
                                 color: selectCategoriesError
                                     ? Colors.red
@@ -1182,6 +1234,94 @@ class _SignupScreenState extends State<SignupScreen>
                             : BorderRadius.circular(20),
                         children: [
                           for (var item in selectedCategories)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 2),
+                              decoration: BoxDecoration(
+                                  color: const Color(0xFF43A146),
+                                  border: Border.all(width: 0.05),
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Text(
+                                item.name ?? '',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                        ],
+                      ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    labelContainer(
+                      label: 'Core Values',
+                      labelTextBoxSpace: 8,
+                      width: MediaQuery.of(context).size.width * 1,
+                      height: MediaQuery.of(context).size.height * 0.06,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      isError: selectCoreValuesError,
+                      errorText: fieldErrors['coreValueIds'],
+                      borderRadius: selectedCoreValues.isEmpty
+                          ? BorderRadius.circular(20)
+                          : const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
+                            ),
+                      onTap: () {
+                        enableCoachSubmitButton();
+                        hideKeyboard(context);
+                        showCategoryDialog(context, coreValues,
+                            (categoriesFromDialogue) {
+                          if (categoriesFromDialogue.length > 10) {
+                            SnackBarHelper.showStatusSnackBar(
+                                context,
+                                StatusIndicator.error,
+                                'Core Value must contain less than or equal to 10 items');
+                          } else {
+                            setState(() {
+                              selectedCoreValues = categoriesFromDialogue;
+                              selectCoreValuesError = false;
+                              if (categoriesFromDialogue.isEmpty) {
+                                selectCoreValuesError = true;
+                              }
+                            });
+                            for (var category in selectedCoreValues) {
+                              debugPrint(
+                                  'Selected Core Values: ${category.name} (ID: ${category.id})');
+                            }
+                          }
+                        });
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Tap to select core values',
+                            style: TextStyle(
+                                color: selectCoreValuesError
+                                    ? Colors.red
+                                    : Colors.black),
+                          ),
+                          Icon(
+                            Icons.arrow_drop_down,
+                            color: selectCoreValuesError
+                                ? Colors.red
+                                : Colors.black,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (selectedCoreValues.isNotEmpty)
+                      selectionContainerForAll(
+                        context,
+                        spaceBelowTitle:
+                            MediaQuery.of(context).size.height * 0.02,
+                        borderRadius: selectedCoreValues.isNotEmpty
+                            ? const BorderRadius.only(
+                                bottomLeft: Radius.circular(20),
+                                bottomRight: Radius.circular(20),
+                              )
+                            : BorderRadius.circular(20),
+                        children: [
+                          for (var item in selectedCoreValues)
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 2),

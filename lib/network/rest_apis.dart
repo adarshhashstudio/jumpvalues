@@ -41,6 +41,19 @@ Future<CategoryDropdownResponse?> categoriesDropdown() async {
   return response;
 }
 
+Future<CategoryDropdownResponse?> coreValuesDropdown() async {
+  CategoryDropdownResponse? response;
+  try {
+    response = CategoryDropdownResponse.fromJson(await handleResponse(
+      await buildHttpResponse('core_value/dropdown',
+          isAuth: false, method: HttpMethodType.get),
+    ));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
 Future<CategoryDropdownResponse?> sponsorDropdown() async {
   CategoryDropdownResponse? response;
   try {
