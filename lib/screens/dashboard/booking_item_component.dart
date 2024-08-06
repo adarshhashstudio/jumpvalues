@@ -1,7 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:jumpvalues/main.dart';
-import 'package:jumpvalues/models/booking_item_model.dart';
 import 'package:jumpvalues/models/requested_sessions_response_model.dart';
 import 'package:jumpvalues/screens/video_calling_module/video_call_page.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
@@ -9,72 +8,55 @@ import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart' as nb;
 
-class BookingItemComponent extends StatelessWidget {
+class BookingItemComponent extends StatefulWidget {
   BookingItemComponent({
     required this.showButtons,
-    required this.bookingItem,
     this.serviceResource,
     this.index,
   });
   final bool showButtons;
-  final BookingItem bookingItem;
   final RequestedSession? serviceResource;
   final int? index;
+
+  @override
+  State<BookingItemComponent> createState() => _BookingItemComponentState();
+}
+
+class _BookingItemComponentState extends State<BookingItemComponent> {
+
+  
 
   @override
   Widget build(BuildContext context) => buildBookingItem(context);
 
   Widget buildBookingItem(BuildContext context) {
     // Use data from bookingItem instead of dummy data
-    var status = serviceResource?.status ?? bookingItem.status ?? 0;
+    var status = widget.serviceResource?.status ?? 0;
     SessionStatus sessionStatus;
 
     if (status == 0) {
-      status = 'pending';
       sessionStatus = SessionStatus.pending;
     } else if (status == 1) {
-      status = 'pending';
       sessionStatus = SessionStatus.pending;
     } else if (status == 2) {
-      status = 'accepted';
       sessionStatus = SessionStatus.accepted;
     } else if (status == 3) {
-      status = 'rejected';
       sessionStatus = SessionStatus.rejected;
     } else if (status == 4) {
-      status = 'in-progress';
       sessionStatus = SessionStatus.inProgress;
     } else if (status == 5) {
-      status = 'in-progress';
       sessionStatus = SessionStatus.inProgress;
     } else if (status == 6) {
-      status = 'in-progress';
       sessionStatus = SessionStatus.inProgress;
     } else if (status == 7) {
-      status = 'completed';
       sessionStatus = SessionStatus.completed;
     } else if (status == 8) {
-      status = 'completed';
       sessionStatus = SessionStatus.completed;
     } else if (status == 9) {
-      status = 'completed';
       sessionStatus = SessionStatus.completed;
     } else {
-      status = 'expired';
       sessionStatus = SessionStatus.expired;
     }
-
-    var imageUrl = getImageUrl(serviceResource?.userDp);
-    var bookingId = serviceResource?.id ?? bookingItem.bookingId ?? 'N/A';
-    var serviceName =
-        serviceResource?.name ?? bookingItem.serviceName ?? 'Service';
-    var date = DateFormat('yyyy-MM-dd').format(DateTime.now()).toString();
-    var time = DateFormat.jms().format(DateTime.now());
-    var customerName =
-        serviceResource?.name ?? bookingItem.customerName ?? 'Customer';
-    var description = serviceResource?.remark ??
-        bookingItem.description ??
-        'No description available';
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -86,12 +68,34 @@ class BookingItemComponent extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CachedImageWidget(
-                url: imageUrl,
-                height: 80,
-                width: 80,
-                fit: BoxFit.cover,
-                radius: BorderRadius.circular(12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: CachedNetworkImage(
+                    imageUrl: getImageUrl(widget.serviceResource?.userDp),
+                    fit: BoxFit.cover,
+                    height: 80,
+                    width: 80,
+                    placeholder: (context, _) => Center(
+                      child: Icon(
+                        Icons.person,
+                        size: 40,
+                        color: Colors.grey.shade400,
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Center(
+                      child: Icon(
+                        Icons.person,
+                        size: 40,
+                        color: Colors.grey.shade400,
+                      ),
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -123,7 +127,7 @@ class BookingItemComponent extends StatelessWidget {
                           ],
                         ),
                         Text(
-                          '#$bookingId',
+                          '#${widget.serviceResource?.id}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).primaryColor,
@@ -133,7 +137,7 @@ class BookingItemComponent extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '$serviceName $customerName',
+                      '${widget.serviceResource?.name}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: nb.textSecondaryColor,
@@ -147,10 +151,12 @@ class BookingItemComponent extends StatelessWidget {
               ),
             ],
           ),
-          if (description.isNotEmpty)
-            buildDescriptionSection(
-                context, date, time, customerName, description),
-          if (showButtons) buildButtons(context, sessionStatus)
+          buildDescriptionSection(
+              context,
+              widget.serviceResource?.date ?? '',
+              widget.serviceResource?.startTime ?? '',
+              widget.serviceResource?.remark ?? 'N/A'),
+          if (widget.showButtons) buildButtons(context, sessionStatus)
         ],
       ),
     ).onTap(() {
@@ -162,7 +168,6 @@ class BookingItemComponent extends StatelessWidget {
     BuildContext context,
     String date,
     String time,
-    String customerName,
     String description,
   ) =>
       Container(

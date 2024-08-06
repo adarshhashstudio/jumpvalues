@@ -1,8 +1,6 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/models/booking_item_model.dart';
 import 'package:jumpvalues/models/requested_sessions_response_model.dart';
-import 'package:jumpvalues/models/service_resource.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/dashboard/booking_item_component.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
@@ -29,6 +27,8 @@ class _ClientSessionsState extends State<ClientSessions> {
   int _currentPage = 1;
   bool _isLoading = false;
   bool _hasMoreData = true;
+
+  final Debouncer _debouncer = Debouncer(milliseconds: 500);
 
   @override
   void initState() {
@@ -110,7 +110,7 @@ class _ClientSessionsState extends State<ClientSessions> {
       requestedSessions.clear();
       _hasMoreData = true;
     });
-    await clientRequestedSessions();
+    await clientRequestedSessions(searchData: searchController.text);
   }
 
   @override
@@ -169,7 +169,6 @@ class _ClientSessionsState extends State<ClientSessions> {
                       }
                       return BookingItemComponent(
                         showButtons: true,
-                        bookingItem: BookingItem(),
                         serviceResource: requestedSessions[index],
                         index: index,
                       );
@@ -195,14 +194,21 @@ class _ClientSessionsState extends State<ClientSessions> {
                               suffix: GestureDetector(
                                 onTap: () {
                                   setState(() {
+                                    hideKeyboard(context);
                                     searchController.clear();
                                     isSearching = false;
+                                    _refreshBookingItems();
                                   });
                                 },
                                 child: const Icon(Icons.clear),
                               ),
                               onChanged: (value) {
-                                setState(() {});
+                                _debouncer.run(() {
+                                  setState(() {
+                                    isSearching = true;
+                                    _refreshBookingItems();
+                                  });
+                                });
                               },
                             )
                           : Container(

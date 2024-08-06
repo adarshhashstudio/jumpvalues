@@ -7,7 +7,7 @@ import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
-class ClientAllCoaches extends StatefulWidget { 
+class ClientAllCoaches extends StatefulWidget {
   const ClientAllCoaches({super.key});
 
   @override
@@ -99,7 +99,7 @@ class _ClientAllCoachesState extends State<ClientAllCoaches> {
                 ? dataNotFoundWidget(context, onTap: _refreshCoachItems)
                 : ListView.separated(
                     controller: _scrollController,
-                    itemCount: availableCoachList.length + 1,
+                    itemCount: availableCoachList.length,
                     separatorBuilder: (context, index) => SizedBox(
                           height: MediaQuery.of(context).size.height * 0.03,
                         ),

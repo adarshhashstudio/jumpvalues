@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/models/booking_item_model.dart';
 import 'package:jumpvalues/models/service_resource.dart';
 import 'package:jumpvalues/screens/dashboard/booking_item_component.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
@@ -115,7 +114,6 @@ class _CoachDashboardState extends State<CoachDashboard> {
                         itemBuilder: (context, index) => BookingItemComponent(
                           showButtons: false,
                           // serviceResource: _bookingItems[index],
-                          bookingItem: BookingItem(),
                           index: index,
                         ),
                       ),
