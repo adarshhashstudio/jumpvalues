@@ -24,7 +24,7 @@ class TimeSlotsListResponseModel {
 }
 
 class TimeSlotListItem {
-  TimeSlotListItem({this.id, this.start, this.end, this.title});
+  TimeSlotListItem({this.id, this.start, this.end, this.title, this.status});
 
   factory TimeSlotListItem.fromJson(Map<String, dynamic> json) =>
       TimeSlotListItem(
@@ -32,16 +32,19 @@ class TimeSlotListItem {
         start: json['start'] as String?,
         end: json['end'] as String?,
         title: json['title'] as String?,
+        status: json['status'] as int?,
       );
   int? id;
   String? start;
   String? end;
   String? title;
+  int? status;
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'start': start,
         'end': end,
         'title': title,
+        'status': status,
       };
 }

@@ -50,16 +50,16 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                 widget.onSlotSelected(selectedDate, startTime, endTime,
                     selectSlotRemark, allSlots);
               },
-              onSlotBooking:
-                  (selectedDate, startTime, endTime, bookSlotRemark, timeSheetId) {
+              onSlotBooking: (selectedDate, startTime, endTime, bookSlotRemark,
+                  timeSheetId) {
                 // Handle the selected slot details and the list of all slots here
                 debugPrint('Selected Date: $selectedDate');
                 debugPrint('Start Time: $startTime');
                 debugPrint('End Time: $endTime');
                 debugPrint('Title: $bookSlotRemark');
                 if (widget.onSlotBooking != null) {
-                  widget.onSlotBooking!(
-                      selectedDate, startTime, endTime, bookSlotRemark, timeSheetId);
+                  widget.onSlotBooking!(selectedDate, startTime, endTime,
+                      bookSlotRemark, timeSheetId);
                 }
               },
               startBooking: widget.startBooking,
@@ -73,153 +73,153 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
         ),
       );
 
-void _onCalendarTapped({
-  required BuildContext context,
-  required CalendarTapDetails details,
-  required List<Meeting> meetings,
-  required void Function(DateTime selectedDate, DateTime startTime,
-          DateTime endTime, String selectSlotRemark, List<Meeting> allSlots)
-      onSlotSelected,
-  required void Function(
-    DateTime selectedDate,
-    DateTime startTime,
-    DateTime endTime,
-    String bookSlotRemark,
-    int timeSheetId,
-  ) onSlotBooking,
-  required bool startBooking,
-}) {
-  if (details.targetElement == CalendarElement.calendarCell) {
-    if (startBooking) {
-      SnackBarHelper.showStatusSnackBar(
-          context, StatusIndicator.warning, 'Not Available for booking.');
-    } else {
-      var selectedDate = details.date!;
-      var startTime = DateTime(
-          selectedDate.year,
-          selectedDate.month,
-          selectedDate.day,
-          selectedDate.hour,
-          selectedDate.minute,
-          selectedDate.second);
-      var endTime = startTime.add(const Duration(hours: 1));
-      _showSlotDialog(context, null, selectedDate, startTime, endTime,
-          meetings, onSlotSelected);
-    }
-  } else if (details.targetElement == CalendarElement.appointment) {
-    final Meeting meeting = details.appointments?.first;
-    if (startBooking) {
-      _showSlotBookingDialog(context, meeting, onSlotBooking);
-    } else {
-      _showSlotDialog(context, meeting, meeting.from, meeting.from,
-          meeting.to, meetings, onSlotSelected);
+  void _onCalendarTapped({
+    required BuildContext context,
+    required CalendarTapDetails details,
+    required List<Meeting> meetings,
+    required void Function(DateTime selectedDate, DateTime startTime,
+            DateTime endTime, String selectSlotRemark, List<Meeting> allSlots)
+        onSlotSelected,
+    required void Function(
+      DateTime selectedDate,
+      DateTime startTime,
+      DateTime endTime,
+      String bookSlotRemark,
+      int timeSheetId,
+    ) onSlotBooking,
+    required bool startBooking,
+  }) {
+    if (details.targetElement == CalendarElement.calendarCell) {
+      if (startBooking) {
+        SnackBarHelper.showStatusSnackBar(
+            context, StatusIndicator.warning, 'Not Available for booking.');
+      } else {
+        var selectedDate = details.date!;
+        var startTime = DateTime(
+            selectedDate.year,
+            selectedDate.month,
+            selectedDate.day,
+            selectedDate.hour,
+            selectedDate.minute,
+            selectedDate.second);
+        var endTime = startTime.add(const Duration(hours: 1));
+        _showSlotDialog(context, null, selectedDate, startTime, endTime,
+            meetings, onSlotSelected);
+      }
+    } else if (details.targetElement == CalendarElement.appointment) {
+      final Meeting meeting = details.appointments?.first;
+      if (startBooking) {
+        _showSlotBookingDialog(context, meeting, onSlotBooking);
+      } else {
+        _showSlotDialog(context, meeting, meeting.from, meeting.from,
+            meeting.to, meetings, onSlotSelected);
+      }
     }
   }
-}
 
-void _showSlotBookingDialog(
-  BuildContext context,
-  Meeting? meeting,
-  void Function(DateTime selectedDate, DateTime startTime, DateTime endTime,
-          String bookSlotRemark, int timeSheetId)
-      onSlotBooking,
-) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Column(
-        children: [
-          Text('Book Slots', style: boldTextStyle(size: 18)),
-          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-          const Divider(height: 0, color: Colors.black12),
-        ],
-      ),
-      content: StatefulBuilder(
-        builder: (context, setState) => SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (meeting?.remark != null)
-                Text.rich(
-                  TextSpan(
-                    text: 'Remark : ',
-                    style: boldTextStyle(),
-                    children: [
-                      TextSpan(
-                          text:
-                              '${meeting!.remark.isEmpty ? 'No Description!' : meeting.remark}',
-                          style:
-                              const TextStyle(fontWeight: FontWeight.normal))
-                    ],
+  void _showSlotBookingDialog(
+    BuildContext context,
+    Meeting? meeting,
+    void Function(DateTime selectedDate, DateTime startTime, DateTime endTime,
+            String bookSlotRemark, int timeSheetId)
+        onSlotBooking,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Column(
+          children: [
+            Text('Book Slots', style: boldTextStyle(size: 18)),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+            const Divider(height: 0, color: Colors.black12),
+          ],
+        ),
+        content: StatefulBuilder(
+          builder: (context, setState) => SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (meeting?.remark != null)
+                  Text.rich(
+                    TextSpan(
+                      text: 'Remark : ',
+                      style: boldTextStyle(),
+                      children: [
+                        TextSpan(
+                            text:
+                                '${meeting!.remark.isEmpty ? 'No Description!' : meeting.remark}',
+                            style:
+                                const TextStyle(fontWeight: FontWeight.normal))
+                      ],
+                    ),
                   ),
+                if (meeting?.remark != null)
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                if (meeting?.remark != null) divider(),
+                if (meeting?.remark != null)
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                labelContainer(
+                  label: 'Date',
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height * 0.06,
+                  labelContainerSpace: 8,
+                  alignment: Alignment.centerLeft,
+                  text:
+                      '${meeting?.from.year}-${meeting?.from.month.toString().padLeft(2, '0')}-${meeting?.from.day.toString().padLeft(2, '0')}',
                 ),
-              if (meeting?.remark != null)
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-              if (meeting?.remark != null) divider(),
-              if (meeting?.remark != null)
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-              labelContainer(
-                label: 'Date',
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height * 0.06,
-                labelContainerSpace: 8,
-                alignment: Alignment.centerLeft,
-                text:
-                    '${meeting?.from.year}-${meeting?.from.month.toString().padLeft(2, '0')}-${meeting?.from.day.toString().padLeft(2, '0')}',
-              ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-              Row(
-                children: [
-                  labelContainer(
-                    label: 'Start Time:',
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height * 0.06,
-                    labelContainerSpace: 8,
-                    alignment: Alignment.centerLeft,
-                    text:
-                        '${DateFormat('hh:mm a').format(DateTime(meeting!.from.year, meeting.from.month, meeting.from.day, meeting.from.hour, meeting.from.minute, meeting.from.second)).toString().padLeft(2, '0')}',
-                  ).expand(),
-                  SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-                  labelContainer(
-                    label: 'End Time:',
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height * 0.06,
-                    labelContainerSpace: 8,
-                    alignment: Alignment.centerLeft,
-                    text:
-                        '${DateFormat('hh:mm a').format(meeting.to).toString().padLeft(2, '0')}',
-                  ).expand(),
-                ],
-              ),
-            ],
+                SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                Row(
+                  children: [
+                    labelContainer(
+                      label: 'Start Time:',
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height * 0.06,
+                      labelContainerSpace: 8,
+                      alignment: Alignment.centerLeft,
+                      text:
+                          '${DateFormat('hh:mm a').format(DateTime(meeting!.from.year, meeting.from.month, meeting.from.day, meeting.from.hour, meeting.from.minute, meeting.from.second)).toString().padLeft(2, '0')}',
+                    ).expand(),
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+                    labelContainer(
+                      label: 'End Time:',
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height * 0.06,
+                      labelContainerSpace: 8,
+                      alignment: Alignment.centerLeft,
+                      text:
+                          '${DateFormat('hh:mm a').format(meeting.to).toString().padLeft(2, '0')}',
+                    ).expand(),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel',
+                style: boldTextStyle(size: 16, color: primaryColor)),
+          ),
+          AppButton(
+            onTap: () {
+              Navigator.of(context).pop();
+              onSlotBooking(meeting!.from, meeting.from, meeting.to,
+                  meeting.remark, meeting.timeSheetId);
+            },
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            shapeBorder: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(360)),
+            textColor: white,
+            color: primaryColor,
+            text: 'Book Slot',
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Text('Cancel',
-              style: boldTextStyle(size: 16, color: primaryColor)),
-        ),
-        AppButton(
-          onTap: () {
-            Navigator.of(context).pop();
-            onSlotBooking(
-                meeting!.from, meeting.from, meeting.to, meeting.remark, meeting.timeSheetId);
-          },
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          shapeBorder: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(360)),
-          textColor: white,
-          color: primaryColor,
-          text: 'Book Slot',
-        ),
-      ],
-    ),
-  );
-}
+    );
+  }
 
   void _showSlotDialog(
     BuildContext context,
@@ -476,7 +476,6 @@ class MeetingDataSource extends CalendarDataSource {
     return meetingData;
   }
 }
-
 
 class Meeting {
   factory Meeting.fromJson(Map<String, dynamic> json) => Meeting(

@@ -31,10 +31,13 @@ class _CoachMySlotsState extends State<CoachMySlots> {
     setState(() {
       globalMeetings = serverTimeSlotsList
           .map((slot) => Meeting(
-              slot.title ?? '',
+              '${slot.status == 1 ? 'Booked - ${slot.title ?? ''}' : slot.title ?? ''}',
               DateTime.parse(slot.start!),
               DateTime.parse(slot.end!),
-              Colors.green, // Assuming a default color for the meeting
+              slot.status == 1
+                  ? Colors.blue
+                  : const Color(
+                      0xFF0F8644), // Assuming a default color for the meeting
               slot.id ?? -1))
           .toList();
     });
