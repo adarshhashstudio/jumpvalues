@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/requested_sessions_response_model.dart';
+import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/video_calling_module/video_call_page.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -23,8 +24,35 @@ class BookingItemComponent extends StatefulWidget {
 }
 
 class _BookingItemComponentState extends State<BookingItemComponent> {
+  bool loader = false;
 
-  
+  Future<void> coachAcceptOrRejectSessions(int status) async {
+    setState(() {
+      loader = true;
+    });
+    try {
+      var request = <String, dynamic>{
+        'status': status,
+      };
+
+      var response = await acceptOrRejectSessions(request);
+      if (response?.status == true) {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
+            response?.message ?? 'Saved Successfully.');
+      } else {
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? 'Something went wrong');
+        }
+      }
+    } catch (e) {
+      debugPrint('coachAcceptOrRejectSessions Error: $e');
+    } finally {
+      setState(() {
+        loader = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) => buildBookingItem(context);
@@ -37,22 +65,12 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
     if (status == 0) {
       sessionStatus = SessionStatus.pending;
     } else if (status == 1) {
-      sessionStatus = SessionStatus.pending;
-    } else if (status == 2) {
       sessionStatus = SessionStatus.accepted;
-    } else if (status == 3) {
+    } else if (status == 2) {
       sessionStatus = SessionStatus.rejected;
+    } else if (status == 3) {
+      sessionStatus = SessionStatus.inProgress;
     } else if (status == 4) {
-      sessionStatus = SessionStatus.inProgress;
-    } else if (status == 5) {
-      sessionStatus = SessionStatus.inProgress;
-    } else if (status == 6) {
-      sessionStatus = SessionStatus.inProgress;
-    } else if (status == 7) {
-      sessionStatus = SessionStatus.completed;
-    } else if (status == 8) {
-      sessionStatus = SessionStatus.completed;
-    } else if (status == 9) {
       sessionStatus = SessionStatus.completed;
     } else {
       sessionStatus = SessionStatus.expired;

@@ -372,3 +372,18 @@ Future<BaseResponseModel?> clientBookSession(
   }
   return response;
 }
+
+Future<BaseResponseModel?> acceptOrRejectSessions(
+    Map<String, dynamic> request) async {
+  BaseResponseModel? response;
+  try {
+    response = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(
+            'session/acceptOrRejectSessions/${appStore.userId}',
+            request: request,
+            method: HttpMethodType.patch)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
