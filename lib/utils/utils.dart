@@ -139,6 +139,18 @@ const Map<SessionStatus, int> sessionStatusCodes = {
   SessionStatus.abandoned: 7,
 };
 
+const Map<int, SessionStatus> sessionStatusFromCodes = {
+  -1: SessionStatus.all,
+  0: SessionStatus.pending,
+  1: SessionStatus.accepted,
+  4: SessionStatus.waitingInProgress,
+  2: SessionStatus.rejected,
+  5: SessionStatus.completed,
+  6: SessionStatus.expired,
+  3: SessionStatus.booked,
+  7: SessionStatus.abandoned,
+};
+
 Color getColorByStatus(SessionStatus status) =>
     statusColors[status] ?? Colors.grey;
 
@@ -147,6 +159,9 @@ String getNameByStatus(SessionStatus status) =>
 
 int getSessionStatusCode(SessionStatus status) =>
     sessionStatusCodes[status] ?? -1;
+
+SessionStatus getSessionStatusFromCode(int statusCode) =>
+    sessionStatusFromCodes[statusCode] ?? SessionStatus.all;
 
 class Debouncer {
   Debouncer({required this.milliseconds});

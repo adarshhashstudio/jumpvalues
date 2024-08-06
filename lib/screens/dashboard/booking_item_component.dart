@@ -14,10 +14,12 @@ class BookingItemComponent extends StatefulWidget {
     required this.showButtons,
     this.serviceResource,
     this.index,
+    required this.onActionPerformed,
   });
   final bool showButtons;
   final RequestedSession? serviceResource;
   final int? index;
+  final VoidCallback onActionPerformed;
 
   @override
   State<BookingItemComponent> createState() => _BookingItemComponentState();
@@ -58,23 +60,8 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
   Widget build(BuildContext context) => buildBookingItem(context);
 
   Widget buildBookingItem(BuildContext context) {
-    // Use data from bookingItem instead of dummy data
-    var status = widget.serviceResource?.status ?? 0;
-    SessionStatus sessionStatus;
-
-    if (status == 0) {
-      sessionStatus = SessionStatus.pending;
-    } else if (status == 1) {
-      sessionStatus = SessionStatus.accepted;
-    } else if (status == 2) {
-      sessionStatus = SessionStatus.rejected;
-    } else if (status == 3) {
-       sessionStatus = SessionStatus.waitingInProgress;
-    } else if (status == 4) {
-     sessionStatus = SessionStatus.completed;
-    } else {
-      sessionStatus = SessionStatus.expired;
-    } 
+    var sessionStatus =
+        getSessionStatusFromCode(widget.serviceResource?.status ?? -1);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -238,6 +225,32 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
         ),
       );
 
+  void showConfirmationDialog(BuildContext outerContext, int status) {
+    showDialog(
+      context: outerContext,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Are you sure?'),
+        content: const Text('You want to decline this session?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await coachAcceptOrRejectSessions(status);
+              widget.onActionPerformed();
+            },
+            child: const Text('Decline'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget buildButtons(BuildContext context, SessionStatus status) => Row(
         children: [
           if (status == SessionStatus.pending)
@@ -249,7 +262,10 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                     textColor: primaryColor,
                     color: nb.white,
                     enabled: true,
-                    onTap: () {},
+                    onTap: () {
+                      showConfirmationDialog(context,
+                          getSessionStatusCode(SessionStatus.rejected));
+                    },
                   ).expand(),
                 if (appStore.userTypeCoach)
                   SizedBox(
@@ -260,7 +276,13 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   textColor: nb.white,
                   color: primaryColor,
                   enabled: true,
-                  onTap: () {},
+                  onTap: () async {
+                    if (appStore.userTypeCoach) {
+                      await coachAcceptOrRejectSessions(
+                          getSessionStatusCode(SessionStatus.accepted));
+                      widget.onActionPerformed();
+                    }
+                  },
                 ).expand(),
               ],
             ).expand(),

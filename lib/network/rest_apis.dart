@@ -381,6 +381,7 @@ Future<BaseResponseModel?> acceptOrRejectSessions(
         await buildHttpResponse(
             'session/acceptOrRejectSessions/${appStore.userId}',
             request: request,
+            isAuth: true,
             method: HttpMethodType.patch)));
   } catch (e) {
     rethrow;

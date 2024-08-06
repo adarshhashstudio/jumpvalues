@@ -155,6 +155,9 @@ class _ClientSessionsState extends State<ClientSessions> {
                         showButtons: true,
                         serviceResource: requestedSessions[index],
                         index: index,
+                        onActionPerformed: () async {
+                          await _refreshBookingItems();
+                        },
                       );
                     }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),
           ),
