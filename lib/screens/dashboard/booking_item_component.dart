@@ -28,7 +28,7 @@ class BookingItemComponent extends StatefulWidget {
 class _BookingItemComponentState extends State<BookingItemComponent> {
   bool loader = false;
 
-  Future<void> coachAcceptOrRejectSessions(int status,int sessionId) async {
+  Future<void> coachAcceptOrRejectSessions(int status, int sessionId) async {
     setState(() {
       loader = true;
     });
@@ -161,7 +161,9 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
               widget.serviceResource?.date ?? '',
               widget.serviceResource?.startTime ?? '',
               widget.serviceResource?.remark ?? 'N/A'),
-          if (widget.showButtons) buildButtons(context, sessionStatus, widget.serviceResource?.id??-1)
+          if (widget.showButtons)
+            buildButtons(
+                context, sessionStatus, widget.serviceResource?.id ?? -1)
         ],
       ),
     ).onTap(() {
@@ -225,7 +227,8 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
         ),
       );
 
-  void showConfirmationDialog(BuildContext outerContext, int status, int sessionId) {
+  void showConfirmationDialog(
+      BuildContext outerContext, int status, int sessionId) {
     showDialog(
       context: outerContext,
       builder: (BuildContext context) => AlertDialog(
@@ -251,7 +254,9 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
     );
   }
 
-  Widget buildButtons(BuildContext context, SessionStatus status, int sessionId) => Row(
+  Widget buildButtons(
+          BuildContext context, SessionStatus status, int sessionId) =>
+      Row(
         children: [
           if (status == SessionStatus.pending)
             Row(
@@ -263,8 +268,10 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                     color: nb.white,
                     enabled: true,
                     onTap: () {
-                      showConfirmationDialog(context,
-                          getSessionStatusCode(SessionStatus.rejected), sessionId);
+                      showConfirmationDialog(
+                          context,
+                          getSessionStatusCode(SessionStatus.rejected),
+                          sessionId);
                     },
                   ).expand(),
                 if (appStore.userTypeCoach)
@@ -279,7 +286,8 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   onTap: () async {
                     if (appStore.userTypeCoach) {
                       await coachAcceptOrRejectSessions(
-                          getSessionStatusCode(SessionStatus.accepted), sessionId);
+                          getSessionStatusCode(SessionStatus.accepted),
+                          sessionId);
                       widget.onActionPerformed();
                     }
                   },
@@ -303,6 +311,50 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
               children: [
                 AppButton(
                   text: 'Rejected',
+                  textColor: Colors.black38,
+                  color: Colors.grey.withOpacity(0.5),
+                  onTap: () {},
+                ).expand(),
+              ],
+            ).expand(),
+          if (status == SessionStatus.abandoned)
+            Row(
+              children: [
+                AppButton(
+                  text: 'Abandoned',
+                  textColor: Colors.black38,
+                  color: Colors.grey.withOpacity(0.5),
+                  onTap: () {},
+                ).expand(),
+              ],
+            ).expand(),
+          if (status == SessionStatus.completed)
+            Row(
+              children: [
+                AppButton(
+                  text: 'Completed',
+                  textColor: Colors.black38,
+                  color: Colors.grey.withOpacity(0.5),
+                  onTap: () {},
+                ).expand(),
+              ],
+            ).expand(),
+          if (status == SessionStatus.expired)
+            Row(
+              children: [
+                AppButton(
+                  text: 'Expired',
+                  textColor: Colors.black38,
+                  color: Colors.grey.withOpacity(0.5),
+                  onTap: () {},
+                ).expand(),
+              ],
+            ).expand(),
+          if (status == SessionStatus.booked)
+            Row(
+              children: [
+                AppButton(
+                  text: 'Booked',
                   textColor: Colors.black38,
                   color: Colors.grey.withOpacity(0.5),
                   onTap: () {},
