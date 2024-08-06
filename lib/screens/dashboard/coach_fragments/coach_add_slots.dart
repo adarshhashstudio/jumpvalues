@@ -67,8 +67,13 @@ class _CoachMySlotsState extends State<CoachMySlots> {
     }
   }
 
-  void handleSingleTimeSlotBooking(DateTime date, DateTime startTime,
-      DateTime endTime, String remark, int? timeSheetId) async {
+  void handleSingleTimeSlotBooking(
+      DateTime date,
+      DateTime startTime,
+      DateTime endTime,
+      String remark,
+      int? timeSheetId,
+      bool isUpdating) async {
     try {
       var rDate = formatDate(date);
       var rStartTime = formatTime(startTime);
@@ -79,8 +84,14 @@ class _CoachMySlotsState extends State<CoachMySlots> {
       debugPrint('End Time: $rEndTime');
       debugPrint('Remark: $remark');
 
-      await createAndUpdateSingleTimeSlot(rDate, rStartTime, rEndTime, remark,
-          timeSheetId == 0 ? null : timeSheetId);
+      if (!isUpdating) {
+        // Only Delete
+        await deleteSingleTimeSlot(timeSheetId ?? -1);
+      } else {
+        // Create or Update
+        await createAndUpdateSingleTimeSlot(rDate, rStartTime, rEndTime, remark,
+            timeSheetId == 0 ? null : timeSheetId);
+      }
     } catch (e) {
       debugPrint('handleSingleTimeSlotBooking error: $e');
     }
@@ -105,7 +116,7 @@ class _CoachMySlotsState extends State<CoachMySlots> {
 
       if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
-            response?.message ?? 'Slot Booked Successfully');
+            response?.message ?? 'Slot Updated Successfully');
         await getAllTimeSlotsForCoach();
       } else {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
@@ -120,15 +131,39 @@ class _CoachMySlotsState extends State<CoachMySlots> {
     }
   }
 
+  Future<void> deleteSingleTimeSlot(int timeSheetId) async {
+    setState(() {
+      loader = true;
+    });
+    try {
+      var response = await deleteSingleSlot(timeSheetId: timeSheetId);
+
+      if (response?.status == true) {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
+            response?.message ?? 'Slot Deleted Successfully');
+        await getAllTimeSlotsForCoach();
+      } else {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+            response?.message ?? 'Something went wrong.');
+      }
+    } catch (e) {
+      debugPrint('deleteSingleTimeSlot error: $e');
+    } finally {
+      setState(() {
+        loader = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Stack(
         children: [
           SlotsCalendar(
             meetings: globalMeetings,
-            onSlotSelected:
-                (sDate, sSTime, sETime, sRemark, sMeeting, sTimeSheetId) {
+            onSlotSelected: (sDate, sSTime, sETime, sRemark, sMeeting,
+                sTimeSheetId, sIsUpdating) {
               handleSingleTimeSlotBooking(
-                  sDate, sSTime, sETime, sRemark, sTimeSheetId);
+                  sDate, sSTime, sETime, sRemark, sTimeSheetId, sIsUpdating);
             },
           ),
           Positioned(

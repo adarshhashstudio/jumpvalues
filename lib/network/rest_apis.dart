@@ -279,6 +279,18 @@ Future<BaseResponseModel?> createAndUpdateSingleSlot(
   return response;
 }
 
+Future<BaseResponseModel?> deleteSingleSlot({required int timeSheetId}) async {
+  BaseResponseModel? response;
+  try {
+    response = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('time-slot/delete/$timeSheetId',
+            isAuth: true, method: HttpMethodType.delete)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
 Future<TimeSlotsListResponseModel?> getTimeSlotsForCoach(int coachId) async {
   TimeSlotsListResponseModel?
       response; // For Booked - 1, default - 0 (Available)

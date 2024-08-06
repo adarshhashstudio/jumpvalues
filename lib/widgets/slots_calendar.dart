@@ -14,7 +14,8 @@ class SlotsCalendar extends StatefulWidget {
       this.onSlotBooking,
       this.startBooking = false});
   final List<Meeting> meetings;
-  final void Function(DateTime, DateTime, DateTime, String, List<Meeting>, int)
+  final void Function(
+          DateTime, DateTime, DateTime, String, List<Meeting>, int, bool)
       onSlotSelected;
   final void Function(DateTime, DateTime, DateTime, String, int)? onSlotBooking;
   final bool startBooking;
@@ -38,7 +39,7 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
               details: details,
               meetings: widget.meetings,
               onSlotSelected: (selectedDate, startTime, endTime,
-                  selectSlotRemark, allSlots, timeSheetId) {
+                  selectSlotRemark, allSlots, timeSheetId, isUpdating) {
                 // Handle the selected slot details and the list of all slots here
                 debugPrint('Selected Date: $selectedDate');
                 debugPrint('Start Time: $startTime');
@@ -48,7 +49,7 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                   debugPrint('${allSlots[i].remark}');
                 }
                 widget.onSlotSelected(selectedDate, startTime, endTime,
-                    selectSlotRemark, allSlots, timeSheetId);
+                    selectSlotRemark, allSlots, timeSheetId, isUpdating);
               },
               onSlotBooking: (selectedDate, startTime, endTime, bookSlotRemark,
                   timeSheetId) {
@@ -83,7 +84,8 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
             DateTime endTime,
             String selectSlotRemark,
             List<Meeting> allSlots,
-            int timeSheetId)
+            int timeSheetId,
+            bool isUpdating)
         onSlotSelected,
     required void Function(
       DateTime selectedDate,
@@ -233,8 +235,14 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
     DateTime startTime,
     DateTime endTime,
     List<Meeting> meetings,
-    void Function(DateTime selectedDate, DateTime startTime, DateTime endTime,
-            String selectSlotRemark, List<Meeting> allSlots, int timeSheetId)
+    void Function(
+            DateTime selectedDate,
+            DateTime startTime,
+            DateTime endTime,
+            String selectSlotRemark,
+            List<Meeting> allSlots,
+            int timeSheetId,
+            bool isUpdating)
         onSlotSelected,
   ) {
     final remarkController = TextEditingController(text: meeting?.remark ?? '');
@@ -397,7 +405,8 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                         ? 'Available Slot'
                         : remarkController.text,
                     meetings,
-                    meeting.timeSheetId);
+                    meeting.timeSheetId,
+                    false);
               },
               padding: const EdgeInsets.symmetric(horizontal: 16),
               shapeBorder: RoundedRectangleBorder(
@@ -451,7 +460,8 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                         ? 'Available Slot'
                         : remarkController.text,
                     meetings,
-                    meeting?.timeSheetId ?? -1);
+                    meeting?.timeSheetId ?? -1,
+                    true);
               }
             },
             padding: EdgeInsets.zero,
