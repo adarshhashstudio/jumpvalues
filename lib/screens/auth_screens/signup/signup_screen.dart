@@ -196,13 +196,14 @@ class _SignupScreenState extends State<SignupScreen>
   }
 
   void showCategoryDialog(BuildContext context, List<Category> categories,
-      Function(List<Category>) onConfirm) {
+      Function(List<Category>) onConfirm, {bool selectAllButton = true}) {
     showDialog(
       context: context,
       builder: (BuildContext context) => CategoryDialog(
         categories: categories,
         onConfirm: onConfirm,
         selectedCat: categories.where((cat) => cat.isSelected).toList(),
+        selectAllButton: selectAllButton,
       ),
     );
   }
@@ -1288,7 +1289,7 @@ class _SignupScreenState extends State<SignupScreen>
                                   'Selected Core Values: ${category.name} (ID: ${category.id})');
                             }
                           }
-                        });
+                        }, selectAllButton: false);
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

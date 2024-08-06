@@ -6,10 +6,12 @@ class CategoryDialog extends StatefulWidget {
     required this.categories,
     required this.onConfirm,
     required this.selectedCat,
+    this.selectAllButton = true,
   });
   final List<Category> categories;
   final Function(List<Category>) onConfirm;
   final List<Category> selectedCat;
+  final bool selectAllButton;
 
   @override
   _CategoryDialogState createState() => _CategoryDialogState();
@@ -103,17 +105,18 @@ class _CategoryDialogState extends State<CategoryDialog> {
                 onChanged: _filterCategories,
               ),
               const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: _selectAll,
-                  icon: const Icon(Icons.select_all),
-                  label: const Text(
-                    'Select All',
-                    style: TextStyle(fontSize: 12),
+              if (widget.selectAllButton)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: _selectAll,
+                    icon: const Icon(Icons.select_all),
+                    label: const Text(
+                      'Select All',
+                      style: TextStyle(fontSize: 12),
+                    ),
                   ),
                 ),
-              ),
               SizedBox(
                 width: MediaQuery.of(context).size.width * 1,
                 height: MediaQuery.of(context).size.height * 0.5,
