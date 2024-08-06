@@ -79,8 +79,8 @@ class _CoachMySlotsState extends State<CoachMySlots> {
       debugPrint('End Time: $rEndTime');
       debugPrint('Remark: $remark');
 
-      await createAndUpdateSingleTimeSlot(
-          rDate, rStartTime, rEndTime, remark, timeSheetId);
+      await createAndUpdateSingleTimeSlot(rDate, rStartTime, rEndTime, remark,
+          timeSheetId == 0 ? null : timeSheetId);
     } catch (e) {
       debugPrint('handleSingleTimeSlotBooking error: $e');
     }
@@ -125,8 +125,10 @@ class _CoachMySlotsState extends State<CoachMySlots> {
         children: [
           SlotsCalendar(
             meetings: globalMeetings,
-            onSlotSelected: (p0, p1, p2, p3, p4) {
-              handleSingleTimeSlotBooking(p0, p1, p2, p3, -1);
+            onSlotSelected:
+                (sDate, sSTime, sETime, sRemark, sMeeting, sTimeSheetId) {
+              handleSingleTimeSlotBooking(
+                  sDate, sSTime, sETime, sRemark, sTimeSheetId);
             },
           ),
           Positioned(

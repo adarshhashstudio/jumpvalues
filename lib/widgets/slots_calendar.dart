@@ -14,7 +14,7 @@ class SlotsCalendar extends StatefulWidget {
       this.onSlotBooking,
       this.startBooking = false});
   final List<Meeting> meetings;
-  final void Function(DateTime, DateTime, DateTime, String, List<Meeting>)
+  final void Function(DateTime, DateTime, DateTime, String, List<Meeting>, int)
       onSlotSelected;
   final void Function(DateTime, DateTime, DateTime, String, int)? onSlotBooking;
   final bool startBooking;
@@ -38,7 +38,7 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
               details: details,
               meetings: widget.meetings,
               onSlotSelected: (selectedDate, startTime, endTime,
-                  selectSlotRemark, allSlots) {
+                  selectSlotRemark, allSlots, timeSheetId) {
                 // Handle the selected slot details and the list of all slots here
                 debugPrint('Selected Date: $selectedDate');
                 debugPrint('Start Time: $startTime');
@@ -48,7 +48,7 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                   debugPrint('${allSlots[i].remark}');
                 }
                 widget.onSlotSelected(selectedDate, startTime, endTime,
-                    selectSlotRemark, allSlots);
+                    selectSlotRemark, allSlots, timeSheetId);
               },
               onSlotBooking: (selectedDate, startTime, endTime, bookSlotRemark,
                   timeSheetId) {
@@ -77,8 +77,13 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
     required BuildContext context,
     required CalendarTapDetails details,
     required List<Meeting> meetings,
-    required void Function(DateTime selectedDate, DateTime startTime,
-            DateTime endTime, String selectSlotRemark, List<Meeting> allSlots)
+    required void Function(
+            DateTime selectedDate,
+            DateTime startTime,
+            DateTime endTime,
+            String selectSlotRemark,
+            List<Meeting> allSlots,
+            int timeSheetId)
         onSlotSelected,
     required void Function(
       DateTime selectedDate,
@@ -229,7 +234,7 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
     DateTime endTime,
     List<Meeting> meetings,
     void Function(DateTime selectedDate, DateTime startTime, DateTime endTime,
-            String selectSlotRemark, List<Meeting> allSlots)
+            String selectSlotRemark, List<Meeting> allSlots, int timeSheetId)
         onSlotSelected,
   ) {
     final remarkController = TextEditingController(text: meeting?.remark ?? '');
@@ -384,8 +389,15 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                   meetings.remove(meeting);
                 });
                 Navigator.of(context).pop();
-                onSlotSelected(selectedDate, startTime, endTime,
-                    remarkController.text, meetings);
+                onSlotSelected(
+                    selectedDate,
+                    startTime,
+                    endTime,
+                    remarkController.text.isEmpty
+                        ? 'Available Slot'
+                        : remarkController.text,
+                    meetings,
+                    meeting.timeSheetId);
               },
               padding: const EdgeInsets.symmetric(horizontal: 16),
               shapeBorder: RoundedRectangleBorder(
@@ -432,7 +444,14 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                 }
                 Navigator.of(context).pop();
                 onSlotSelected(
-                    selectedDate, startTime, endTime, remarkText, meetings);
+                    selectedDate,
+                    startTime,
+                    endTime,
+                    remarkController.text.isEmpty
+                        ? 'Available Slot'
+                        : remarkController.text,
+                    meetings,
+                    meeting?.timeSheetId ?? -1);
               }
             },
             padding: EdgeInsets.zero,
