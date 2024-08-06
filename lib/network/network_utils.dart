@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:dio/dio.dart';
-
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/network/status_codes.dart';
@@ -104,6 +102,7 @@ Future<Response<dynamic>> buildHttpResponse(
       url: url.toString(),
       endPoint: endPoint,
       headers: jsonEncode(headers),
+      queryParams: jsonEncode(queryParams),
       hasRequest: method == HttpMethodType.post || method == HttpMethodType.put,
       request: jsonEncode(request),
       statusCode: response.statusCode!,
@@ -127,6 +126,7 @@ void apidebugPrint({
   String url = '',
   String endPoint = '',
   String headers = '',
+  String queryParams = '',
   String request = '',
   int statusCode = 0,
   String responseBody = '',
@@ -138,6 +138,8 @@ void apidebugPrint({
   debugPrint('\u001b[93m Url: \u001B[39m $url');
   debugPrint('\u001b[93m endPoint: \u001B[39m \u001B[1m$endPoint\u001B[22m');
   debugPrint('\u001b[93m header: \u001B[39m \u001b[96m$headers\u001B[39m');
+  debugPrint(
+      '\u001b[93m QueryParams: \u001B[39m \u001b[96m$queryParams\u001B[39m');
   debugPrint('\u001b[93m Request: \u001B[39m \u001b[96m$request\u001B[39m');
   debugPrint(statusCode == 200 ? '\u001b[32m' : '\u001b[31m');
   debugPrint('Response ($methodtype) $statusCode: $responseBody');

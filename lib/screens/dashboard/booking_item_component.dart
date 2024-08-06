@@ -69,12 +69,12 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
     } else if (status == 2) {
       sessionStatus = SessionStatus.rejected;
     } else if (status == 3) {
-      sessionStatus = SessionStatus.inProgress;
+       sessionStatus = SessionStatus.waitingInProgress;
     } else if (status == 4) {
-      sessionStatus = SessionStatus.completed;
+     sessionStatus = SessionStatus.completed;
     } else {
       sessionStatus = SessionStatus.expired;
-    }
+    } 
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -287,7 +287,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                 ).expand(),
               ],
             ).expand(),
-          if (status == SessionStatus.inProgress)
+          if (status == SessionStatus.waitingInProgress)
             Row(
               children: [
                 AppButton(

@@ -9,12 +9,15 @@ import 'package:jumpvalues/utils/configs.dart';
 enum StatusIndicator { warning, error, success }
 
 enum SessionStatus {
+  all,
   pending,
   accepted,
   rejected,
-  inProgress,
+  booked,
+  waitingInProgress,
   completed,
   expired,
+  abandoned,
 }
 
 void hideAppKeyboard(context) =>
@@ -101,24 +104,39 @@ void tokenExpired(BuildContext context) async {
   isTokenAvailable(context);
 }
 
-// Define colors for each status
 const Map<SessionStatus, Color> statusColors = {
   SessionStatus.pending: Color(0xFFEA2F2F),
   SessionStatus.accepted: Color(0xFF00968A),
-  SessionStatus.inProgress: Color(0xFFB953C0),
+  SessionStatus.waitingInProgress: Color(0xFFB953C0),
   SessionStatus.rejected: Color(0xFF8D0E06),
   SessionStatus.completed: Color(0xFF3CAE5C),
   SessionStatus.expired: Color(0xFFC41520),
+  SessionStatus.booked: Color(0xFF1E88E5),
+  SessionStatus.abandoned: Color(0xFF9E9E9E),
 };
 
-// Define display names for each status
 const Map<SessionStatus, String> statusDisplayNames = {
+  SessionStatus.all: 'All',
   SessionStatus.pending: 'Pending',
   SessionStatus.accepted: 'Accepted',
-  SessionStatus.inProgress: 'In Progress',
+  SessionStatus.waitingInProgress: 'In Progress',
   SessionStatus.rejected: 'Rejected',
   SessionStatus.completed: 'Completed',
   SessionStatus.expired: 'Expired',
+  SessionStatus.booked: 'Booked',
+  SessionStatus.abandoned: 'Abandoned',
+};
+
+const Map<SessionStatus, int> sessionStatusCodes = {
+  SessionStatus.all: -1,
+  SessionStatus.pending: 0,
+  SessionStatus.accepted: 1,
+  SessionStatus.waitingInProgress: 4,
+  SessionStatus.rejected: 2,
+  SessionStatus.completed: 5,
+  SessionStatus.expired: 6,
+  SessionStatus.booked: 3,
+  SessionStatus.abandoned: 7,
 };
 
 Color getColorByStatus(SessionStatus status) =>
@@ -126,6 +144,9 @@ Color getColorByStatus(SessionStatus status) =>
 
 String getNameByStatus(SessionStatus status) =>
     statusDisplayNames[status] ?? 'Unknown';
+
+int getSessionStatusCode(SessionStatus status) =>
+    sessionStatusCodes[status] ?? -1;
 
 class Debouncer {
   Debouncer({required this.milliseconds});

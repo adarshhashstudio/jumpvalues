@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/models/booking_item_model.dart';
 import 'package:jumpvalues/models/requested_sessions_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/dashboard/booking_item_component.dart';
@@ -18,7 +17,7 @@ class ClientSessions extends StatefulWidget {
 }
 
 class _ClientSessionsState extends State<ClientSessions> {
-  String selectedStatus = 'All';
+  SessionStatus selectedStatus = SessionStatus.all;
   TextEditingController searchController = TextEditingController();
   bool isSearching = false;
 
@@ -85,32 +84,17 @@ class _ClientSessionsState extends State<ClientSessions> {
     }
   }
 
-  List<BookingItem> _filterBookingItems(List<BookingItem> bookingItems) {
-    var filteredItems = bookingItems;
-
-    if (selectedStatus != 'All') {
-      filteredItems =
-          filteredItems.where((item) => item.status == selectedStatus).toList();
-    }
-
-    if (isSearching && searchController.text.isNotEmpty) {
-      filteredItems = filteredItems
-          .where((item) => item.serviceName!
-              .toLowerCase()
-              .contains(searchController.text.toLowerCase()))
-          .toList();
-    }
-
-    return filteredItems;
-  }
-
   Future<void> _refreshBookingItems() async {
     setState(() {
       _currentPage = 1;
       requestedSessions.clear();
       _hasMoreData = true;
     });
-    await clientRequestedSessions(searchData: searchController.text);
+    await clientRequestedSessions(
+        searchData: searchController.text,
+        status: selectedStatus == SessionStatus.all
+            ? null
+            : getSessionStatusCode(selectedStatus));
   }
 
   @override
@@ -221,29 +205,24 @@ class _ClientSessionsState extends State<ClientSessions> {
                                   color: secondaryColor,
                                 ),
                               ),
-                              child: DropdownButton<String>(
+                              child: DropdownButton<SessionStatus>(
                                 value: selectedStatus,
-                                items: [
-                                  'All',
-                                  'Pending',
-                                  'In Progress',
-                                  'Completed'
-                                ]
-                                    .map<DropdownMenuItem<String>>(
-                                        (String value) =>
-                                            DropdownMenuItem<String>(
-                                              value: value,
-                                              child: Text(value),
-                                            ))
+                                items: SessionStatus.values
+                                    .map((SessionStatus status) =>
+                                        DropdownMenuItem<SessionStatus>(
+                                          value: status,
+                                          child: Text(getNameByStatus(status)),
+                                        ))
                                     .toList(),
                                 underline: const SizedBox(),
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 16),
                                 isExpanded: true,
-                                onChanged: (String? newValue) {
+                                onChanged: (SessionStatus? newValue) async {
                                   setState(() {
                                     selectedStatus = newValue!;
                                   });
+                                  await _refreshBookingItems();
                                 },
                               ),
                             ),
