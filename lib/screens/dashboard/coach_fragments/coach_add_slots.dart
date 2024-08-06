@@ -68,7 +68,7 @@ class _CoachMySlotsState extends State<CoachMySlots> {
   }
 
   void handleSingleTimeSlotBooking(DateTime date, DateTime startTime,
-      DateTime endTime, String remark) async {
+      DateTime endTime, String remark, int? timeSheetId) async {
     try {
       var rDate = formatDate(date);
       var rStartTime = formatTime(startTime);
@@ -79,14 +79,15 @@ class _CoachMySlotsState extends State<CoachMySlots> {
       debugPrint('End Time: $rEndTime');
       debugPrint('Remark: $remark');
 
-      await createSingleTimeSlot(rDate, rStartTime, rEndTime, remark);
+      await createAndUpdateSingleTimeSlot(
+          rDate, rStartTime, rEndTime, remark, timeSheetId);
     } catch (e) {
       debugPrint('handleSingleTimeSlotBooking error: $e');
     }
   }
 
-  Future<void> createSingleTimeSlot(
-      String date, String startTime, String endTime, String remark) async {
+  Future<void> createAndUpdateSingleTimeSlot(String date, String startTime,
+      String endTime, String remark, int? timeSheetId) async {
     setState(() {
       loader = true;
     });
@@ -99,7 +100,8 @@ class _CoachMySlotsState extends State<CoachMySlots> {
         'remark': remark,
       };
 
-      var response = await createSingleSlot(request);
+      var response =
+          await createAndUpdateSingleSlot(request, timeSheetId: timeSheetId);
 
       if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
@@ -124,7 +126,7 @@ class _CoachMySlotsState extends State<CoachMySlots> {
           SlotsCalendar(
             meetings: globalMeetings,
             onSlotSelected: (p0, p1, p2, p3, p4) {
-              handleSingleTimeSlotBooking(p0, p1, p2, p3);
+              handleSingleTimeSlotBooking(p0, p1, p2, p3, -1);
             },
           ),
           Positioned(

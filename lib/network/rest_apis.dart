@@ -258,13 +258,21 @@ Future<GlobalUserResponseModel?> getGlobalUserDetails() async {
   return response;
 }
 
-Future<BaseResponseModel?> createSingleSlot(
-    Map<String, dynamic> request) async {
+Future<BaseResponseModel?> createAndUpdateSingleSlot(
+    Map<String, dynamic> request,
+    {required int? timeSheetId}) async {
   BaseResponseModel? response;
   try {
     response = BaseResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse('time-slot/create',
-            request: request, isAuth: true, method: HttpMethodType.post)));
+        await buildHttpResponse(
+            timeSheetId != null
+                ? 'time-slot/update/$timeSheetId'
+                : 'time-slot/create',
+            request: request,
+            isAuth: true,
+            method: timeSheetId != null
+                ? HttpMethodType.put
+                : HttpMethodType.post)));
   } catch (e) {
     rethrow;
   }
@@ -374,15 +382,12 @@ Future<BaseResponseModel?> clientBookSession(
 }
 
 Future<BaseResponseModel?> acceptOrRejectSessions(
-    Map<String, dynamic> request) async {
+    Map<String, dynamic> request, int sessionId) async {
   BaseResponseModel? response;
   try {
     response = BaseResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse(
-            'session/acceptOrRejectSessions/${appStore.userId}',
-            request: request,
-            isAuth: true,
-            method: HttpMethodType.patch)));
+        await buildHttpResponse('session/updateSessionStatus/$sessionId',
+            request: request, isAuth: true, method: HttpMethodType.patch)));
   } catch (e) {
     rethrow;
   }

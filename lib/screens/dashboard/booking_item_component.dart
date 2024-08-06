@@ -28,7 +28,7 @@ class BookingItemComponent extends StatefulWidget {
 class _BookingItemComponentState extends State<BookingItemComponent> {
   bool loader = false;
 
-  Future<void> coachAcceptOrRejectSessions(int status) async {
+  Future<void> coachAcceptOrRejectSessions(int status,int sessionId) async {
     setState(() {
       loader = true;
     });
@@ -37,7 +37,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
         'status': status,
       };
 
-      var response = await acceptOrRejectSessions(request);
+      var response = await acceptOrRejectSessions(request, sessionId);
       if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Saved Successfully.');
@@ -161,7 +161,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
               widget.serviceResource?.date ?? '',
               widget.serviceResource?.startTime ?? '',
               widget.serviceResource?.remark ?? 'N/A'),
-          if (widget.showButtons) buildButtons(context, sessionStatus)
+          if (widget.showButtons) buildButtons(context, sessionStatus, widget.serviceResource?.id??-1)
         ],
       ),
     ).onTap(() {
@@ -225,7 +225,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
         ),
       );
 
-  void showConfirmationDialog(BuildContext outerContext, int status) {
+  void showConfirmationDialog(BuildContext outerContext, int status, int sessionId) {
     showDialog(
       context: outerContext,
       builder: (BuildContext context) => AlertDialog(
@@ -241,7 +241,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              await coachAcceptOrRejectSessions(status);
+              await coachAcceptOrRejectSessions(status, sessionId);
               widget.onActionPerformed();
             },
             child: const Text('Decline'),
@@ -251,7 +251,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
     );
   }
 
-  Widget buildButtons(BuildContext context, SessionStatus status) => Row(
+  Widget buildButtons(BuildContext context, SessionStatus status, int sessionId) => Row(
         children: [
           if (status == SessionStatus.pending)
             Row(
@@ -264,7 +264,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                     enabled: true,
                     onTap: () {
                       showConfirmationDialog(context,
-                          getSessionStatusCode(SessionStatus.rejected));
+                          getSessionStatusCode(SessionStatus.rejected), sessionId);
                     },
                   ).expand(),
                 if (appStore.userTypeCoach)
@@ -279,7 +279,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   onTap: () async {
                     if (appStore.userTypeCoach) {
                       await coachAcceptOrRejectSessions(
-                          getSessionStatusCode(SessionStatus.accepted));
+                          getSessionStatusCode(SessionStatus.accepted), sessionId);
                       widget.onActionPerformed();
                     }
                   },
