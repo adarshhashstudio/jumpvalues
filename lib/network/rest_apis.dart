@@ -437,7 +437,7 @@ Future<BaseResponseModel?> createMultipleSlot(
   BaseResponseModel? response;
   try {
     response = BaseResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse('time-slot/create-setting',
+        await buildHttpResponse('time-slot/create-slot-in-range',
             request: request, isAuth: true, method: HttpMethodType.post)));
   } catch (e) {
     rethrow;

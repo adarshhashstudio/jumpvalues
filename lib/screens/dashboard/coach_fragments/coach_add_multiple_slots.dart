@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/utils.dart' as util;
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:jumpvalues/widgets/slots_calendar.dart';
@@ -21,6 +22,8 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
   List<TimeSlot> selectedTimeSlots = [];
   bool loader = false;
   TextEditingController remarkController = TextEditingController();
+  DateTime selectedStartTime = DateTime.now();
+  DateTime selectedEndTime = DateTime.now();
 
   String? remarkErrorText;
 
@@ -73,6 +76,7 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
           !isWeekDaysError &&
           !isTimeRangeError &&
           (remarkErrorText == null)) {
+        hideKeyboard(context);
         createAndUpdateSingleTimeSlot();
       }
     });
@@ -84,10 +88,11 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
     });
     try {
       var request = {
-        'start_date': formatDate(selectedDateRange?.start??DateTime.now()),
-        'end_date': formatDate(selectedDateRange?.end??DateTime.now()),
-        'start_time': '',
-        'end_time': '',
+        'start_date':
+            util.formatDate(selectedDateRange?.start ?? DateTime.now()),
+        'end_date': util.formatDate(selectedDateRange?.end ?? DateTime.now()),
+        'start_time': util.formatTime(selectedStartTime),
+        'end_time': util.formatTime(selectedEndTime),
         'remark': remarkController.text,
         'selected_days': selectedWeekdays,
       };
@@ -97,6 +102,7 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
       if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
             response?.message ?? 'Slot Updated Successfully');
+        Navigator.of(context).pop(true);
       } else {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
             response?.message ?? 'Something went wrong.');
@@ -154,7 +160,8 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
                       label: 'Remark',
                       controller: remarkController,
                       errorText: remarkErrorText,
-                      hintText: 'Enter Remark'
+                      hintText: 'Enter Remark',
+                      textInputAction: TextInputAction.done,
                     ),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.02),
                     labelContainer(
@@ -170,6 +177,7 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
                           ? '${DateFormat('dd MMM yyyy').format(selectedDateRange!.start)} - ${DateFormat('dd MMM yyyy').format(selectedDateRange!.end)}'
                           : 'Tap to Pick Date Range',
                       onTap: () async {
+                        hideKeyboard(context);
                         final pickedRange = await showDateRangePicker(
                           context: context,
                           firstDate: DateTime(2020),
@@ -209,6 +217,7 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
                               value: isSelectedAllWeekdays,
                               onChanged: (v) {
                                 setState(() {
+                                  hideKeyboard(context);
                                   isSelectedAllWeekdays = v ?? false;
                                   selectedWeekdays.clear();
                                   if (isSelectedAllWeekdays) {
@@ -287,6 +296,7 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
                       errorText: timeRangeErrorText,
                       text: 'Tap to pick date',
                       onTap: () async {
+                        hideKeyboard(context);
                         final selectedTimes =
                             await showTimeRangePicker(context);
                         if (selectedTimes.isNotEmpty) {
@@ -359,6 +369,21 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
       );
 
       if (pickedEndTime != null) {
+        // =========================================================================
+        var startDate = selectedDateRange != null
+            ? selectedDateRange?.start
+            : DateTime.now();
+        try {
+          selectedStartTime = DateTime(startDate!.year, startDate.month,
+              startDate.day, pickedStartTime.hour, pickedStartTime.minute);
+
+          selectedEndTime = DateTime(startDate.year, startDate.month,
+              startDate.day, pickedEndTime.hour, pickedEndTime.minute);
+        } catch (e) {
+          debugPrint('showTimeRangePicker error: $e');
+        }
+        // =========================================================================
+
         // Calculate number of 1-hour slots between pickedStartTime and pickedEndTime
         final slots = <TimeSlot>[];
         var currentSlotStart = DateTime(

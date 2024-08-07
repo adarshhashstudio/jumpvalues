@@ -51,6 +51,8 @@ class _CoachMySlotsState extends State<CoachMySlots> {
       var response = await getTimeSlotsForCoach(appStore.userId ?? -1);
       if (response?.status == true) {
         setState(() {
+          serverTimeSlotsList.clear();
+          globalMeetings.clear();
           serverTimeSlotsList = response?.data ?? [];
         });
         addServerTimeSlotsToCalender();
@@ -183,13 +185,19 @@ class _CoachMySlotsState extends State<CoachMySlots> {
               right: 16,
               child: AppButton(
                 onTap: () async {
-                  final list = await Navigator.of(context).push<List<Meeting>>(
+                  // final list = await Navigator.of(context).push<List<Meeting>>(
+                  //     MaterialPageRoute(
+                  //         builder: (context) => const CoachAddMultipleSlots()));
+                  // if (list != null) {
+                  //   setState(() {
+                  //     globalMeetings = list;
+                  //   });
+                  // }
+                  var updated = await Navigator.of(context).push(
                       MaterialPageRoute(
                           builder: (context) => const CoachAddMultipleSlots()));
-                  if (list != null) {
-                    setState(() {
-                      globalMeetings = list;
-                    });
+                  if (updated) {
+                    await getAllTimeSlotsForCoach();
                   }
                 },
                 color: primaryColor,
