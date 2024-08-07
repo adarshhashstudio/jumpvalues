@@ -431,3 +431,16 @@ Future<TwilioAccessTokenResponseModel?> twilioAccessToken(int sessionId) async {
   }
   return response;
 }
+
+Future<BaseResponseModel?> createMultipleSlot(
+    Map<String, dynamic> request) async {
+  BaseResponseModel? response;
+  try {
+    response = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('time-slot/create-setting',
+            request: request, isAuth: true, method: HttpMethodType.post)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}

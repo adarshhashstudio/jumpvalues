@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:jumpvalues/widgets/slots_calendar.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -17,8 +19,32 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
   DateTimeRange? selectedDateRange;
   List<int> selectedWeekdays = [];
   List<TimeSlot> selectedTimeSlots = [];
+  bool loader = false;
+  TextEditingController remarkController = TextEditingController();
 
-  // Method to add or remove a meeting based on selected slot
+  String? remarkErrorText;
+
+  bool isDateRangeError = false;
+  String? dateRangeErrorText;
+
+  bool isWeekDaysError = false;
+  String? weekDaysErrorText;
+
+  bool isTimeRangeError = false;
+  String? timeRangeErrorText;
+
+  bool isSelectedAllWeekdays = false;
+
+  final List<String> weekdays = [
+    'Sun',
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat'
+  ];
+
   void handleSlotSelection(DateTime selectedDate, DateTime startTime,
       DateTime endTime, String remark) {
     setState(() {
@@ -26,6 +52,62 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
         Meeting(remark, startTime, endTime, const Color(0xFF0F8644), 1),
       );
     });
+  }
+
+  void validateAndCreateSlots() {
+    setState(() {
+      isDateRangeError = selectedDateRange == null;
+      dateRangeErrorText = isDateRangeError ? 'Please pick date range' : null;
+
+      isWeekDaysError = selectedWeekdays.isEmpty;
+      weekDaysErrorText =
+          isWeekDaysError ? 'Select at least one week day' : null;
+
+      isTimeRangeError = selectedTimeSlots.isEmpty;
+      timeRangeErrorText = isTimeRangeError ? 'Please pick time range' : null;
+
+      remarkErrorText =
+          remarkController.text.isEmpty ? 'Remark should not be empty' : null;
+
+      if (!isDateRangeError &&
+          !isWeekDaysError &&
+          !isTimeRangeError &&
+          (remarkErrorText == null)) {
+        createAndUpdateSingleTimeSlot();
+      }
+    });
+  }
+
+  Future<void> createAndUpdateSingleTimeSlot() async {
+    setState(() {
+      loader = true;
+    });
+    try {
+      var request = {
+        'start_date': formatDate(selectedDateRange?.start??DateTime.now()),
+        'end_date': formatDate(selectedDateRange?.end??DateTime.now()),
+        'start_time': '',
+        'end_time': '',
+        'remark': remarkController.text,
+        'selected_days': selectedWeekdays,
+      };
+
+      var response = await createMultipleSlot(request);
+
+      if (response?.status == true) {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
+            response?.message ?? 'Slot Updated Successfully');
+      } else {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+            response?.message ?? 'Something went wrong.');
+      }
+    } catch (e) {
+      debugPrint('createSingleTimeSlot error: $e');
+    } finally {
+      setState(() {
+        loader = false;
+      });
+    }
   }
 
   @override
@@ -57,151 +139,178 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
           ),
         ),
         floatingActionButton: FloatingActionButton.extended(
-            onPressed: selectedDateRange != null &&
-                    selectedWeekdays.isNotEmpty &&
-                    selectedTimeSlots.isNotEmpty
-                ? _createSlots
-                : null,
-            label: const Text('Create Slots')),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child:
-              // globalMeetings.isNotEmpty
-              //     ? Expanded(
-              //         child: SfCalendar(
-              //           view: CalendarView.day,
-              //           showNavigationArrow: true,
-              //           showDatePickerButton: true,
-              //           dataSource: MeetingDataSource(globalMeetings),
-              //         ),
-              //       )
-              //     :
-              SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                labelContainer(
-                  label: 'Pick Date Range',
-                  labelContainerSpace: 8,
-                  width: MediaQuery.of(context).size.width * 1,
-                  height: MediaQuery.of(context).size.height * 0.055,
-                  borderRadius: BorderRadius.circular(12),
-                  alignment: Alignment.centerLeft,
-                  text: selectedDateRange != null
-                      ? '${DateFormat('dd MMM yyyy').format(selectedDateRange!.start)} - ${DateFormat('dd MMM yyyy').format(selectedDateRange!.end)}'
-                      : 'Tap to Pick Date Range',
-                  onTap: () async {
-                    final pickedRange = await showDateRangePicker(
-                      context: context,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2101),
-                    );
-                    if (pickedRange != null) {
-                      setState(() {
-                        selectedDateRange = pickedRange;
-                      });
-                    }
-                  },
-                ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-                const Text(
-                  'Select Weekdays:',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 15,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.01,
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width * 1,
-                  height: MediaQuery.of(context).size.height * 0.06,
-                  decoration: boxDecorationDefault(
-                    color: primaryColor,
-                  ),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
+          onPressed: validateAndCreateSlots,
+          label: const Text('Create Slots'),
+        ),
+        body: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    textFormField(
+                      label: 'Remark',
+                      controller: remarkController,
+                      errorText: remarkErrorText,
+                      hintText: 'Enter Remark'
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                    labelContainer(
+                      label: 'Pick Date Range',
+                      labelContainerSpace: 8,
+                      width: MediaQuery.of(context).size.width * 1,
+                      height: MediaQuery.of(context).size.height * 0.055,
+                      borderRadius: BorderRadius.circular(12),
+                      alignment: Alignment.centerLeft,
+                      errorText: dateRangeErrorText,
+                      isError: isDateRangeError,
+                      text: selectedDateRange != null
+                          ? '${DateFormat('dd MMM yyyy').format(selectedDateRange!.start)} - ${DateFormat('dd MMM yyyy').format(selectedDateRange!.end)}'
+                          : 'Tap to Pick Date Range',
+                      onTap: () async {
+                        final pickedRange = await showDateRangePicker(
+                          context: context,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2101),
+                        );
+                        if (pickedRange != null) {
+                          setState(() {
+                            selectedDateRange = pickedRange;
+                          });
+                        }
+                      },
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        for (var i = 1; i <= 7; i++)
-                          FilterChip(
-                            label: SizedBox(
-                              width: 25,
-                              height: 25,
-                              child: Text(
-                                DateFormat.E().format(DateTime(
-                                    selectedDateRange != null
-                                        ? selectedDateRange!.start.year
-                                        : DateTime.now().year,
-                                    selectedDateRange != null
-                                        ? selectedDateRange!.start.month
-                                        : DateTime.now().month,
-                                    i)),
-                                style: const TextStyle(fontSize: 12),
-                              ).center(),
+                        const Text(
+                          'Select Weekdays:',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            const Text(
+                              'All',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 15,
+                                fontFamily: 'Roboto',
+                              ),
                             ),
-                            selected: selectedWeekdays.contains(i),
-                            showCheckmark: false,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            shape: RoundedRectangleBorder(
-                                side: const BorderSide(color: transparentColor),
-                                borderRadius: BorderRadius.circular(360)),
-                            labelPadding: EdgeInsets.zero,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            backgroundColor: primaryColor,
-                            labelStyle: const TextStyle(color: white),
-                            selectedColor: primaryColor.withOpacity(0.7),
-                            onSelected: (selected) {
-                              setState(() {
-                                if (selected) {
-                                  selectedWeekdays.add(i);
-                                  debugPrint('Selected Day: Int value $i');
-                                } else {
-                                  selectedWeekdays.remove(i);
-                                }
-                              });
-                            },
-                          ).paddingRight(10),
+                            Checkbox(
+                              value: isSelectedAllWeekdays,
+                              onChanged: (v) {
+                                setState(() {
+                                  isSelectedAllWeekdays = v ?? false;
+                                  selectedWeekdays.clear();
+                                  if (isSelectedAllWeekdays) {
+                                    selectedWeekdays
+                                        .addAll([0, 1, 2, 3, 4, 5, 6]);
+                                  }
+                                });
+                              },
+                            ),
+                          ],
+                        )
                       ],
                     ),
-                  ),
-                ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-                labelContainer(
-                  label: 'Pick Time Range',
-                  labelContainerSpace: 8,
-                  width: MediaQuery.of(context).size.width * 1,
-                  height: MediaQuery.of(context).size.height * 0.055,
-                  borderRadius: BorderRadius.circular(12),
-                  alignment: Alignment.centerLeft,
-                  text: 'Tap to pick date',
-                  onTap: () async {
-                    final selectedTimes = await showTimeRangePicker(context);
-                    if (selectedTimes.isNotEmpty) {
-                      setState(() {
-                        selectedTimeSlots.addAll(selectedTimes);
-                      });
-                    }
-                  },
-                ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-                GridView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 10,
-                            crossAxisSpacing: 15,
-                            mainAxisExtent: 50),
-                    itemCount: selectedTimeSlots.length,
-                    itemBuilder: (context, index) {
-                      final slot = selectedTimeSlots[index];
-                      return FilterChip(
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                    labelContainer(
+                      isLabel: false,
+                      label: '',
+                      width: MediaQuery.of(context).size.width * 1,
+                      height: MediaQuery.of(context).size.height * 0.06,
+                      isError: isWeekDaysError,
+                      errorText: weekDaysErrorText,
+                      color: primaryColor,
+                      padding: EdgeInsets.zero,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: weekdays.asMap().entries.map((entry) {
+                            var idx = entry.key;
+                            var weekday = entry.value;
+                            return FilterChip(
+                              label: SizedBox(
+                                width: 25,
+                                height: 25,
+                                child: Text(
+                                  weekday,
+                                  style: const TextStyle(fontSize: 12),
+                                ).center(),
+                              ),
+                              selected: selectedWeekdays.contains(idx),
+                              showCheckmark: false,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              shape: RoundedRectangleBorder(
+                                side: const BorderSide(color: transparentColor),
+                                borderRadius: BorderRadius.circular(360),
+                              ),
+                              labelPadding: EdgeInsets.zero,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              backgroundColor: primaryColor,
+                              labelStyle: const TextStyle(color: white),
+                              selectedColor: primaryColor.withOpacity(0.7),
+                              onSelected: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    selectedWeekdays.add(idx);
+                                  } else {
+                                    selectedWeekdays.remove(idx);
+                                  }
+                                });
+                              },
+                            ).paddingRight(10);
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                    labelContainer(
+                      label: 'Pick Time Range',
+                      labelContainerSpace: 8,
+                      width: MediaQuery.of(context).size.width * 1,
+                      height: MediaQuery.of(context).size.height * 0.055,
+                      borderRadius: BorderRadius.circular(12),
+                      alignment: Alignment.centerLeft,
+                      isError: isTimeRangeError,
+                      errorText: timeRangeErrorText,
+                      text: 'Tap to pick date',
+                      onTap: () async {
+                        final selectedTimes =
+                            await showTimeRangePicker(context);
+                        if (selectedTimes.isNotEmpty) {
+                          setState(() {
+                            selectedTimeSlots.addAll(selectedTimes);
+                          });
+                        }
+                      },
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                    GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 15,
+                        mainAxisExtent: 50,
+                      ),
+                      itemCount: selectedTimeSlots.length,
+                      itemBuilder: (context, index) {
+                        final slot = selectedTimeSlots[index];
+                        return FilterChip(
                           label: Text(
                             '${slot.startTime.format(context)} - ${slot.endTime.format(context)}',
                             style: const TextStyle(fontSize: 14),
@@ -217,12 +326,22 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
                               selectedTimeSlots.removeAt(index);
                             });
                           },
-                          onSelected: (v) {});
-                    }),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-              ],
+                          onSelected: (v) {},
+                        );
+                      },
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                  ],
+                ),
+              ),
             ),
-          ),
+            if (loader)
+              const Positioned(
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+          ],
         ),
       );
 
