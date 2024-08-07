@@ -4,10 +4,9 @@ import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:twilio_programmable_video/twilio_programmable_video.dart';
-import 'package:uuid/uuid.dart';
 
 class VideoCallPage extends StatefulWidget {
-  VideoCallPage({required this.sessionId, this.joinRoomAutomatically = false});
+  VideoCallPage({required this.sessionId, this.joinRoomAutomatically = true});
   final int sessionId;
   final bool joinRoomAutomatically;
 
@@ -17,17 +16,38 @@ class VideoCallPage extends StatefulWidget {
 
 class _VideoCallPageState extends State<VideoCallPage> {
   Room? _room;
-  CameraCapturer? _cameraCapturer;
+  LocalAudioTrack? _localAudioTrack;
   LocalVideoTrack? _localVideoTrack;
-  final LocalAudioTrack _localAudioTrack =
-      LocalAudioTrack(true, '${DateTime.now()}');
+  CameraCapturer? _cameraCapturer;
   bool _isLoading = false;
+  bool _isMuted = false;
+  CameraSource? _currentCameraSource;
+  List<CameraSource>? _cameraSources;
   TwilioAccessTokenResponseModel? twilioAccessTokenResponseModel;
 
   @override
   void initState() {
     super.initState();
-    getTwilioAccessToken();
+    _checkPermissionsAndJoinRoom();
+  }
+
+  Future<void> _checkPermissionsAndJoinRoom() async {
+    final permissions = await _requestPermissions();
+    if (permissions) {
+      await getTwilioAccessToken();
+    } else {
+      Navigator.of(context).pop();
+    }
+  }
+
+  Future<bool> _requestPermissions() async {
+    final cameraStatus = await Permission.camera.request();
+    final micStatus = await Permission.microphone.request();
+    final bluetoothStatus = await Permission.bluetooth.request();
+
+    return cameraStatus.isGranted &&
+        micStatus.isGranted &&
+        bluetoothStatus.isGranted;
   }
 
   Future<void> getTwilioAccessToken() async {
@@ -56,98 +76,54 @@ class _VideoCallPageState extends State<VideoCallPage> {
     }
   }
 
-  Future<void> _createOneToOneRoom() async {
+  Future<void> _joinRoom() async {
     setState(() {
       _isLoading = true;
     });
 
+    await _initCameraCapturer();
+    await _initVideoPreview();
+
     try {
-      final cameraSources = await CameraSource.getSources();
-      _cameraCapturer = CameraCapturer(
-        cameraSources.firstWhere((source) => source.isFrontFacing),
+      var connectOptions = ConnectOptions(
+        twilioAccessTokenResponseModel?.token ?? '',
+        roomName: twilioAccessTokenResponseModel?.roomId,
+        audioTracks: [_localAudioTrack ?? LocalAudioTrack(true, '')],
+        videoTracks: [_localVideoTrack!],
       );
 
-      _room = await TwilioProgrammableVideo.connect(
-        ConnectOptions(
-          twilioAccessTokenResponseModel?.token ?? '',
-          roomName: twilioAccessTokenResponseModel?.roomId,
-          enableAutomaticSubscription: true,
-          preferredAudioCodecs: [OpusCodec()],
-          audioTracks: [
-            LocalAudioTrack(true, 'audio_track-${const Uuid().v4()}')
-          ],
-          videoTracks: [LocalVideoTrack(true, _cameraCapturer!)],
-        ),
-      );
+      _room = await TwilioProgrammableVideo.connect(connectOptions);
 
-      _room!.onConnected.listen((event) {
+      _room!.onConnected.listen((Room room) {
+        SnackBarHelper.showStatusSnackBar(
+            context, StatusIndicator.success, 'Connected to ${room.name}');
+        debugPrint('Connected to ${room.name}');
+        setState(() {
+          _isLoading = false;
+        });
+      });
+
+      _room!.onConnectFailure.listen((RoomConnectFailureEvent event) {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+            'Failed to connect to room ${event.room.name}: ${event.exception}');
+        debugPrint(
+            'Failed to connect to room ${event.room.name}: ${event.exception}');
         setState(() {
           _isLoading = false;
         });
       });
 
       _room!.onDisconnected.listen((event) {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.warning,
+            'Disconnected from ${event.room.name}');
+        debugPrint('Disconnected from ${event.room.name}');
         setState(() {
           _room = null;
         });
       });
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      debugPrint('Failed to create room: $e');
-    }
-  }
-
-  Future<void> _joinRoom() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      var status = await Permission.camera.request();
-      if (status.isGranted) {
-        var cameraSources = await CameraSource.getSources();
-        var cameraSource =
-            cameraSources.firstWhere((source) => source.isFrontFacing);
-        _cameraCapturer = CameraCapturer(cameraSource);
-
-        _localVideoTrack = LocalVideoTrack(true, _cameraCapturer!);
-
-        var connectOptions = ConnectOptions(
-          twilioAccessTokenResponseModel?.token ?? '',
-          roomName: twilioAccessTokenResponseModel?.roomId,
-          audioTracks: [_localAudioTrack],
-          videoTracks: [_localVideoTrack!],
-        );
-
-        _room = await TwilioProgrammableVideo.connect(connectOptions);
-
-        _room!.onConnected.listen((Room room) {
-          debugPrint('Connected to ${room.name}');
-          setState(() {
-            _isLoading = false;
-          });
-        });
-
-        _room!.onConnectFailure.listen((RoomConnectFailureEvent event) {
-          debugPrint(
-              'Failed to connect to room ${event.room.name}: ${event.exception}');
-          setState(() {
-            _isLoading = false;
-          });
-        });
-
-        _room!.onDisconnected.listen((event) {
-          debugPrint('Disconnected from ${event.room.name}');
-          setState(() {
-            _room = null;
-          });
-        });
-      } else {
-        throw Exception('Camera permission not granted');
-      }
-    } catch (e) {
+      SnackBarHelper.showStatusSnackBar(
+          context, StatusIndicator.error, 'Failed to join room: $e');
       setState(() {
         _isLoading = false;
       });
@@ -155,15 +131,49 @@ class _VideoCallPageState extends State<VideoCallPage> {
     }
   }
 
+  Future<void> _initCameraCapturer() async {
+    _cameraSources = await CameraSource.getSources();
+    _currentCameraSource =
+        _cameraSources?.firstWhere((source) => source.isFrontFacing);
+
+    if (_currentCameraSource != null) {
+      _cameraCapturer = CameraCapturer(_currentCameraSource!);
+    }
+  }
+
+  Future<void> _initVideoPreview() async {
+    _localVideoTrack = LocalVideoTrack(
+      true,
+      _cameraCapturer!,
+      name: 'preview-video#1',
+    );
+    await _localVideoTrack?.create();
+  }
+
   Future<void> _leaveRoom() async {
     await _room?.disconnect();
     await _localVideoTrack?.release();
-    await _cameraCapturer
-        ?.switchCamera(const CameraSource('cameraId', true, false, false));
     setState(() {
       _room = null;
       _localVideoTrack = null;
-      _cameraCapturer = null;
+    });
+  }
+
+  void _switchCamera() {
+    if (_cameraSources != null && _cameraSources!.isNotEmpty) {
+      final newSource = _cameraSources!.firstWhere(
+        (source) => source != _currentCameraSource,
+        orElse: () => _cameraSources!.first,
+      );
+      _cameraCapturer?.switchCamera(newSource);
+      _currentCameraSource = newSource;
+    }
+  }
+
+  void _toggleMute() {
+    setState(() {
+      _isMuted = !_isMuted;
+      _localAudioTrack?.enable(!_isMuted);
     });
   }
 
@@ -181,15 +191,13 @@ class _VideoCallPageState extends State<VideoCallPage> {
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _room == null
-                ? _buildCreateRoomButton()
+                ? Center(
+                    child: ElevatedButton(
+                      onPressed: _joinRoom,
+                      child: const Text('Join Room'),
+                    ),
+                  )
                 : _buildRoomWidget(),
-      );
-
-  Widget _buildCreateRoomButton() => Center(
-        child: ElevatedButton(
-          onPressed: _createOneToOneRoom,
-          child: const Text('Create One-to-One Room'),
-        ),
       );
 
   Widget _buildRoomWidget() => Stack(
@@ -204,6 +212,27 @@ class _VideoCallPageState extends State<VideoCallPage> {
             child: IconButton(
               icon: const Icon(Icons.call_end, color: Colors.red, size: 30),
               onPressed: _leaveRoom,
+            ),
+          ),
+          Positioned(
+            bottom: 20,
+            right: 80,
+            child: IconButton(
+              icon: Icon(
+                _isMuted ? Icons.mic_off : Icons.mic,
+                color: Colors.white,
+                size: 30,
+              ),
+              onPressed: _toggleMute,
+            ),
+          ),
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: IconButton(
+              icon: const Icon(Icons.switch_camera,
+                  color: Colors.white, size: 30),
+              onPressed: _switchCamera,
             ),
           ),
         ],

@@ -306,8 +306,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => VideoCallPage(
                               sessionId: sessionId,
-                              joinRoomAutomatically:
-                                  appStore.userTypeCoach ? false : true,
+                              joinRoomAutomatically: true,
                             )));
                   },
                 ).expand(),
