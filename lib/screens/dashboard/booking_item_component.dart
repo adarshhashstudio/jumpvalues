@@ -302,7 +302,14 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   textColor: nb.white,
                   color: primaryColor,
                   enabled: true,
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => VideoCallPage(
+                              sessionId: sessionId,
+                              joinRoomAutomatically:
+                                  appStore.userTypeCoach ? false : true,
+                            )));
+                  },
                 ).expand(),
               ],
             ).expand(),
@@ -383,10 +390,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   ),
                   textColor: nb.white,
                   color: primaryColor,
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => VideoCallPage()));
-                  },
+                  onTap: () {},
                 ).expand(),
               ],
             ).expand(),

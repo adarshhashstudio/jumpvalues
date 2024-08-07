@@ -12,6 +12,7 @@ import 'package:jumpvalues/models/login_response.dart';
 import 'package:jumpvalues/models/requested_sessions_response_model.dart';
 import 'package:jumpvalues/models/signup_response_model.dart';
 import 'package:jumpvalues/models/time_slots_list_response_model.dart';
+import 'package:jumpvalues/models/twilio_access_token_response_model.dart';
 import 'package:jumpvalues/network/network_utils.dart';
 import 'package:jumpvalues/utils/utils.dart';
 
@@ -413,6 +414,18 @@ Future<BaseResponseModel?> acceptOrRejectSessions(
     response = BaseResponseModel.fromJson(await handleResponse(
         await buildHttpResponse('session/updateSessionStatus/$sessionId',
             request: request, isAuth: true, method: HttpMethodType.patch)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<TwilioAccessTokenResponseModel?> twilioAccessToken(int sessionId) async {
+  TwilioAccessTokenResponseModel? response;
+  try {
+    response = TwilioAccessTokenResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('twilio/get-access-token/$sessionId',
+            isAuth: true, method: HttpMethodType.get)));
   } catch (e) {
     rethrow;
   }
