@@ -1,6 +1,7 @@
 // Function to show all selected values when the button is clicked
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pannable_rating_bar/flutter_pannable_rating_bar.dart';
 import 'package:jumpvalues/models/available_coaches_response_model.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/images.dart';
@@ -217,7 +218,7 @@ class CoachItemComponent extends StatelessWidget {
                         maxLines: 1,
                       ),
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.01,
+                        height: MediaQuery.of(context).size.height * 0.001,
                       ),
                       Text.rich(
                         TextSpan(
@@ -239,6 +240,30 @@ class CoachItemComponent extends StatelessWidget {
                           ],
                         ),
                       ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.001,
+                      ),
+                      Text.rich(
+                        TextSpan(
+                          text: 'Total sessions: ',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                            color: textSecondaryColor,
+                          ),
+                          children: [
+                            TextSpan(
+                              text:
+                                  (coachDetail?.totalSessions ?? 0).toString(),
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: textSecondaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -249,13 +274,14 @@ class CoachItemComponent extends StatelessWidget {
             ),
             buildDescriptionSection(context,
                 certificate: coachDetail?.certifications ?? 'N/A',
-                philosophy: coachDetail?.philosophy ?? 'N/A'),
+                philosophy: coachDetail?.philosophy ?? 'N/A',
+                rating: coachDetail?.rating),
           ],
         ),
       ).onTap(onTap ?? () {});
 
   Widget buildDescriptionSection(BuildContext context,
-          {String? certificate, String? philosophy}) =>
+          {String? certificate, String? philosophy, double? rating}) =>
       Container(
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
@@ -264,6 +290,35 @@ class CoachItemComponent extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              children: [
+                const Text(
+                  'Total Ratings: ',
+                  style: TextStyle(fontSize: 11, color: textSecondaryColor),
+                ),
+                SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+                PannableRatingBar.builder(
+                  rate: '${rating??0}'.toDouble(),
+                  alignment: WrapAlignment.center,
+                  spacing: 2,
+                  runSpacing: 2,
+                  itemCount: 5,
+                  direction: Axis.horizontal,
+                  itemBuilder: (context, index) => const RatingWidget(
+                    selectedColor: Colors.orange,
+                    unSelectedColor: Colors.grey,
+                    child: Icon(
+                      Icons.star,
+                      size: 16,
+                    ),
+                  ),
+                  onChanged: (value) {},
+                ),
+              ],
+            ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.01,
+            ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

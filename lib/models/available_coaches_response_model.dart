@@ -1,18 +1,4 @@
 class AvailableCoachesResponseModel {
-  factory AvailableCoachesResponseModel.fromJson(Map<String, dynamic> json) =>
-      AvailableCoachesResponseModel(
-        status: json['status'] as bool?,
-        flag: json['flag'] as String?,
-        message: json['message'] as String?,
-        pageDetails: json['page_details'] != null
-            ? PageDetails.fromJson(json['page_details'])
-            : null,
-        data: (json['data'] as List<dynamic>?)
-            ?.map((item) =>
-                AvailableCoaches.fromJson(item as Map<String, dynamic>))
-            .toList(),
-      );
-
   AvailableCoachesResponseModel({
     this.status,
     this.flag,
@@ -20,6 +6,21 @@ class AvailableCoachesResponseModel {
     this.pageDetails,
     this.data,
   });
+
+  factory AvailableCoachesResponseModel.fromJson(Map<String, dynamic> json) =>
+      AvailableCoachesResponseModel(
+        status: json['status'],
+        flag: json['flag'],
+        message: json['message'],
+        pageDetails: json['page_details'] != null
+            ? PageDetails.fromJson(json['page_details'])
+            : null,
+        data: json['data'] != null
+            ? (json['data'] as List)
+                .map((item) => AvailableCoaches.fromJson(item))
+                .toList()
+            : null,
+      );
   bool? status;
   String? flag;
   String? message;
@@ -31,17 +32,21 @@ class AvailableCoachesResponseModel {
         'flag': flag,
         'message': message,
         'page_details': pageDetails?.toJson(),
-        'data': data?.map((coach) => coach.toJson()).toList(),
+        'data': data?.map((item) => item.toJson()).toList(),
       };
 }
 
 class PageDetails {
-  PageDetails({this.page, this.limit, this.noOfRecords});
+  PageDetails({
+    this.page,
+    this.limit,
+    this.noOfRecords,
+  });
 
   factory PageDetails.fromJson(Map<String, dynamic> json) => PageDetails(
-        page: json['page'] as int?,
-        limit: json['limit'] as int?,
-        noOfRecords: json['no_of_records'] as int?,
+        page: json['page'],
+        limit: json['limit'],
+        noOfRecords: json['no_of_records'],
       );
   int? page;
   int? limit;
@@ -55,6 +60,29 @@ class PageDetails {
 }
 
 class AvailableCoaches {
+  factory AvailableCoaches.fromJson(Map<String, dynamic> json) =>
+      AvailableCoaches(
+        id: json['id'],
+        referenceId: json['reference_id'],
+        firstName: json['first_name'],
+        lastName: json['last_name'],
+        email: json['email'],
+        countryCode: json['country_code'],
+        phone: json['phone'],
+        status: json['status'],
+        verified: json['verified'],
+        dp: json['dp'],
+        experience: json['experiance'],
+        niche: json['niche'],
+        education: json['education'],
+        philosophy: json['philosophy'],
+        certifications: json['certifications'],
+        industriesServed: json['industries_served'],
+        preferVia: json['prefer_via'],
+        totalSessions: json['total_sessions'],
+        rating: (json['rating'] as num?)?.toDouble(),
+      );
+
   AvailableCoaches({
     this.id,
     this.referenceId,
@@ -73,28 +101,9 @@ class AvailableCoaches {
     this.certifications,
     this.industriesServed,
     this.preferVia,
+    this.totalSessions,
+    this.rating,
   });
-
-  factory AvailableCoaches.fromJson(Map<String, dynamic> json) =>
-      AvailableCoaches(
-        id: json['id'] as int?,
-        referenceId: json['reference_id'] as String?,
-        firstName: json['first_name'] as String?,
-        lastName: json['last_name'] as String?,
-        email: json['email'] as String?,
-        countryCode: json['country_code'] as String?,
-        phone: json['phone'] as String?,
-        status: json['status'] as int?,
-        verified: json['verified'] as bool?,
-        dp: json['dp'] as String?,
-        experience: json['experiance'] as int?,
-        niche: json['niche'] as String?,
-        education: json['education'] as String?,
-        philosophy: json['philosophy'] as String?,
-        certifications: json['certifications'] as String?,
-        industriesServed: json['industries_served'] as String?,
-        preferVia: json['prefer_via'] as int?,
-      );
   int? id;
   String? referenceId;
   String? firstName;
@@ -112,6 +121,8 @@ class AvailableCoaches {
   String? certifications;
   String? industriesServed;
   int? preferVia;
+  int? totalSessions;
+  double? rating;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -123,6 +134,7 @@ class AvailableCoaches {
         'phone': phone,
         'status': status,
         'verified': verified,
+        'dp': dp,
         'experiance': experience,
         'niche': niche,
         'education': education,
@@ -130,5 +142,7 @@ class AvailableCoaches {
         'certifications': certifications,
         'industries_served': industriesServed,
         'prefer_via': preferVia,
+        'total_sessions': totalSessions,
+        'rating': rating,
       };
 }

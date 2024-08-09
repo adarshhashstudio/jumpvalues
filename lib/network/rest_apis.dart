@@ -6,6 +6,7 @@ import 'package:jumpvalues/models/available_coaches_response_model.dart';
 import 'package:jumpvalues/models/base_response.dart';
 import 'package:jumpvalues/models/category_dropdown_response.dart';
 import 'package:jumpvalues/models/client_profile_response_model.dart';
+import 'package:jumpvalues/models/coach_dashboard_response_model.dart';
 import 'package:jumpvalues/models/coach_profile_response_model.dart';
 import 'package:jumpvalues/models/global_user_response_model.dart';
 import 'package:jumpvalues/models/login_response.dart';
@@ -439,6 +440,18 @@ Future<BaseResponseModel?> createMultipleSlot(
     response = BaseResponseModel.fromJson(await handleResponse(
         await buildHttpResponse('time-slot/create-slot-in-range',
             request: request, isAuth: true, method: HttpMethodType.post)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<CoachDashboardResponseModel?> coachDashboard() async {
+  CoachDashboardResponseModel? response;
+  try {
+    response = CoachDashboardResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('coach/dashboard',
+            isAuth: true, method: HttpMethodType.get)));
   } catch (e) {
     rethrow;
   }

@@ -32,6 +32,7 @@ dependencies:
   webview_flutter: ^4.7.0
   permission_handler: ^10.4.0
   phone_numbers_parser: ^8.3.0
+  flutter_pannable_rating_bar: ^2.7.2+1
 
 dev_dependencies:
   build_runner: ^2.4.6
