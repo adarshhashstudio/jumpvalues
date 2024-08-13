@@ -12,7 +12,6 @@ import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/images.dart';
 import 'package:jumpvalues/utils/string_extensions.dart';
 import 'package:jumpvalues/utils/utils.dart';
-import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class Dashboard extends StatefulWidget {

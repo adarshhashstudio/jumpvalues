@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/requested_sessions_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
-import 'package:jumpvalues/screens/video_calling_module/video_call_page.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/utils.dart';
@@ -164,7 +163,10 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
               widget.serviceResource?.remark ?? 'N/A'),
           if (widget.showButtons)
             buildButtons(
-                context, sessionStatus, widget.serviceResource?.id ?? -1, widget.serviceResource?.userId??-1)
+                context,
+                sessionStatus,
+                widget.serviceResource?.id ?? -1,
+                widget.serviceResource?.userId ?? -1)
         ],
       ),
     ).onTap(() {
@@ -255,8 +257,8 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
     );
   }
 
-  Widget buildButtons(
-          BuildContext context, SessionStatus status, int sessionId, int coachId) =>
+  Widget buildButtons(BuildContext context, SessionStatus status, int sessionId,
+          int coachId) =>
       Row(
         children: [
           if (status == SessionStatus.pending)
@@ -309,7 +311,8 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                     //           sessionId: sessionId,
                     //           joinRoomAutomatically: true,
                     //         )));
-                    showRatingDialog(context, sessionId: sessionId, coachId: coachId);
+                    showRatingDialog(context,
+                        sessionId: sessionId, coachId: coachId);
                   },
                 ).expand(),
               ],

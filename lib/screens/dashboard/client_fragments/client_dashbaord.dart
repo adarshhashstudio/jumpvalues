@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:jumpvalues/main.dart';
+import 'package:jumpvalues/models/client_dashboard_response_model.dart';
+import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/client_screens/select_screen.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
@@ -23,13 +25,40 @@ class ClientDashboard extends StatefulWidget {
 
 class _ClientDashboardState extends State<ClientDashboard> {
   final goalsStore = GoalsStore(goalsBox);
+  bool loader = false;
+  ClientDashboardResponseModel? clientDashboardResponseModel;
 
   @override
   void initState() {
     isTokenAvailable(context);
-
+    getClientDashboard();
     goalsStore.loadGoals();
     super.initState();
+  }
+
+  Future<void> getClientDashboard() async {
+    setState(() {
+      loader = true;
+    });
+
+    try {
+      var response = await clientDashboard();
+
+      if (response?.status == true) {
+        setState(() {
+          clientDashboardResponseModel = response;
+        });
+      } else {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+            response?.message ?? 'Something went wrong');
+      }
+    } catch (e) {
+      debugPrint('getClientDashboard error: $e');
+    } finally {
+      setState(() {
+        loader = false;
+      });
+    }
   }
 
   @override
@@ -68,9 +97,12 @@ class _ClientDashboardState extends State<ClientDashboard> {
                                 'Click to select your values from our comprehensive list.',
                             buttonTitle: 'Select ( Values )', onTap: () {
                           Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const SelectScreen(
+                              builder: (context) => SelectScreen(
                                   isFromProfile: false,
-                                  initialSelectedValues: [])));
+                                  initialSelectedValues:
+                                      clientDashboardResponseModel
+                                              ?.data?.coreValues ??
+                                          [])));
                         }),
                       ],
                     ),

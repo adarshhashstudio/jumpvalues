@@ -145,7 +145,7 @@ Widget labelContainer(
               child: Text(
                 errorText,
                 textAlign: TextAlign.left,
-                style: TextStyle(color: Color(0xffff3333), fontSize: 12),
+                style: const TextStyle(color: Color(0xffff3333), fontSize: 12),
               )),
       ],
     );

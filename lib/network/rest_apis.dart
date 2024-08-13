@@ -5,6 +5,7 @@ import 'package:jumpvalues/models/all_comprehensive_response.dart';
 import 'package:jumpvalues/models/available_coaches_response_model.dart';
 import 'package:jumpvalues/models/base_response.dart';
 import 'package:jumpvalues/models/category_dropdown_response.dart';
+import 'package:jumpvalues/models/client_dashboard_response_model.dart';
 import 'package:jumpvalues/models/client_profile_response_model.dart';
 import 'package:jumpvalues/models/coach_dashboard_response_model.dart';
 import 'package:jumpvalues/models/coach_profile_response_model.dart';
@@ -451,6 +452,18 @@ Future<CoachDashboardResponseModel?> coachDashboard() async {
   try {
     response = CoachDashboardResponseModel.fromJson(await handleResponse(
         await buildHttpResponse('coach/dashboard',
+            isAuth: true, method: HttpMethodType.get)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<ClientDashboardResponseModel?> clientDashboard() async {
+  ClientDashboardResponseModel? response;
+  try {
+    response = ClientDashboardResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('client/dashboard',
             isAuth: true, method: HttpMethodType.get)));
   } catch (e) {
     rethrow;
