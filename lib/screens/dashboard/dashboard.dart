@@ -117,7 +117,7 @@ class DashboardState extends State<Dashboard> {
     //   });
     // }
     await appStore.clearData();
-        isTokenAvailable(context);
+    isTokenAvailable(context);
   }
 
   @override
@@ -212,21 +212,21 @@ class DashboardState extends State<Dashboard> {
                       ],
                     ),
                   ),
-                  PopupMenuItem(
-                    value: 3,
-                    onTap: () {
-                      showRatingDialog(context);
-                    },
-                    child: const Row(
-                      children: [
-                        Icon(Icons.star),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text('Feedback')
-                      ],
-                    ),
-                  ),
+                  // PopupMenuItem(
+                  //   value: 3,
+                  //   onTap: () {
+                  //     showRatingDialog(context);
+                  //   },
+                  //   child: const Row(
+                  //     children: [
+                  //       Icon(Icons.star),
+                  //       SizedBox(
+                  //         width: 10,
+                  //       ),
+                  //       Text('Feedback')
+                  //     ],
+                  //   ),
+                  // ),
                 ],
                 offset: const Offset(0, 50),
                 elevation: 2,

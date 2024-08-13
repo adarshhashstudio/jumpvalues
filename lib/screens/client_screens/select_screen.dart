@@ -16,7 +16,7 @@ class SelectScreen extends StatefulWidget {
       required this.initialSelectedValues});
   final bool isFromProfile;
   final bool isCategories;
-  final List<CoreValue> initialSelectedValues;
+  final List<CoreValue>? initialSelectedValues;
 
   @override
   State<SelectScreen> createState() => _SelectScreenState();
@@ -31,8 +31,10 @@ class _SelectScreenState extends State<SelectScreen> {
 
   @override
   void initState() {
-    selectedTones = widget.initialSelectedValues
-        .toSet(); // Initialize selectedTones with initial selected values
+    if (widget.initialSelectedValues != null) {
+      selectedTones = widget.initialSelectedValues!
+          .toSet(); // Initialize selectedTones with initial selected values
+    }
     getAllComprehensive();
     super.initState();
   }

@@ -7,6 +7,7 @@ import 'package:jumpvalues/screens/video_calling_module/video_call_page.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/utils.dart';
+import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart' as nb;
 
 class BookingItemComponent extends StatefulWidget {
@@ -163,7 +164,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
               widget.serviceResource?.remark ?? 'N/A'),
           if (widget.showButtons)
             buildButtons(
-                context, sessionStatus, widget.serviceResource?.id ?? -1)
+                context, sessionStatus, widget.serviceResource?.id ?? -1, widget.serviceResource?.userId??-1)
         ],
       ),
     ).onTap(() {
@@ -255,7 +256,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
   }
 
   Widget buildButtons(
-          BuildContext context, SessionStatus status, int sessionId) =>
+          BuildContext context, SessionStatus status, int sessionId, int coachId) =>
       Row(
         children: [
           if (status == SessionStatus.pending)
@@ -303,11 +304,12 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   color: primaryColor,
                   enabled: true,
                   onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => VideoCallPage(
-                              sessionId: sessionId,
-                              joinRoomAutomatically: true,
-                            )));
+                    // Navigator.of(context).push(MaterialPageRoute(
+                    //     builder: (context) => VideoCallPage(
+                    //           sessionId: sessionId,
+                    //           joinRoomAutomatically: true,
+                    //         )));
+                    showRatingDialog(context, sessionId: sessionId, coachId: coachId);
                   },
                 ).expand(),
               ],

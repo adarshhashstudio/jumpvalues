@@ -457,3 +457,15 @@ Future<CoachDashboardResponseModel?> coachDashboard() async {
   }
   return response;
 }
+
+Future<BaseResponseModel?> submitRating(var request) async {
+  BaseResponseModel? response;
+  try {
+    response = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('rating/submit-rating',
+            request: request, isAuth: true, method: HttpMethodType.post)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}

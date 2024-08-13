@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart';
+import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class CommonWidgets {
@@ -409,9 +411,11 @@ Widget divider() => const Divider(
     );
 
 void showRatingDialog(BuildContext context,
-    {void Function()? onTapRateNow,
+    {void Function(double? rating, String? message)? onTapRateNow,
     void Function()? onTapMaybeLater,
-    bool isShortDialogue = false}) {
+    bool isShortDialogue = false,
+    required int sessionId,
+    required int coachId}) {
   var messageController = TextEditingController();
   var rating = 3.0;
   var rateLoading = false;
@@ -509,13 +513,34 @@ void showRatingDialog(BuildContext context,
                           setState(() {
                             rateLoading = true;
                           });
-                          await Future.delayed(const Duration(seconds: 1))
-                              .then((v) {
+                          try {
+                            var request = {
+                              'score': rating,
+                              'comment': messageController.text,
+                              'session_id': sessionId,
+                              'coach_id': coachId,
+                            };
+                            var response = await submitRating(request);
+                            if (response?.status == true) {
+                              SnackBarHelper.showStatusSnackBar(
+                                  context,
+                                  StatusIndicator.success,
+                                  response?.message ??
+                                      'Submitted Successfully');
+                            } else {
+                              SnackBarHelper.showStatusSnackBar(
+                                  context,
+                                  StatusIndicator.error,
+                                  response?.message ?? 'Something went wrong');
+                            }
+                          } catch (e) {
+                            debugPrint('Submit rating error: $e');
+                          } finally {
                             setState(() {
                               rateLoading = false;
                             });
                             Navigator.of(context).pop();
-                          });
+                          }
                         },
                         text: 'Rate Now',
                         child: rateLoading
