@@ -55,8 +55,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
           await _joinRoom();
         }
       } else {
-        SnackBarHelper.showStatusSnackBar(
-            context, StatusIndicator.error, response?.message ?? 'Something went wrong');
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+            response?.message ?? 'Something went wrong');
       }
     } catch (e) {
       debugPrint('getTwilioAccessToken Error: $e');
@@ -115,7 +115,9 @@ class _VideoCallPageState extends State<VideoCallPage> {
         twilioAccessTokenResponseModel?.token ?? '',
         roomName: twilioAccessTokenResponseModel?.roomId ?? 'SESSION_ROOM0004',
         audioTracks: [LocalAudioTrack(true, 'audio_track')],
-        videoTracks: [_localVideoTrack ?? LocalVideoTrack(true, _cameraCapturer!)],
+        videoTracks: [
+          _localVideoTrack ?? LocalVideoTrack(true, _cameraCapturer!)
+        ],
         dataTracks: [
           LocalDataTrack(
             DataTrackOptions(name: 'preview-data-track#1'),
@@ -189,7 +191,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
   }
 
   void _addRemoteParticipantListeners(RemoteParticipant remoteParticipant) {
-    remoteParticipant.onVideoTrackSubscribed.listen((RemoteVideoTrackSubscriptionEvent event) {
+    remoteParticipant.onVideoTrackSubscribed
+        .listen((RemoteVideoTrackSubscriptionEvent event) {
       _participants.add(_buildParticipant(
         child: event.remoteVideoTrack.widget(),
         id: remoteParticipant.sid!,
@@ -197,21 +200,26 @@ class _VideoCallPageState extends State<VideoCallPage> {
       setState(() {});
     });
 
-    remoteParticipant.onVideoTrackUnsubscribed.listen((RemoteVideoTrackSubscriptionEvent event) {
-      _participants.removeWhere((participant) => participant.id == remoteParticipant.sid);
+    remoteParticipant.onVideoTrackUnsubscribed
+        .listen((RemoteVideoTrackSubscriptionEvent event) {
+      _participants.removeWhere(
+          (participant) => participant.id == remoteParticipant.sid);
       setState(() {});
     });
 
-    remoteParticipant.onAudioTrackSubscribed.listen((RemoteAudioTrackSubscriptionEvent event) {
+    remoteParticipant.onAudioTrackSubscribed
+        .listen((RemoteAudioTrackSubscriptionEvent event) {
       // Handle remote audio track
     });
 
-    remoteParticipant.onAudioTrackUnsubscribed.listen((RemoteAudioTrackSubscriptionEvent event) {
+    remoteParticipant.onAudioTrackUnsubscribed
+        .listen((RemoteAudioTrackSubscriptionEvent event) {
       // Handle remote audio track
     });
   }
 
-  ParticipantWidget _buildParticipant({required Widget child, required String id}) {
+  ParticipantWidget _buildParticipant(
+      {required Widget child, required String id}) {
     return ParticipantWidget(
       id: id,
       child: child,
@@ -252,6 +260,14 @@ class _VideoCallPageState extends State<VideoCallPage> {
     super.dispose();
   }
 
+  // Position for the draggable small video window
+  double _smallVideoTop = 50;
+  double _smallVideoLeft = 50;
+
+  // Dimensions of the small video window
+  final double smallVideoWidth = 150;
+  final double smallVideoHeight = 200;
+
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
@@ -271,18 +287,53 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
   Widget _buildRoomWidget() => Stack(
         children: [
-            
-          ..._participants.map((participant) => Positioned.fill(
-                child: participant.child,
-              )),
-            if (_localVideoTrack != null)
-            Positioned(
-              top: 2,
+          
+          // Big Video Window (Full Screen)
+          _participants.isNotEmpty
+              ? Container(
+                  child: Stack(children: [
+                  ..._participants.map((participant) => Positioned.fill(
+                        child: participant.child,
+                      ))
+                ]))
+              : Positioned.fill(
+                  child: Container(
+                    color: Colors.black, // Placeholder for the big video
+                    child: Center(
+                      child: Text(
+                        'Connecting...',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+
+          // Draggable Small Video Window
+         if(_localVideoTrack != null ) Positioned(
+            top: _smallVideoTop,
+            left: _smallVideoLeft,
+            child: GestureDetector(
+              onPanUpdate: (details) {
+                setState(() {
+                  // Update the position of the small video window
+                  _smallVideoTop += details.delta.dy;
+                  _smallVideoLeft += details.delta.dx;
+
+                  // Ensure the small video stays within the screen boundaries
+                  _smallVideoTop = _smallVideoTop.clamp(0.0,
+                      MediaQuery.of(context).size.height - smallVideoHeight);
+                  _smallVideoLeft = _smallVideoLeft.clamp(
+                      0.0, MediaQuery.of(context).size.width - smallVideoWidth);
+                });
+              },
               child: Container(
-                width: 200,
-                height: 200,
-                child: _localVideoTrack!.widget()),
+                width: smallVideoWidth,
+                height: smallVideoHeight,
+                color: Colors.grey, // Placeholder for the small video
+                child: _localVideoTrack!.widget(),
+              ),
             ),
+          ),
           Positioned(
             bottom: 20,
             left: 20,
@@ -324,7 +375,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: IconButton(
-                icon: const Icon(Icons.switch_camera, color: Colors.black, size: 30),
+                icon: const Icon(Icons.switch_camera,
+                    color: Colors.black, size: 30),
                 onPressed: _switchCamera,
               ).center(),
             ),
