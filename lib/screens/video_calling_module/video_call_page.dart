@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:jumpvalues/models/twilio_access_token_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/utils/utils.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:twilio_programmable_video/twilio_programmable_video.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class VideoCallPage extends StatefulWidget {
-  VideoCallPage({required this.sessionId, this.joinRoomAutomatically = true});
   final int sessionId;
   final bool joinRoomAutomatically;
+
+  VideoCallPage({required this.sessionId, this.joinRoomAutomatically = true});
 
   @override
   _VideoCallPageState createState() => _VideoCallPageState();
@@ -24,36 +26,25 @@ class _VideoCallPageState extends State<VideoCallPage> {
   CameraSource? _currentCameraSource;
   List<CameraSource>? _cameraSources;
   TwilioAccessTokenResponseModel? twilioAccessTokenResponseModel;
+  List<ParticipantWidget> _participants = [];
 
   @override
   void initState() {
     super.initState();
-    _checkPermissionsAndJoinRoom();
+    _init();
   }
 
-  Future<void> _checkPermissionsAndJoinRoom() async {
-    final permissions = await _requestPermissions();
-    if (permissions) {
-      await getTwilioAccessToken();
-    } else {
-      Navigator.of(context).pop();
-    }
-  }
-
-  Future<bool> _requestPermissions() async {
-    final cameraStatus = await Permission.camera.request();
-    final micStatus = await Permission.microphone.request();
-    final bluetoothStatus = await Permission.bluetooth.request();
-
-    return cameraStatus.isGranted &&
-        micStatus.isGranted &&
-        bluetoothStatus.isGranted;
-  }
-
-  Future<void> getTwilioAccessToken() async {
+  Future<void> _init() async {
     setState(() {
       _isLoading = true;
     });
+    await _requestPermissions();
+    await _initCameraCapturer();
+    await _initVideoPreview();
+    await getTwilioAccessToken();
+  }
+
+  Future<void> getTwilioAccessToken() async {
     try {
       var response = await twilioAccessToken(widget.sessionId);
       if (response?.status == true) {
@@ -64,8 +55,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
           await _joinRoom();
         }
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong');
+        SnackBarHelper.showStatusSnackBar(
+            context, StatusIndicator.error, response?.message ?? 'Something went wrong');
       }
     } catch (e) {
       debugPrint('getTwilioAccessToken Error: $e');
@@ -76,50 +67,85 @@ class _VideoCallPageState extends State<VideoCallPage> {
     }
   }
 
+  Future<void> _requestPermissions() async {
+    await [Permission.camera, Permission.microphone].request();
+  }
+
+  Future<void> _initCameraCapturer() async {
+    try {
+      _cameraSources = await CameraSource.getSources();
+      _currentCameraSource =
+          _cameraSources?.firstWhere((source) => source.isBackFacing);
+
+      if (_currentCameraSource != null) {
+        _cameraCapturer = CameraCapturer(_currentCameraSource!);
+      } else {
+        throw Exception('No back-facing camera found');
+      }
+    } catch (e) {
+      debugPrint('Camera initialization failed: $e');
+    }
+  }
+
+  Future<void> _initVideoPreview() async {
+    try {
+      _localVideoTrack = LocalVideoTrack(
+        true,
+        _cameraCapturer!,
+        name: 'preview-video#1',
+      );
+      await _localVideoTrack?.create();
+    } catch (e) {
+      debugPrint('VideoTrack creation failed: $e');
+      SnackBarHelper.showStatusSnackBar(
+        context,
+        StatusIndicator.error,
+        'Failed to create video track: $e',
+      );
+    }
+  }
+
   Future<void> _joinRoom() async {
     setState(() {
       _isLoading = true;
     });
 
-    await _initCameraCapturer();
-    await _initVideoPreview();
-
     try {
       var connectOptions = ConnectOptions(
         twilioAccessTokenResponseModel?.token ?? '',
-        roomName: twilioAccessTokenResponseModel?.roomId,
-        audioTracks: [_localAudioTrack ?? LocalAudioTrack(true, '')],
-        videoTracks: [_localVideoTrack!],
+        roomName: twilioAccessTokenResponseModel?.roomId ?? 'SESSION_ROOM0004',
+        audioTracks: [LocalAudioTrack(true, 'audio_track')],
+        videoTracks: [_localVideoTrack ?? LocalVideoTrack(true, _cameraCapturer!)],
+        dataTracks: [
+          LocalDataTrack(
+            DataTrackOptions(name: 'preview-data-track#1'),
+          )
+        ],
+        enableDominantSpeaker: true,
+        enableNetworkQuality: true,
+        networkQualityConfiguration: NetworkQualityConfiguration(
+          remote: NetworkQualityVerbosity.NETWORK_QUALITY_VERBOSITY_MINIMAL,
+        ),
       );
 
       _room = await TwilioProgrammableVideo.connect(connectOptions);
 
-      _room!.onConnected.listen((Room room) {
+      _room?.onConnected.listen((Room room) {
         SnackBarHelper.showStatusSnackBar(
             context, StatusIndicator.success, 'Connected to ${room.name}');
-        debugPrint('Connected to ${room.name}');
-        setState(() {
-          _isLoading = false;
-        });
+        _onConnected(room);
       });
 
-      _room!.onConnectFailure.listen((RoomConnectFailureEvent event) {
+      _room?.onConnectFailure.listen((RoomConnectFailureEvent event) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
             'Failed to connect to room ${event.room.name}: ${event.exception}');
-        debugPrint(
-            'Failed to connect to room ${event.room.name}: ${event.exception}');
-        setState(() {
-          _isLoading = false;
-        });
+        _onConnectFailure(event);
       });
 
-      _room!.onDisconnected.listen((event) {
+      _room?.onDisconnected.listen((RoomDisconnectedEvent event) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.warning,
             'Disconnected from ${event.room.name}');
-        debugPrint('Disconnected from ${event.room.name}');
-        setState(() {
-          _room = null;
-        });
+        _onDisconnected(event);
       });
     } catch (e) {
       SnackBarHelper.showStatusSnackBar(
@@ -131,23 +157,65 @@ class _VideoCallPageState extends State<VideoCallPage> {
     }
   }
 
-  Future<void> _initCameraCapturer() async {
-    _cameraSources = await CameraSource.getSources();
-    _currentCameraSource =
-        _cameraSources?.firstWhere((source) => source.isFrontFacing);
-
-    if (_currentCameraSource != null) {
-      _cameraCapturer = CameraCapturer(_currentCameraSource!);
+  void _onConnected(Room room) {
+    final localParticipant = room.localParticipant;
+    if (localParticipant != null) {
+      _participants.add(_buildParticipant(
+        child: localParticipant.localVideoTracks[0].localVideoTrack.widget(),
+        id: localParticipant.identity,
+      ));
     }
+
+    for (final remoteParticipant in room.remoteParticipants) {
+      _addRemoteParticipantListeners(remoteParticipant);
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
-  Future<void> _initVideoPreview() async {
-    _localVideoTrack = LocalVideoTrack(
-      true,
-      _cameraCapturer!,
-      name: 'preview-video#1',
+  void _onDisconnected(RoomDisconnectedEvent event) {
+    setState(() {
+      _room = null;
+      _participants.clear();
+    });
+  }
+
+  void _onConnectFailure(RoomConnectFailureEvent event) {
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  void _addRemoteParticipantListeners(RemoteParticipant remoteParticipant) {
+    remoteParticipant.onVideoTrackSubscribed.listen((RemoteVideoTrackSubscriptionEvent event) {
+      _participants.add(_buildParticipant(
+        child: event.remoteVideoTrack.widget(),
+        id: remoteParticipant.sid!,
+      ));
+      setState(() {});
+    });
+
+    remoteParticipant.onVideoTrackUnsubscribed.listen((RemoteVideoTrackSubscriptionEvent event) {
+      _participants.removeWhere((participant) => participant.id == remoteParticipant.sid);
+      setState(() {});
+    });
+
+    remoteParticipant.onAudioTrackSubscribed.listen((RemoteAudioTrackSubscriptionEvent event) {
+      // Handle remote audio track
+    });
+
+    remoteParticipant.onAudioTrackUnsubscribed.listen((RemoteAudioTrackSubscriptionEvent event) {
+      // Handle remote audio track
+    });
+  }
+
+  ParticipantWidget _buildParticipant({required Widget child, required String id}) {
+    return ParticipantWidget(
+      id: id,
+      child: child,
     );
-    await _localVideoTrack?.create();
   }
 
   Future<void> _leaveRoom() async {
@@ -156,6 +224,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
     setState(() {
       _room = null;
       _localVideoTrack = null;
+      _participants.clear();
     });
   }
 
@@ -202,39 +271,93 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
   Widget _buildRoomWidget() => Stack(
         children: [
-          if (_localVideoTrack != null)
-            Positioned.fill(
-              child: _localVideoTrack!.widget(),
+            
+          ..._participants.map((participant) => Positioned.fill(
+                child: participant.child,
+              )),
+            if (_localVideoTrack != null)
+            Positioned(
+              top: 2,
+              child: Container(
+                width: 200,
+                height: 200,
+                child: _localVideoTrack!.widget()),
             ),
           Positioned(
             bottom: 20,
             left: 20,
-            child: IconButton(
-              icon: const Icon(Icons.call_end, color: Colors.red, size: 30),
-              onPressed: _leaveRoom,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.call_end, color: Colors.red, size: 30),
+                onPressed: _leaveRoom,
+              ).center(),
             ),
           ),
           Positioned(
             bottom: 20,
             right: 80,
-            child: IconButton(
-              icon: Icon(
-                _isMuted ? Icons.mic_off : Icons.mic,
-                color: Colors.white,
-                size: 30,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(8),
               ),
-              onPressed: _toggleMute,
+              child: IconButton(
+                icon: Icon(
+                  _isMuted ? Icons.mic_off : Icons.mic,
+                  color: Colors.black,
+                  size: 30,
+                ),
+                onPressed: _toggleMute,
+              ).center(),
             ),
           ),
           Positioned(
             bottom: 20,
             right: 20,
-            child: IconButton(
-              icon: const Icon(Icons.switch_camera,
-                  color: Colors.white, size: 30),
-              onPressed: _switchCamera,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.switch_camera, color: Colors.black, size: 30),
+                onPressed: _switchCamera,
+              ).center(),
             ),
           ),
         ],
       );
+}
+
+class ParticipantWidget extends StatelessWidget {
+  final Widget child;
+  final String id;
+
+  const ParticipantWidget({required this.child, required this.id});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: 10,
+      right: 10,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: SizedBox(
+            width: 120,
+            height: 180,
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
 }

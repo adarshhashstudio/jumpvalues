@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/requested_sessions_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
+import 'package:jumpvalues/screens/video_calling_module/video_call_page.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/permission_handler.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart' as nb;
@@ -305,14 +307,39 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   textColor: nb.white,
                   color: primaryColor,
                   enabled: true,
-                  onTap: () {
-                    // Navigator.of(context).push(MaterialPageRoute(
-                    //     builder: (context) => VideoCallPage(
-                    //           sessionId: sessionId,
-                    //           joinRoomAutomatically: true,
-                    //         )));
-                    showRatingDialog(context,
-                        sessionId: sessionId, coachId: coachId);
+                  onTap: () async {
+                    var permissionsGranted =
+                        await PermissionUtils.requestNearbyDevicesPermissions();
+                    debugPrint('Permission Granted: $permissionsGranted');
+                    if (permissionsGranted) {
+                      debugPrint('Permission Denied - First Attempt');
+                      await Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => VideoCallPage(
+                                sessionId: sessionId,
+                                joinRoomAutomatically: true,
+                              )));
+                    } else {
+                      debugPrint('Permission Denied');
+                      SnackBarHelper.showStatusSnackBar(
+                          context, StatusIndicator.error, 'Permission Denied');
+                      // Handle the case when permissions are not granted
+                      permissionsGranted = await PermissionUtils
+                          .requestNearbyDevicesPermissions();
+                      if (permissionsGranted) {
+                        await Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => VideoCallPage(
+                                  sessionId: sessionId,
+                                  joinRoomAutomatically: true,
+                                )));
+                      } else {
+                        debugPrint(
+                            'Go to the Settings → Applications → Manage Applications → JumpCC → Enable Nearby Devices');
+                        SnackBarHelper.showStatusSnackBar(
+                            context,
+                            StatusIndicator.warning,
+                            'Go to the Settings → Applications → Manage Applications → JumpCC → Enable Nearby Devices');
+                      }
+                    }
                   },
                 ).expand(),
               ],
@@ -346,7 +373,12 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   text: 'Completed',
                   textColor: Colors.black38,
                   color: Colors.grey.withOpacity(0.5),
-                  onTap: () {},
+                  onTap: () {
+                    if (!appStore.userTypeCoach) {
+                      showRatingDialog(context,
+                          sessionId: sessionId, coachId: coachId);
+                    }
+                  },
                 ).expand(),
               ],
             ).expand(),
