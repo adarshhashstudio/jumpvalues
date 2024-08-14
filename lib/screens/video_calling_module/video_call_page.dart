@@ -26,7 +26,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
   CameraSource? _currentCameraSource;
   List<CameraSource>? _cameraSources;
   TwilioAccessTokenResponseModel? twilioAccessTokenResponseModel;
-  List<ParticipantWidget> _participants = [];
+  Map<String, ParticipantWidget> _participants =
+      {}; // Store participants by their ID
 
   @override
   void initState() {
@@ -95,6 +96,12 @@ class _VideoCallPageState extends State<VideoCallPage> {
         name: 'preview-video#1',
       );
       await _localVideoTrack?.create();
+      debugPrint('Local Video Track created');
+      // Add local video track to participants list
+      _addParticipant(_buildParticipant(
+        child: _localVideoTrack!.widget(),
+        id: 'local', // Assign a unique ID for local participant
+      ));
     } catch (e) {
       debugPrint('VideoTrack creation failed: $e');
       SnackBarHelper.showStatusSnackBar(
@@ -160,11 +167,12 @@ class _VideoCallPageState extends State<VideoCallPage> {
   }
 
   void _onConnected(Room room) {
+    // Ensure local participant's video is already added
     final localParticipant = room.localParticipant;
-    if (localParticipant != null) {
-      _participants.add(_buildParticipant(
+    if (localParticipant != null && _participants['local'] == null) {
+      _addParticipant(_buildParticipant(
         child: localParticipant.localVideoTracks[0].localVideoTrack.widget(),
-        id: localParticipant.identity,
+        id: 'local',
       ));
     }
 
@@ -193,28 +201,27 @@ class _VideoCallPageState extends State<VideoCallPage> {
   void _addRemoteParticipantListeners(RemoteParticipant remoteParticipant) {
     remoteParticipant.onVideoTrackSubscribed
         .listen((RemoteVideoTrackSubscriptionEvent event) {
-      _participants.add(_buildParticipant(
+      _addParticipant(_buildParticipant(
         child: event.remoteVideoTrack.widget(),
         id: remoteParticipant.sid!,
       ));
-      setState(() {});
     });
 
     remoteParticipant.onVideoTrackUnsubscribed
         .listen((RemoteVideoTrackSubscriptionEvent event) {
-      _participants.removeWhere(
-          (participant) => participant.id == remoteParticipant.sid);
-      setState(() {});
+      _removeParticipant(remoteParticipant.sid!);
     });
+  }
 
-    remoteParticipant.onAudioTrackSubscribed
-        .listen((RemoteAudioTrackSubscriptionEvent event) {
-      // Handle remote audio track
+  void _addParticipant(ParticipantWidget participant) {
+    setState(() {
+      _participants[participant.id] = participant;
     });
+  }
 
-    remoteParticipant.onAudioTrackUnsubscribed
-        .listen((RemoteAudioTrackSubscriptionEvent event) {
-      // Handle remote audio track
+  void _removeParticipant(String id) {
+    setState(() {
+      _participants.remove(id);
     });
   }
 
@@ -260,14 +267,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
     super.dispose();
   }
 
-  // Position for the draggable small video window
-  double _smallVideoTop = 50;
-  double _smallVideoLeft = 50;
-
-  // Dimensions of the small video window
-  final double smallVideoWidth = 150;
-  final double smallVideoHeight = 200;
-
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
@@ -285,131 +284,98 @@ class _VideoCallPageState extends State<VideoCallPage> {
                 : _buildRoomWidget(),
       );
 
-  Widget _buildRoomWidget() => Stack(
-        children: [
-          
-          // Big Video Window (Full Screen)
-          _participants.isNotEmpty
-              ? Container(
-                  child: Stack(children: [
-                  ..._participants.map((participant) => Positioned.fill(
-                        child: participant.child,
-                      ))
-                ]))
-              : Positioned.fill(
-                  child: Container(
-                    color: Colors.black, // Placeholder for the big video
-                    child: Center(
-                      child: Text(
-                        'Connecting...',
-                        style: TextStyle(color: Colors.white),
-                      ),
+  Widget _buildRoomWidget() {
+    final remoteParticipants = _participants.values
+        .where((participant) => participant.id != 'local')
+        .map((participant) => participant.child)
+        .toList();
+
+    return Stack(
+      children: [
+        // Big Video Window (Full Screen) for remote participants
+        Positioned.fill(
+          child: remoteParticipants.isNotEmpty
+              ? remoteParticipants.first // Show the first remote participant
+              : Container(
+                  color: Colors.black, // Placeholder for the big video
+                  child: Center(
+                    child: Text(
+                      'Connecting...',
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
-
-          // Draggable Small Video Window
-         if(_localVideoTrack != null ) Positioned(
-            top: _smallVideoTop,
-            left: _smallVideoLeft,
-            child: GestureDetector(
-              onPanUpdate: (details) {
-                setState(() {
-                  // Update the position of the small video window
-                  _smallVideoTop += details.delta.dy;
-                  _smallVideoLeft += details.delta.dx;
-
-                  // Ensure the small video stays within the screen boundaries
-                  _smallVideoTop = _smallVideoTop.clamp(0.0,
-                      MediaQuery.of(context).size.height - smallVideoHeight);
-                  _smallVideoLeft = _smallVideoLeft.clamp(
-                      0.0, MediaQuery.of(context).size.width - smallVideoWidth);
-                });
-              },
-              child: Container(
-                width: smallVideoWidth,
-                height: smallVideoHeight,
+        ),
+        // Small Video Window for local participant
+        Positioned(
+          top: 20,
+          right: 20,
+          width: 120,
+          height: 160,
+          child: _participants['local']?.child ??
+              Container(
                 color: Colors.grey, // Placeholder for the small video
-                child: _localVideoTrack!.widget(),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 20,
-            left: 20,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.call_end, color: Colors.red, size: 30),
-                onPressed: _leaveRoom,
-              ).center(),
-            ),
-          ),
-          Positioned(
-            bottom: 20,
-            right: 80,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: IconButton(
-                icon: Icon(
-                  _isMuted ? Icons.mic_off : Icons.mic,
-                  color: Colors.black,
-                  size: 30,
+                child: const Center(
+                  child: Text(
+                    'Local Video',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
-                onPressed: _toggleMute,
-              ).center(),
-            ),
-          ),
-          Positioned(
-            bottom: 20,
-            right: 20,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(8),
               ),
-              child: IconButton(
-                icon: const Icon(Icons.switch_camera,
-                    color: Colors.black, size: 30),
-                onPressed: _switchCamera,
-              ).center(),
+        ),
+        // Call end button
+        Positioned(
+          bottom: 20,
+          left: 20,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.redAccent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.call_end),
+              onPressed: _leaveRoom,
             ),
           ),
-        ],
-      );
-}
-
-class ParticipantWidget extends StatelessWidget {
-  final Widget child;
-  final String id;
-
-  const ParticipantWidget({required this.child, required this.id});
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: 10,
-      right: 10,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(8),
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: SizedBox(
-            width: 120,
-            height: 180,
-            child: child,
+        // Mute button
+        Positioned(
+          bottom: 20,
+          right: 20,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: Icon(_isMuted ? Icons.mic_off_rounded : Icons.mic_rounded),
+              onPressed: _toggleMute,
+            ),
           ),
         ),
-      ),
+        // Switch camera button
+        Positioned(
+          bottom: 20,
+          right: 80,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.switch_camera),
+              onPressed: _switchCamera,
+            ),
+          ),
+        ),
+      ],
     );
   }
+}
+
+class ParticipantWidget {
+  final String id;
+  final Widget child;
+
+  ParticipantWidget({required this.id, required this.child});
 }
