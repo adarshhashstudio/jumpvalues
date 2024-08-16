@@ -1,76 +1,57 @@
+import 'package:flutter/material.dart';
+import 'package:jumpvalues/utils/configs.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionUtils {
   // Request permissions for nearby devices, microphone, and camera
-  static Future<bool> requestNearbyDevicesPermissions() async {
-    // // Check if all Bluetooth permissions are granted
-    // var bluetoothGranted = !(await Future.wait([
-    //   Permission.bluetooth.isGranted,
-    //   Permission.bluetoothAdvertise.isGranted,
-    //   Permission.bluetoothConnect.isGranted,
-    //   Permission.bluetoothScan.isGranted,
-    // ]))
-    //     .any((element) => element == false);
-
-    // // Request Bluetooth permissions if not granted
-    // if (!bluetoothGranted) {
-    //   var statuses = await [
-    //     Permission.bluetooth,
-    //     Permission.bluetoothAdvertise,
-    //     Permission.bluetoothConnect,
-    //     Permission.bluetoothScan,
-    //   ].request();
-
-    //   bluetoothGranted =
-    //       !statuses.values.any((status) => status != PermissionStatus.granted);
-    // }
-
-    // Request permission for nearby WiFi devices (Android 12+)
-    // var nearbyWifiDevicesStatus = await Permission.nearbyWifiDevices.request();
-    // var nearbyWifiDevicesGranted =
-    //     nearbyWifiDevicesStatus == PermissionStatus.granted;
-
-    // Request microphone and camera permissions
-    var micAndCameraGranted = !(await Future.wait([
-      Permission.microphone.isGranted,
-      Permission.camera.isGranted,
-    ]))
-        .any((element) => element == false);
+  static Future<bool> requestNearbyDevicesPermissions(
+      BuildContext context) async {
+    var micAndCameraGranted = await _arePermissionsGranted();
 
     if (!micAndCameraGranted) {
-      var micAndCameraStatuses = await [
-        Permission.microphone,
-        Permission.camera,
-      ].request();
-
-      micAndCameraGranted = !micAndCameraStatuses.values
-          .any((status) => status != PermissionStatus.granted);
+      micAndCameraGranted = await _requestPermissions();
     }
 
-    // Return true if all permissions are granted // bluetoothGranted && nearbyWifiDevicesGranted &&
-    return  micAndCameraGranted;
+    if (!micAndCameraGranted) {
+      _showPermissionDialog(context);
+    }
+
+    return micAndCameraGranted;
   }
 
-  // // Optional: Request location permissions (if needed)
-  // static Future<bool> requestLocationPermissions() async {
-  //   if (!(await Permission.location.isGranted)) {
-  //     await Permission.location.request();
-  //   }
+  static Future<bool> _arePermissionsGranted() async {
+    final micStatus = await Permission.microphone.status;
+    final cameraStatus = await Permission.camera.status;
+    return micStatus.isGranted && cameraStatus.isGranted;
+  }
 
-  //   bool serviceEnabled = await Permission.location.serviceStatus.isEnabled;
-  //   if (!serviceEnabled) {
-  //     serviceEnabled = await Location.instance.requestService();
-  //   }
+  static Future<bool> _requestPermissions() async {
+    final statuses = await [
+      Permission.microphone,
+      Permission.camera,
+    ].request();
 
-  //   return serviceEnabled;
-  // }
+    return !statuses.values.any((status) => status != PermissionStatus.granted);
+  }
 
-  // Optional: Request external storage permissions (if needed)
-  // static Future<bool> requestStoragePermissions() async {
-  //   if (!(await Permission.storage.isGranted)) {
-  //     await Permission.storage.request();
-  //   }
-
-  //   return await Permission.storage.isGranted;
-  // }
+  static void _showPermissionDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Permissions Required'),
+        content: const Text(
+          'The app requires access to the camera and microphone. Please enable these permissions manually from your device settings.\n\n'
+          'To do this, go to Settings > Apps > $APP_NAME > Permissions and allow access to the Camera and Microphone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Okay'),
+          ),
+        ],
+      ),
+    );
+  }
 }

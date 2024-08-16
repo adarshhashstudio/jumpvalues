@@ -32,7 +32,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
       _isLoading = true;
     });
     debugPrint('Initializing video call setup...');
-    await _requestPermissions();
     await _initCameraCapturer();
     await _initVideoPreview();
     await getTwilioAccessToken();
@@ -59,25 +58,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
         _isLoading = false;
       });
     }
-  }
-
-  Future<void> _requestPermissions() async {
-    debugPrint('Requesting camera, microphone, and Bluetooth permissions...');
-    var status = await [
-      Permission.camera,
-      Permission.microphone,
-      Permission.bluetooth
-    ].request();
-
-    // if (status[Permission.camera]?.isDenied ?? true ||
-    //     status[Permission.microphone]?.isDenied ?? true) {
-    //   debugPrint('Permissions denied.');
-    //   SnackBarHelper.showStatusSnackBar(
-    //     context,
-    //     StatusIndicator.error,
-    //     'Camera and microphone permissions are required.',
-    //   );
-    // }
   }
 
   Future<void> _initCameraCapturer() async {
@@ -263,12 +243,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: Text('Video Call'),
-      ),
       body: Stack(
         children: [
           // if (!_remoteParticipantJoined)
@@ -299,7 +275,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
             ),
 
           if (_isLoading)
-            Center(
+            const Center(
               child: CircularProgressIndicator(),
             ),
         ],
@@ -310,25 +286,24 @@ class _VideoCallPageState extends State<VideoCallPage> {
           FloatingActionButton(
             onPressed: _switchCamera,
             tooltip: 'Switch Camera',
-            child: Icon(Icons.cameraswitch),
+            child: const Icon(Icons.cameraswitch),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           FloatingActionButton(
             onPressed: _toggleMute,
             tooltip: _isMuted ? 'Unmute' : 'Mute',
             child: Icon(_isMuted ? Icons.mic_off : Icons.mic),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           FloatingActionButton(
             onPressed: _leaveRoom,
             tooltip: 'End Call',
             backgroundColor: Colors.red,
-            child: Icon(Icons.call_end),
+            child: const Icon(Icons.call_end),
           ),
         ],
       ),
     );
-  }
 
   void _toggleMute() {
     setState(() {

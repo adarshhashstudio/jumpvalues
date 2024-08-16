@@ -309,34 +309,20 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   enabled: true,
                   onTap: () async {
                     var permissionsGranted =
-                        await PermissionUtils.requestNearbyDevicesPermissions();
-                    debugPrint('Permission Granted: $permissionsGranted');
+                        await PermissionUtils.requestNearbyDevicesPermissions(
+                            context);
                     if (permissionsGranted) {
-                      debugPrint('Permission Denied - First Attempt');
                       await Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => VideoCallPage(
                                 sessionId: sessionId,
                               )));
                     } else {
-                      debugPrint('Permission Denied');
+                      debugPrint(
+                          'Go to the Settings → Applications → Manage Applications → JumpCC → Enable Nearby Devices');
                       SnackBarHelper.showStatusSnackBar(
-                          context, StatusIndicator.error, 'Permission Denied');
-                      // Handle the case when permissions are not granted
-                      permissionsGranted = await PermissionUtils
-                          .requestNearbyDevicesPermissions();
-                      if (permissionsGranted) {
-                        await Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => VideoCallPage(
-                                  sessionId: sessionId,
-                                )));
-                      } else {
-                        debugPrint(
-                            'Go to the Settings → Applications → Manage Applications → JumpCC → Enable Nearby Devices');
-                        SnackBarHelper.showStatusSnackBar(
-                            context,
-                            StatusIndicator.warning,
-                            'Go to the Settings → Applications → Manage Applications → JumpCC → Enable Nearby Devices');
-                      }
+                          context,
+                          StatusIndicator.warning,
+                          'Go to Settings > Apps > $APP_NAME > Permissions and allow access to the Camera and Microphone.');
                     }
                   },
                 ).expand(),
