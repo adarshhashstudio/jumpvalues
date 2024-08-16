@@ -316,7 +316,6 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                       await Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => VideoCallPage(
                                 sessionId: sessionId,
-                                joinRoomAutomatically: true,
                               )));
                     } else {
                       debugPrint('Permission Denied');
@@ -329,7 +328,6 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                         await Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => VideoCallPage(
                                   sessionId: sessionId,
-                                  joinRoomAutomatically: true,
                                 )));
                       } else {
                         debugPrint(
