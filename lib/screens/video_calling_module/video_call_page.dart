@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/utils/utils.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:twilio_programmable_video/twilio_programmable_video.dart';
 
 class VideoCallPage extends StatefulWidget {
@@ -19,6 +20,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
   Map<String, RemoteVideoTrack?> _remoteParticipantVideoTracks = {};
   bool _isMuted = false;
   bool _remoteParticipantJoined = false;
+  CameraSource? _currentCameraSource;
 
   @override
   void initState() {
@@ -67,6 +69,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
           cameraSources.firstWhere((source) => source.isBackFacing);
 
       _cameraCapturer = CameraCapturer(backCameraSource);
+      _currentCameraSource =
+          backCameraSource; // Initialize with the back camera
       debugPrint('Camera capturer initialized.');
     } catch (e) {
       debugPrint('Camera initialization failed: $e');
@@ -279,9 +283,54 @@ class _VideoCallPageState extends State<VideoCallPage> {
                 child: CircularProgressIndicator(),
               ),
 
-            // Call mute button at left side
-            // Call end button at center
-            // Camera switch button at right side
+            controlButtons()
+          ],
+        ),
+      );
+
+  Widget controlButtons() => // Call control buttons
+      Positioned(
+        bottom: 20,
+        left: 20,
+        right: 20,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            // Mute/Unmute button
+            Container(
+              decoration: boxDecorationDefault(color: transparentColor),
+              child: IconButton(
+                icon: Icon(
+                  _isMuted ? Icons.mic_off : Icons.mic,
+                  color: Colors.white,
+                ),
+                onPressed: _toggleMute,
+              ),
+            ),
+
+            // End call button
+            Container(
+              decoration: boxDecorationDefault(color: transparentColor),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.call_end,
+                  color: Colors.red,
+                ),
+                onPressed: _leaveRoom,
+              ),
+            ),
+
+            // Switch camera button
+            Container(
+              decoration: boxDecorationDefault(color: transparentColor),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.switch_camera,
+                  color: Colors.white,
+                ),
+                onPressed: _switchCamera,
+              ),
+            ),
           ],
         ),
       );
@@ -293,5 +342,28 @@ class _VideoCallPageState extends State<VideoCallPage> {
     _localVideoTrack?.enable(!_isMuted);
   }
 
-  void _switchCamera() async {}
+  Future<void> _switchCamera() async {
+    try {
+      debugPrint('Switching camera...');
+      var cameraSources = await CameraSource.getSources();
+
+      if (_currentCameraSource?.isBackFacing == true) {
+        // Switch to the front camera
+        var frontCameraSource =
+            cameraSources.firstWhere((source) => source.isFrontFacing);
+        await _cameraCapturer?.switchCamera(frontCameraSource);
+        _currentCameraSource = frontCameraSource;
+      } else {
+        // Switch to the back camera
+        var backCameraSource =
+            cameraSources.firstWhere((source) => source.isBackFacing);
+        await _cameraCapturer?.switchCamera(backCameraSource);
+        _currentCameraSource = backCameraSource;
+      }
+
+      debugPrint('Camera switched successfully.');
+    } catch (e) {
+      debugPrint('Failed to switch camera: $e');
+    }
+  }
 }
