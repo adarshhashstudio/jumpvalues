@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/utils/utils.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:twilio_programmable_video/twilio_programmable_video.dart';
 
 class VideoCallPage extends StatefulWidget {
@@ -234,6 +233,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
       _remoteParticipantVideoTracks.clear();
       _remoteParticipantJoined = false;
     });
+    Navigator.of(context).pop();
   }
 
   @override
@@ -244,66 +244,47 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // if (!_remoteParticipantJoined)
-          //   Center(
-          //     child: Text(
-          //       'Connecting...',
-          //       style: TextStyle(color: Colors.white),
-          //     ),
-          //   ),
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            // if (!_remoteParticipantJoined)
+            //   Center(
+            //     child: Text(
+            //       'Connecting...',
+            //       style: TextStyle(color: Colors.white),
+            //     ),
+            //   ),
 
-          if (_remoteParticipantJoined &&
-              _remoteParticipantVideoTracks.isNotEmpty)
-            Positioned.fill(
-              child: _remoteParticipantVideoTracks.values.first?.widget() ??
-                  Container(),
-            ),
-
-          if (_localVideoTrack != null)
-            Positioned(
-              bottom: 20,
-              right: 20,
-              width: 120,
-              height: 180,
-              child: Draggable(
-                feedback: _localVideoTrack!.widget(),
-                child: _localVideoTrack!.widget(),
+            if (_remoteParticipantJoined &&
+                _remoteParticipantVideoTracks.isNotEmpty)
+              Positioned.fill(
+                child: _remoteParticipantVideoTracks.values.first?.widget() ??
+                    Container(),
               ),
-            ),
 
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
-        ],
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: _switchCamera,
-            tooltip: 'Switch Camera',
-            child: const Icon(Icons.cameraswitch),
-          ),
-          const SizedBox(height: 16),
-          FloatingActionButton(
-            onPressed: _toggleMute,
-            tooltip: _isMuted ? 'Unmute' : 'Mute',
-            child: Icon(_isMuted ? Icons.mic_off : Icons.mic),
-          ),
-          const SizedBox(height: 16),
-          FloatingActionButton(
-            onPressed: _leaveRoom,
-            tooltip: 'End Call',
-            backgroundColor: Colors.red,
-            child: const Icon(Icons.call_end),
-          ),
-        ],
-      ),
-    );
+            if (_localVideoTrack != null)
+              Positioned(
+                bottom: 20,
+                right: 20,
+                width: 120,
+                height: 180,
+                child: Draggable(
+                  feedback: _localVideoTrack!.widget(),
+                  child: _localVideoTrack!.widget(),
+                ),
+              ),
+
+            if (_isLoading)
+              const Center(
+                child: CircularProgressIndicator(),
+              ),
+
+            // Call mute button at left side
+            // Call end button at center
+            // Camera switch button at right side
+          ],
+        ),
+      );
 
   void _toggleMute() {
     setState(() {
@@ -312,8 +293,5 @@ class _VideoCallPageState extends State<VideoCallPage> {
     _localVideoTrack?.enable(!_isMuted);
   }
 
-  void _switchCamera() async {
-    debugPrint('Switching camera...');
-    // await _cameraCapturer?.switchCamera();
-  }
+  void _switchCamera() async {}
 }
