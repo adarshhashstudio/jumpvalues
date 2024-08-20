@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pannable_rating_bar/flutter_pannable_rating_bar.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/requested_sessions_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
@@ -162,7 +163,8 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
               context,
               widget.serviceResource?.date ?? '',
               widget.serviceResource?.startTime ?? '',
-              widget.serviceResource?.remark ?? 'N/A'),
+              widget.serviceResource?.remark ?? 'N/A',
+              widget.serviceResource?.rating ?? ''),
           if (widget.showButtons)
             buildButtons(
                 context,
@@ -181,6 +183,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
     String date,
     String time,
     String description,
+    String ratings,
   ) =>
       Container(
         decoration: BoxDecoration(
@@ -223,6 +226,39 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                           style: const TextStyle(fontSize: 12),
                           textAlign: TextAlign.right,
                         ),
+                      ),
+                    ],
+                  ).paddingAll(8),
+                ],
+              ),
+            if (ratings.isNotEmpty)
+              Column(
+                children: [
+                  const Divider(height: 0, color: Colors.black12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Rating',
+                          style: TextStyle(color: Colors.grey)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: PannableRatingBar.builder(
+                  rate: '$ratings'.toDouble(),
+                  alignment: WrapAlignment.end,
+                  spacing: 2,
+                  runSpacing: 2,
+                  itemCount: 5,
+                  direction: Axis.horizontal,
+                  itemBuilder: (context, index) => const RatingWidget(
+                    selectedColor: Colors.orange,
+                    unSelectedColor: Colors.grey,
+                    child: Icon(
+                      Icons.star,
+                      size: 16,
+                    ),
+                  ),
+                  onChanged: (value) {},
+                ),
                       ),
                     ],
                   ).paddingAll(8),
@@ -312,10 +348,18 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                         await PermissionUtils.requestNearbyDevicesPermissions(
                             context);
                     if (permissionsGranted) {
-                      await Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => VideoCallPage(
-                                sessionId: sessionId,
-                              )));
+                      var completed =
+                          await Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => VideoCallPage(
+                                    sessionId: sessionId,
+                                  )));
+                      if (completed) {
+                        if (!appStore.userTypeCoach) {
+                          showRatingDialog(context,
+                              sessionId: sessionId, coachId: coachId);
+                          widget.onActionPerformed();
+                        }
+                      }
                     } else {
                       debugPrint(
                           'Go to the Settings → Applications → Manage Applications → JumpCC → Enable Nearby Devices');
@@ -357,12 +401,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   text: 'Completed',
                   textColor: Colors.black38,
                   color: Colors.grey.withOpacity(0.5),
-                  onTap: () {
-                    if (!appStore.userTypeCoach) {
-                      showRatingDialog(context,
-                          sessionId: sessionId, coachId: coachId);
-                    }
-                  },
+                  onTap: () {},
                 ).expand(),
               ],
             ).expand(),

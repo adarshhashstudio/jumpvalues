@@ -72,6 +72,7 @@ class RequestedSession {
     this.endTime,
     this.remark,
     this.date,
+    this.rating,
   });
 
   factory RequestedSession.fromJson(Map<String, dynamic> json) =>
@@ -85,6 +86,7 @@ class RequestedSession {
         endTime: json['end_time'] as String?,
         remark: json['remark'] as String?,
         date: json['date'] as String?,
+        rating: json['rating'] as String?,
       );
   int? id;
   int? status;
@@ -95,6 +97,7 @@ class RequestedSession {
   String? endTime;
   String? remark;
   String? date;
+  String? rating;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -106,5 +109,6 @@ class RequestedSession {
         'end_time': endTime,
         'remark': remark,
         'date': date,
+        'rating': rating,
       };
 }

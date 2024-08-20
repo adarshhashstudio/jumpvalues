@@ -15,6 +15,7 @@ class VideoCallPage extends StatefulWidget {
 class _VideoCallPageState extends State<VideoCallPage> {
   Room? _room;
   LocalVideoTrack? _localVideoTrack;
+  LocalAudioTrack? _localAudioTrack;
   CameraCapturer? _cameraCapturer;
   bool _isLoading = false;
   Map<String, RemoteVideoTrack?> _remoteParticipantVideoTracks = {};
@@ -36,6 +37,34 @@ class _VideoCallPageState extends State<VideoCallPage> {
     await _initCameraCapturer();
     await _initVideoPreview();
     await getTwilioAccessToken();
+  }
+
+  Future<void> coachAcceptOrRejectSessions(int status, int sessionId) async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      var request = <String, dynamic>{
+        'status': status,
+      };
+
+      var response = await acceptOrRejectSessions(request, sessionId);
+      if (response?.status == true) {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
+            response?.message ?? 'Saved Successfully.');
+      } else {
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? 'Something went wrong');
+        }
+      }
+    } catch (e) {
+      debugPrint('coachAcceptOrRejectSessions Error: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> getTwilioAccessToken() async {
@@ -104,10 +133,12 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
     try {
       debugPrint('Joining the room...');
+      _localAudioTrack = LocalAudioTrack(true, 'audio_track');
+
       var connectOptions = ConnectOptions(
         token,
         roomName: roomId,
-        audioTracks: [LocalAudioTrack(true, 'audio_track')],
+        audioTracks: [_localAudioTrack!],
         videoTracks: [_localVideoTrack!],
       );
 
@@ -118,7 +149,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
         SnackBarHelper.showStatusSnackBar(
           context,
           StatusIndicator.success,
-          'Connected to ${room.name}',
+          'Wait for participent to join.',
         );
         _onConnected(room);
       });
@@ -237,7 +268,11 @@ class _VideoCallPageState extends State<VideoCallPage> {
       _remoteParticipantVideoTracks.clear();
       _remoteParticipantJoined = false;
     });
-    Navigator.of(context).pop();
+    await coachAcceptOrRejectSessions(
+            getSessionStatusCode(SessionStatus.completed), widget.sessionId)
+        .then((v) {
+      Navigator.of(context).pop(true);
+    });
   }
 
   @override
@@ -247,46 +282,72 @@ class _VideoCallPageState extends State<VideoCallPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        backgroundColor: Colors.black,
-        body: Stack(
-          children: [
-            // if (!_remoteParticipantJoined)
-            //   Center(
-            //     child: Text(
-            //       'Connecting...',
-            //       style: TextStyle(color: Colors.white),
-            //     ),
-            //   ),
+  Widget build(BuildContext context) {
+    // Position for the draggable small video window
+    double _smallVideoTop = 50;
+    double _smallVideoLeft = 50;
 
-            if (_remoteParticipantJoined &&
-                _remoteParticipantVideoTracks.isNotEmpty)
-              Positioned.fill(
-                child: _remoteParticipantVideoTracks.values.first?.widget() ??
-                    Container(),
-              ),
+    // Dimensions of the small video window
+    final double smallVideoWidth = 100;
+    final double smallVideoHeight = 150;
 
-            if (_localVideoTrack != null)
-              Positioned(
-                bottom: 20,
-                right: 20,
-                width: 120,
-                height: 180,
-                child: Draggable(
-                  feedback: _localVideoTrack!.widget(),
-                  child: _localVideoTrack!.widget(),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          (_remoteParticipantJoined && _remoteParticipantVideoTracks.isNotEmpty)
+              ? Positioned.fill(
+                  child: _remoteParticipantVideoTracks.values.first?.widget() ??
+                      Container(),
+                )
+              : Text(
+                  'Connecting...',
+                  style: boldTextStyle(color: white),
+                ).center(),
+          if (_localVideoTrack != null)
+            Positioned(
+              top: _smallVideoTop,
+              left: _smallVideoLeft,
+              child: GestureDetector(
+                onPanUpdate: (details) {
+                  setState(() {
+                    // Update the position of the small video window
+                    _smallVideoTop += details.delta.dy;
+                    _smallVideoLeft += details.delta.dx;
+
+                    // Ensure the small video stays within the screen boundaries
+                    _smallVideoTop = _smallVideoTop.clamp(0.0,
+                        MediaQuery.of(context).size.height - smallVideoHeight);
+                    _smallVideoLeft = _smallVideoLeft.clamp(0.0,
+                        MediaQuery.of(context).size.width - smallVideoWidth);
+
+                    debugPrint(
+                        'TWILIO ===================================> $_smallVideoLeft');
+                  });
+                },
+                child: Container(
+                  width: smallVideoWidth,
+                  height: smallVideoHeight,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.black,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: _localVideoTrack!.widget(),
+                  ),
                 ),
               ),
-
-            if (_isLoading)
-              const Center(
-                child: CircularProgressIndicator(),
-              ),
-
-            controlButtons()
-          ],
-        ),
-      );
+            ),
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
+          controlButtons(),
+        ],
+      ),
+    );
+  }
 
   Widget controlButtons() => // Call control buttons
       Positioned(
@@ -298,7 +359,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
           children: [
             // Mute/Unmute button
             Container(
-              decoration: boxDecorationDefault(color: transparentColor),
+              decoration: boxDecorationDefault(color: white.withOpacity(0.2)),
               child: IconButton(
                 icon: Icon(
                   _isMuted ? Icons.mic_off : Icons.mic,
@@ -310,7 +371,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
             // End call button
             Container(
-              decoration: boxDecorationDefault(color: transparentColor),
+              decoration: boxDecorationDefault(color: white.withOpacity(0.2)),
               child: IconButton(
                 icon: const Icon(
                   Icons.call_end,
@@ -322,7 +383,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
             // Switch camera button
             Container(
-              decoration: boxDecorationDefault(color: transparentColor),
+              decoration: boxDecorationDefault(color: white.withOpacity(0.2)),
               child: IconButton(
                 icon: const Icon(
                   Icons.switch_camera,
@@ -339,29 +400,59 @@ class _VideoCallPageState extends State<VideoCallPage> {
     setState(() {
       _isMuted = !_isMuted;
     });
-    _localVideoTrack?.enable(!_isMuted);
+    _localAudioTrack?.enable(!_isMuted);
   }
 
   Future<void> _switchCamera() async {
     try {
       debugPrint('Switching camera...');
-      var cameraSources = await CameraSource.getSources();
 
-      if (_currentCameraSource?.isBackFacing == true) {
-        // Switch to the front camera
-        var frontCameraSource =
-            cameraSources.firstWhere((source) => source.isFrontFacing);
-        await _cameraCapturer?.switchCamera(frontCameraSource);
-        _currentCameraSource = frontCameraSource;
-      } else {
-        // Switch to the back camera
-        var backCameraSource =
-            cameraSources.firstWhere((source) => source.isBackFacing);
-        await _cameraCapturer?.switchCamera(backCameraSource);
-        _currentCameraSource = backCameraSource;
+      // Fetch available camera sources
+      var cameraSources = await CameraSource.getSources();
+      if (cameraSources.isEmpty) {
+        debugPrint('No camera sources available.');
+        return;
       }
 
-      debugPrint('Camera switched successfully.');
+      // Debug print all camera sources
+      cameraSources.forEach((source) {
+        debugPrint(
+            'Camera: ${source.cameraId}, isFrontFacing: ${source.isFrontFacing}');
+      });
+
+      CameraSource? newCameraSource;
+
+      if (_currentCameraSource?.isBackFacing == true) {
+        // Try to switch to the front camera
+        var frontCameraSource =
+            cameraSources.firstWhere((source) => source.isFrontFacing);
+        if (frontCameraSource != null &&
+            _currentCameraSource?.cameraId != frontCameraSource.cameraId) {
+          newCameraSource = frontCameraSource;
+        }
+      } else {
+        // Try to switch to the back camera
+        var backCameraSource = cameraSources.firstWhere(
+          (source) => source.isBackFacing,
+        );
+        if (backCameraSource != null &&
+            _currentCameraSource?.cameraId != backCameraSource.cameraId) {
+          newCameraSource = backCameraSource;
+        }
+      }
+
+      if (newCameraSource != null) {
+        // Debug print the new camera information
+        debugPrint(
+            'Switching to camera: ${newCameraSource.cameraId}, isFrontFacing: ${newCameraSource.isFrontFacing}');
+
+        // Switch camera
+        await _cameraCapturer?.switchCamera(newCameraSource);
+        _currentCameraSource = newCameraSource;
+        debugPrint('Camera switched successfully.');
+      } else {
+        debugPrint('Already using the selected camera or no camera found.');
+      }
     } catch (e) {
       debugPrint('Failed to switch camera: $e');
     }
