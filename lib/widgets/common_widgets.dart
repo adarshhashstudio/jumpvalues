@@ -420,7 +420,7 @@ void showRatingDialog(BuildContext context,
   var rating = 3.0;
   var rateLoading = false;
 
-  var maybeLaterButton = InkWell(
+  InkWell(
     onTap: () {
       if (onTapMaybeLater != null) {
         onTapMaybeLater();
@@ -559,13 +559,14 @@ void showRatingDialog(BuildContext context,
               ),
             )),
     actions: [
-      maybeLaterButton,
+      // maybeLaterButton,
     ],
   );
 
   showDialog(
     context: context,
     useSafeArea: true,
+    barrierDismissible: true,
     builder: (BuildContext context) => alertDialog,
   );
 }

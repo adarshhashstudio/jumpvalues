@@ -13,7 +13,7 @@ enum SessionStatus {
   pending,
   accepted,
   rejected,
-  booked,
+  waiting,
   waitingInProgress,
   completed,
   expired,
@@ -111,7 +111,7 @@ const Map<SessionStatus, Color> statusColors = {
   SessionStatus.rejected: Color(0xFF8D0E06),
   SessionStatus.completed: Color(0xFF3CAE5C),
   SessionStatus.expired: Color(0xFFC41520),
-  SessionStatus.booked: Color(0xFF1E88E5),
+  SessionStatus.waiting: Color(0xFF1E88E5),
   SessionStatus.abandoned: Color(0xFF9E9E9E),
 };
 
@@ -123,7 +123,7 @@ const Map<SessionStatus, String> statusDisplayNames = {
   SessionStatus.rejected: 'Rejected',
   SessionStatus.completed: 'Completed',
   SessionStatus.expired: 'Expired',
-  SessionStatus.booked: 'Booked',
+  SessionStatus.waiting: 'Booked',
   SessionStatus.abandoned: 'Abandoned',
 };
 
@@ -135,7 +135,7 @@ const Map<SessionStatus, int> sessionStatusCodes = {
   SessionStatus.rejected: 2,
   SessionStatus.completed: 5,
   SessionStatus.expired: 6,
-  SessionStatus.booked: 3,
+  SessionStatus.waiting: 3,
   SessionStatus.abandoned: 7,
 };
 
@@ -147,7 +147,7 @@ const Map<int, SessionStatus> sessionStatusFromCodes = {
   2: SessionStatus.rejected,
   5: SessionStatus.completed,
   6: SessionStatus.expired,
-  3: SessionStatus.booked,
+  3: SessionStatus.waiting,
   7: SessionStatus.abandoned,
 };
 

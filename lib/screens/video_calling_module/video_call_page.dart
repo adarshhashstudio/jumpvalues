@@ -22,6 +22,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
   bool _isMuted = false;
   bool _remoteParticipantJoined = false;
   CameraSource? _currentCameraSource;
+  int participentLength = 0;
+  String participentSid = '';
 
   @override
   void initState() {
@@ -163,6 +165,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
         setState(() {
           _isLoading = false;
         });
+        coachAcceptOrRejectSessions(
+            getSessionStatusCode(SessionStatus.abandoned), widget.sessionId);
       });
 
       _room?.onDisconnected.listen((RoomDisconnectedEvent event) {
@@ -182,6 +186,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
       setState(() {
         _isLoading = false;
       });
+      await coachAcceptOrRejectSessions(
+          getSessionStatusCode(SessionStatus.abandoned), widget.sessionId);
     }
   }
 
@@ -190,16 +196,23 @@ class _VideoCallPageState extends State<VideoCallPage> {
       _isLoading = false;
     });
 
+    participentLength = room.remoteParticipants.length;
     debugPrint(
-        '++++++++++++++++> Count of room participants: ${room.remoteParticipants.length}');
+        '++++++++++++++++> Count of room participants: $participentLength');
 
     for (final participant in room.remoteParticipants) {
       _addRemoteParticipantListeners(participant);
     }
 
     room.onParticipantConnected.listen((participant) {
-      debugPrint('Participant connected: ${participant.remoteParticipant.sid}');
+      participentSid = participant.remoteParticipant.sid ?? '';
+      debugPrint('++++++++++++++++> Participant connected: $participentSid');
+      
       _addRemoteParticipantListeners(participant.remoteParticipant);
+
+      coachAcceptOrRejectSessions(
+          getSessionStatusCode(SessionStatus.waitingInProgress),
+          widget.sessionId);
     });
   }
 
@@ -209,6 +222,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
       _remoteParticipantVideoTracks.clear();
       _remoteParticipantJoined = false;
     });
+    debugPrint('Current Remote ============>>>> ${event.room.state}');
   }
 
   void _addRemoteParticipantListeners(RemoteParticipant participant) {
@@ -255,7 +269,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
         'Current Remote Participant Video Tracks:===========================');
     _remoteParticipantVideoTracks.forEach((key, value) {
       debugPrint(
-          '============>>>>  Participant SID: $key, Video Track: $value');
+          'Current Remote ============>>>>  Participant SID: $key, Video Track: $value');
     });
   }
 
@@ -268,11 +282,17 @@ class _VideoCallPageState extends State<VideoCallPage> {
       _remoteParticipantVideoTracks.clear();
       _remoteParticipantJoined = false;
     });
-    await coachAcceptOrRejectSessions(
-            getSessionStatusCode(SessionStatus.completed), widget.sessionId)
-        .then((v) {
+    if (participentLength != 0 || participentSid != '') {
+      // if both participents are connected then we can complete call and send true for rate the coach from client
+      await coachAcceptOrRejectSessions(
+              getSessionStatusCode(SessionStatus.completed), widget.sessionId)
+          .then((v) {
+        Navigator.of(context).pop(true);
+      });
       Navigator.of(context).pop(true);
-    });
+    } else {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -305,40 +325,17 @@ class _VideoCallPageState extends State<VideoCallPage> {
                   style: boldTextStyle(color: white),
                 ).center(),
           if (_localVideoTrack != null)
-            Positioned(
-              top: _smallVideoTop,
-              left: _smallVideoLeft,
-              child: GestureDetector(
-                onPanUpdate: (details) {
-                  setState(() {
-                    // Update the position of the small video window
-                    _smallVideoTop += details.delta.dy;
-                    _smallVideoLeft += details.delta.dx;
-
-                    // Ensure the small video stays within the screen boundaries
-                    _smallVideoTop = _smallVideoTop.clamp(0.0,
-                        MediaQuery.of(context).size.height - smallVideoHeight);
-                    _smallVideoLeft = _smallVideoLeft.clamp(0.0,
-                        MediaQuery.of(context).size.width - smallVideoWidth);
-
-                    debugPrint(
-                        'TWILIO ===================================> $_smallVideoLeft');
-                  });
-                },
-                child: Container(
-                  width: smallVideoWidth,
-                  height: smallVideoHeight,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.black,
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: _localVideoTrack!.widget(),
-                  ),
+              Positioned(
+                top: 50,
+                left: 50,
+                width: 100,
+                height: 150,
+                child: Draggable(
+                  feedback: _localVideoTrack!.widget(),
+                  axis: Axis.vertical,
+                  child: _localVideoTrack!.widget(),
                 ),
               ),
-            ),
           if (_isLoading)
             const Center(
               child: CircularProgressIndicator(),

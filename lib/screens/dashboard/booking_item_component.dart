@@ -243,22 +243,22 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: PannableRatingBar.builder(
-                  rate: '$ratings'.toDouble(),
-                  alignment: WrapAlignment.end,
-                  spacing: 2,
-                  runSpacing: 2,
-                  itemCount: 5,
-                  direction: Axis.horizontal,
-                  itemBuilder: (context, index) => const RatingWidget(
-                    selectedColor: Colors.orange,
-                    unSelectedColor: Colors.grey,
-                    child: Icon(
-                      Icons.star,
-                      size: 16,
-                    ),
-                  ),
-                  onChanged: (value) {},
-                ),
+                          rate: '$ratings'.toDouble(),
+                          alignment: WrapAlignment.end,
+                          spacing: 2,
+                          runSpacing: 2,
+                          itemCount: 5,
+                          direction: Axis.horizontal,
+                          itemBuilder: (context, index) => const RatingWidget(
+                            selectedColor: Colors.orange,
+                            unSelectedColor: Colors.grey,
+                            child: Icon(
+                              Icons.star,
+                              size: 16,
+                            ),
+                          ),
+                          onChanged: (value) {},
+                        ),
                       ),
                     ],
                   ).paddingAll(8),
@@ -293,6 +293,31 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
         ],
       ),
     );
+  }
+
+  Future<void> onCall(sessionId, coachId) async {
+    var permissionsGranted =
+        await PermissionUtils.requestNearbyDevicesPermissions(context);
+    if (permissionsGranted) {
+      var completed = await Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => VideoCallPage(
+                sessionId: sessionId,
+              )));
+      if (completed) {
+        if (!appStore.userTypeCoach) {
+          showRatingDialog(context, sessionId: sessionId, coachId: coachId,
+              onTapMaybeLater: () {
+            Navigator.of(context).pop();
+          });
+          widget.onActionPerformed();
+        }
+      }
+    } else {
+      debugPrint(
+          'Go to the Settings → Applications → Manage Applications → JumpCC → Enable Nearby Devices');
+      SnackBarHelper.showStatusSnackBar(context, StatusIndicator.warning,
+          'Go to Settings > Apps > $APP_NAME > Permissions and allow access to the Camera and Microphone.');
+    }
   }
 
   Widget buildButtons(BuildContext context, SessionStatus status, int sessionId,
@@ -344,30 +369,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   color: primaryColor,
                   enabled: true,
                   onTap: () async {
-                    var permissionsGranted =
-                        await PermissionUtils.requestNearbyDevicesPermissions(
-                            context);
-                    if (permissionsGranted) {
-                      var completed =
-                          await Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => VideoCallPage(
-                                    sessionId: sessionId,
-                                  )));
-                      if (completed) {
-                        if (!appStore.userTypeCoach) {
-                          showRatingDialog(context,
-                              sessionId: sessionId, coachId: coachId);
-                          widget.onActionPerformed();
-                        }
-                      }
-                    } else {
-                      debugPrint(
-                          'Go to the Settings → Applications → Manage Applications → JumpCC → Enable Nearby Devices');
-                      SnackBarHelper.showStatusSnackBar(
-                          context,
-                          StatusIndicator.warning,
-                          'Go to Settings > Apps > $APP_NAME > Permissions and allow access to the Camera and Microphone.');
-                    }
+                    await onCall(sessionId, coachId);
                   },
                 ).expand(),
               ],
@@ -416,14 +418,16 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                 ).expand(),
               ],
             ).expand(),
-          if (status == SessionStatus.booked)
+          if (status == SessionStatus.waiting)
             Row(
               children: [
                 AppButton(
-                  text: 'Booked',
+                  text: 'Join Call',
                   textColor: Colors.black38,
                   color: Colors.grey.withOpacity(0.5),
-                  onTap: () {},
+                  onTap: () async {
+                    await onCall(sessionId, coachId);
+                  },
                 ).expand(),
               ],
             ).expand(),
@@ -435,21 +439,23 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Icon(
-                        Icons.av_timer,
+                        Icons.call,
                         color: nb.white,
                       ),
                       SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.01,
+                        width: MediaQuery.of(context).size.width * 0.02,
                       ),
                       const Text(
-                        'In Progress',
+                        'Join Call',
                         style: TextStyle(color: nb.white),
                       )
                     ],
                   ),
                   textColor: nb.white,
                   color: primaryColor,
-                  onTap: () {},
+                  onTap: () async {
+                    await onCall(sessionId, coachId);
+                  },
                 ).expand(),
               ],
             ).expand(),
