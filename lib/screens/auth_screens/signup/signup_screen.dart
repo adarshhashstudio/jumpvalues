@@ -196,7 +196,8 @@ class _SignupScreenState extends State<SignupScreen>
   }
 
   void showCategoryDialog(BuildContext context, List<Category> categories,
-      Function(List<Category>) onConfirm, {bool selectAllButton = true}) {
+      Function(List<Category>) onConfirm,
+      {bool selectAllButton = true}) {
     showDialog(
       context: context,
       builder: (BuildContext context) => CategoryDialog(
@@ -643,21 +644,35 @@ class _SignupScreenState extends State<SignupScreen>
                     const SizedBox(
                       height: 20,
                     ),
-                    intlPhoneField(
+                    textFormField(
                       label: 'Phone Number',
                       labelTextBoxSpace: 8,
                       controller: phoneNumberControllerClient,
                       focusNode: phoneNumberClientFocusNode,
                       errorText: fieldClientErrors['phone'],
+                      prefixIcon: IconButton(
+                        onPressed: () {},
+                        icon: Text(
+                          '+1',
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 15,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      inputFormatters: [maskFormatter],
                       onChanged: (phoneNumber) {
                         setState(() {
-                          sPhoneNumberClient = phoneNumber.number;
-                          sCountryCodeClient = phoneNumber.countryCode;
+                          sPhoneNumberClient = maskedTextToNumber(phoneNumber);
+                          // sCountryCodeClient = phoneNumber.countryCode;
+                          sCountryCodeClient = '+1';
                         });
                         enableCoachSubmitButton();
                       },
                       validator: (phoneNumber) {
-                        if (phoneNumber == null || phoneNumber.number.isEmpty) {
+                        if (phoneNumber == null || phoneNumber.isEmpty) {
                           return 'Phone number is required';
                         }
                         return null;
@@ -1010,21 +1025,35 @@ class _SignupScreenState extends State<SignupScreen>
                     const SizedBox(
                       height: 20,
                     ),
-                    intlPhoneField(
+                    textFormField(
                       label: 'Phone Number',
                       labelTextBoxSpace: 8,
                       controller: phoneNumberController,
                       focusNode: phoneNumberFocusNode,
                       errorText: fieldErrors['phone'],
+                      prefixIcon: IconButton(
+                        onPressed: () {},
+                        icon: Text(
+                          '+1',
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 15,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      inputFormatters: [maskFormatter],
                       onChanged: (phoneNumber) {
                         setState(() {
-                          sPhoneNumber = phoneNumber.number;
-                          sCountryCode = phoneNumber.countryCode;
+                          sPhoneNumber = maskedTextToNumber(phoneNumber);
+                          // sCountryCode = phoneNumber.countryCode;
+                          sCountryCode = '+1';
                         });
                         enableCoachSubmitButton();
                       },
                       validator: (phoneNumber) {
-                        if (phoneNumber == null || phoneNumber.number.isEmpty) {
+                        if (phoneNumber == null || phoneNumber.isEmpty) {
                           return 'Phone number is required';
                         }
                         return null;

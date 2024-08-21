@@ -192,7 +192,40 @@ String formatTime(DateTime dateTime) => DateFormat('HH:mm').format(dateTime);
 String getImageUrl(String? imageUrl) => '$domainUrl/${imageUrl ?? ''}';
 
 var maskFormatter = MaskTextInputFormatter(
-  mask: '(XXX) XXX-XXXX', 
-  filter: { 'X': RegExp(r'[0-9]') },
-  type: MaskAutoCompletionType.lazy
-);
+    mask: '(###) ###-#######',
+    filter: {'#': RegExp(r'[0-9]')},
+    type: MaskAutoCompletionType.lazy);
+
+String numberToMaskedText(String number) {
+  // Apply the mask (###) ###-#### to the first 10 digits
+  final buffer = StringBuffer();
+
+  if (number.length > 0) {
+    buffer.write('(');
+    buffer.write(number.substring(0, number.length < 3 ? number.length : 3));
+    buffer.write(')');
+  }
+
+  if (number.length > 3) {
+    buffer.write(' ');
+    buffer.write(number.substring(3, number.length < 6 ? number.length : 6));
+  }
+
+  if (number.length > 6) {
+    buffer.write('-');
+    buffer.write(number.substring(6, number.length < 10 ? number.length : 10));
+  }
+
+  if (number.length > 10) {
+    buffer.write(number.substring(10));
+  }
+
+  return buffer.toString();
+}
+
+String maskedTextToNumber(String maskedText) {
+  // Use RegExp to remove all non-numeric characters
+  final plainNumber = maskedText.replaceAll(RegExp(r'[^0-9]'), '');
+
+  return plainNumber;
+}

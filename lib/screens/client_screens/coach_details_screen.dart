@@ -175,7 +175,7 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: Text(
-                        '${widget.coachDetail.countryCode ?? ''} ${widget.coachDetail.phone ?? 'N/A'}',
+                        '${widget.coachDetail.countryCode ?? ''} ${numberToMaskedText(widget.coachDetail.phone.toString())}',
                         style: TextStyle(fontSize: 14, color: primaryColor),
                       ),
                     ),

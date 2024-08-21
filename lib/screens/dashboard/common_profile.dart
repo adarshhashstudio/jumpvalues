@@ -148,7 +148,7 @@ class _CommonProfileState extends State<CommonProfile> {
     addIfNotEmpty('first_name', firstNameController?.text);
     addIfNotEmpty('last_name', lastNameController?.text);
     addIfNotEmpty('country_code', sCountryCode);
-    addIfNotEmpty('phone', phoneNumberController.text);
+    addIfNotEmpty('phone', sPhoneNumber);
     addIfNotEmpty('education', educationController.text);
     addIfNotEmpty('philosophy', philosophyController.text);
     addIfNotEmpty('certifications', certificationController.text);
@@ -263,8 +263,8 @@ class _CommonProfileState extends State<CommonProfile> {
     // ----- Common Data - Client/Coach
     firstNameController = TextEditingController(text: appStore.userFirstName);
     lastNameController = TextEditingController(text: appStore.userLastName);
-    phoneNumberController =
-        TextEditingController(text: '${appStore.userContactNumber}');
+    phoneNumberController = TextEditingController(
+        text: numberToMaskedText('${appStore.userContactNumber}'));
     sCountryCode = appStore.userContactCountryCode;
     sCountryIsoCode = appStore.userContactCountryIsoCode;
 
@@ -769,20 +769,34 @@ class _CommonProfileState extends State<CommonProfile> {
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.02,
               ),
-            intlPhoneField(
+            textFormField(
               label: 'Phone Number',
+              labelTextBoxSpace: 8,
               controller: phoneNumberController,
-              onChanged: (phoneNumber) {
-                setState(() {
-                  sPhoneNumber = phoneNumber.number;
-                  sCountryCode = phoneNumber.countryCode;
-                });
-              },
-              initialCountryCode: sCountryIsoCode,
               focusNode: phoneNumberFocusNode,
               errorText: fieldErrors['phone'],
+              prefixIcon: IconButton(
+                onPressed: () {},
+                icon: Text(
+                  '+1',
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 15,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+              inputFormatters: [maskFormatter],
+              onChanged: (phoneNumber) {
+                setState(() {
+                  sPhoneNumber = maskedTextToNumber(phoneNumber);
+                  // sCountryCode = phoneNumber.countryCode;
+                  sCountryCode = '+1';
+                });
+              },
               validator: (phoneNumber) {
-                if (phoneNumber == null || phoneNumber.number.isEmpty) {
+                if (phoneNumber == null || phoneNumber.isEmpty) {
                   return 'Phone number is required';
                 }
                 return null;
