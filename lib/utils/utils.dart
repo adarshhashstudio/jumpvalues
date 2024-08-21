@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
 import 'package:jumpvalues/utils/configs.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 enum StatusIndicator { warning, error, success }
 
@@ -189,3 +190,9 @@ String formatDate(DateTime dateTime) =>
 String formatTime(DateTime dateTime) => DateFormat('HH:mm').format(dateTime);
 
 String getImageUrl(String? imageUrl) => '$domainUrl/${imageUrl ?? ''}';
+
+var maskFormatter = MaskTextInputFormatter(
+  mask: '(XXX) XXX-XXXX', 
+  filter: { 'X': RegExp(r'[0-9]') },
+  type: MaskAutoCompletionType.lazy
+);

@@ -93,36 +93,39 @@ class _ClientAllCoachesState extends State<ClientAllCoaches> {
   @override
   Widget build(BuildContext context) => Stack(
         children: [
-          RefreshIndicator(
-            onRefresh: _refreshCoachItems,
-            child: (!_isLoading && availableCoachList.isEmpty)
-                ? dataNotFoundWidget(context, onTap: _refreshCoachItems)
-                : ListView.separated(
-                    controller: _scrollController,
-                    itemCount: availableCoachList.length,
-                    separatorBuilder: (context, index) => SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.03,
-                        ),
-                    itemBuilder: (context, index) {
-                      if (index == availableCoachList.length) {
-                        return _isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : const SizedBox.shrink();
-                      }
-                      return CoachItemComponent(
-                        coachDetail: availableCoachList[index],
-                        index: index,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => CoachDetailsScreen(
-                                  coachDetail: availableCoachList[index]),
-                            ),
-                          );
-                        },
-                      );
-                    }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),
-          ),
+          if (_isLoading && availableCoachList.isEmpty)
+            const Center(child: CircularProgressIndicator())
+          else
+            RefreshIndicator(
+              onRefresh: _refreshCoachItems,
+              child: (!_isLoading && availableCoachList.isEmpty)
+                  ? dataNotFoundWidget(context, onTap: _refreshCoachItems)
+                  : ListView.separated(
+                      controller: _scrollController,
+                      itemCount: availableCoachList.length,
+                      separatorBuilder: (context, index) => SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.03,
+                          ),
+                      itemBuilder: (context, index) {
+                        if (index == availableCoachList.length) {
+                          return _isLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : const SizedBox.shrink();
+                        }
+                        return CoachItemComponent(
+                          coachDetail: availableCoachList[index],
+                          index: index,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => CoachDetailsScreen(
+                                    coachDetail: availableCoachList[index]),
+                              ),
+                            );
+                          },
+                        );
+                      }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),
+            ),
           Positioned(
               top: 8,
               left: 0,

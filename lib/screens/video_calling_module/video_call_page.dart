@@ -289,7 +289,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
           .then((v) {
         Navigator.of(context).pop(true);
       });
-      Navigator.of(context).pop(true);
     } else {
       Navigator.of(context).pop();
     }

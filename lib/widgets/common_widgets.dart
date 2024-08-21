@@ -278,7 +278,7 @@ Widget intlPhoneField(
         TextEditingController? controller,
         FocusNode? focusNode,
         bool autofocus = false,
-        String initialCountryCode = 'IN',
+        String initialCountryCode = 'US',
         String label = 'Phone Number',
         double borderRadius = 20,
         double labelTextBoxSpace = 16,

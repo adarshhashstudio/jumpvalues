@@ -100,67 +100,70 @@ class _ClientSessionsState extends State<ClientSessions> {
   @override
   Widget build(BuildContext context) => Stack(
         children: [
-          RefreshIndicator(
-            onRefresh: _refreshBookingItems,
-            child: (!_isLoading && requestedSessions.isEmpty)
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        empty,
-                        width: MediaQuery.of(context).size.width * 0.4,
-                      ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.01,
-                      ),
-                      const Text(
-                        'Data Not Available.',
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.02,
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.refresh, color: primaryColor)
-                              .onTap(_refreshBookingItems),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.01,
-                          ),
-                          Text(
-                            'Reload',
-                            textAlign: TextAlign.center,
-                            style: boldTextStyle(color: primaryColor),
-                          ).onTap(_refreshBookingItems),
-                        ],
-                      ),
-                    ],
-                  ).center()
-                : ListView.separated(
-                    controller: _scrollController,
-                    itemCount: requestedSessions.length + 1,
-                    separatorBuilder: (context, index) => SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.03,
+          if (_isLoading && requestedSessions.isEmpty)
+            const Center(child: CircularProgressIndicator())
+          else
+            RefreshIndicator(
+              onRefresh: _refreshBookingItems,
+              child: (!_isLoading && requestedSessions.isEmpty)
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          empty,
+                          width: MediaQuery.of(context).size.width * 0.4,
                         ),
-                    itemBuilder: (context, index) {
-                      if (index == requestedSessions.length) {
-                        return _isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : const SizedBox.shrink();
-                      }
-                      return BookingItemComponent(
-                        showButtons: true,
-                        serviceResource: requestedSessions[index],
-                        index: index,
-                        onActionPerformed: () async {
-                          await _refreshBookingItems();
-                        },
-                      );
-                    }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),
-          ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.01,
+                        ),
+                        const Text(
+                          'Data Not Available.',
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.02,
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.refresh, color: primaryColor)
+                                .onTap(_refreshBookingItems),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.01,
+                            ),
+                            Text(
+                              'Reload',
+                              textAlign: TextAlign.center,
+                              style: boldTextStyle(color: primaryColor),
+                            ).onTap(_refreshBookingItems),
+                          ],
+                        ),
+                      ],
+                    ).center()
+                  : ListView.separated(
+                      controller: _scrollController,
+                      itemCount: requestedSessions.length,
+                      separatorBuilder: (context, index) => SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.03,
+                          ),
+                      itemBuilder: (context, index) {
+                        if (index == requestedSessions.length) {
+                          return _isLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : const SizedBox.shrink();
+                        }
+                        return BookingItemComponent(
+                          showButtons: true,
+                          serviceResource: requestedSessions[index],
+                          index: index,
+                          onActionPerformed: () async {
+                            await _refreshBookingItems();
+                          },
+                        );
+                      }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),
+            ),
           Positioned(
               top: 0,
               left: 0,
