@@ -84,4 +84,5 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging:24.0.0")
     implementation("com.google.firebase:firebase-common-ktx:21.0.0")
     implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.twilio:video-android:7.5.1")
 }
