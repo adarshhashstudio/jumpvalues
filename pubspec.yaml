@@ -16,7 +16,7 @@ dependencies:
   firebase_messaging: ^15.0.2
   flutter:
     sdk: flutter
-  flutter_local_notifications: ^17.2.1
+  flutter_local_notifications: ^17.2.2
   flutter_mobx: ^2.0.6+5
   flutter_pannable_rating_bar: ^2.7.2+1
   flutter_rating_bar: ^4.0.1
@@ -34,6 +34,8 @@ dependencies:
   syncfusion_flutter_calendar: ^26.1.38
   twilio_programmable_video: ^1.1.1
   webview_flutter: ^4.7.0
+  socket_io_client: ^2.0.3+1
+  flutter_background_service: ^5.0.9
 
 dev_dependencies:
   build_runner: ^2.4.6

@@ -168,7 +168,10 @@ class _ClientDashboardState extends State<ClientDashboard> {
                 goalsStore.goalsList.isEmpty
                     ? dataNotFoundWidget(context,
                         text:
-                            'Write Your Goals, Watch Your Life Grow.\nEg. Procrastination, Confidence,...')
+                            'Write Your Goals, Watch Your Life Grow.\nEg. Procrastination, Confidence,...').onTap((){
+                              debugPrint('SOCKET IO : Notification Test');
+                              notificationTest();
+                            })
                     : ListView.separated(
                         itemCount: goalsStore.goalsList.length,
                         physics: const NeverScrollableScrollPhysics(),

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:jumpvalues/screens/splash_screen.dart';
+import 'package:jumpvalues/services/socket_service.dart';
 import 'package:jumpvalues/store/app_store.dart';
 import 'package:jumpvalues/store/goals_data_hive.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -86,6 +87,9 @@ Future<void> main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(GoalsDataAdapter());
   goalsBox = await Hive.openBox<GoalsData>('goalsBox');
+
+  final socketAndNotifications = SocketAndNotifications();
+  socketAndNotifications.connectAndListen();
 
   runApp(const MyApp());
 }

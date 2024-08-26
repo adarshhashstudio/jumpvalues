@@ -482,3 +482,15 @@ Future<BaseResponseModel?> submitRating(var request) async {
   }
   return response;
 }
+
+Future<BaseResponseModel?> notificationTest() async {
+  BaseResponseModel? response;
+  try {
+    response = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('notification/notify/${appStore.userId}',
+            isAuth: true, method: HttpMethodType.get)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
