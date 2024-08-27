@@ -42,7 +42,6 @@ class SocketAndNotifications {
     // Handle socket connection events
     _socket?.onConnect((_) {
       debugPrint('SOCKET IO ==> Socket connected');
-      _socket?.emit('msg', 'test');
     });
 
     _socket?.on('notification', (data) {

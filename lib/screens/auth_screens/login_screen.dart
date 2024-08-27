@@ -6,6 +6,7 @@ import 'package:jumpvalues/screens/auth_screens/forgot_password_screen.dart';
 import 'package:jumpvalues/screens/auth_screens/generate_otp_screen.dart';
 import 'package:jumpvalues/screens/dashboard/dashboard.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
+import 'package:jumpvalues/services/socket_service.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/constants.dart';
 import 'package:jumpvalues/utils/utils.dart';
@@ -100,6 +101,8 @@ class _LoginScreenState extends State<LoginScreen> {
           await globalUserDetails().then((v) async {
             await appStore.setUserData(_globalUserResponseModel);
           });
+          final socketAndNotifications = SocketAndNotifications();
+          socketAndNotifications.connectAndListen();
           // Navigate to Dashboard
           await Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => Dashboard()));

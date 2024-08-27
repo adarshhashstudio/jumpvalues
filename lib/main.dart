@@ -88,8 +88,10 @@ Future<void> main() async {
   Hive.registerAdapter(GoalsDataAdapter());
   goalsBox = await Hive.openBox<GoalsData>('goalsBox');
 
-  final socketAndNotifications = SocketAndNotifications();
-  socketAndNotifications.connectAndListen();
+  if (appStore.isLoggedIn) {
+    final socketAndNotifications = SocketAndNotifications();
+    socketAndNotifications.connectAndListen();
+  }
 
   runApp(const MyApp());
 }

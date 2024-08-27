@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/models/requested_sessions_response_model.dart';
+import 'package:jumpvalues/models/notification_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -15,27 +15,25 @@ class NotificationPage extends StatefulWidget {
 
 class _NotificationPageState extends State<NotificationPage> {
   final ScrollController _scrollController = ScrollController();
-  final List<RequestedSession> requestedSessions = [];
+  final List<NotificationData> notificationsList = [];
   int _currentPage = 1;
   bool _isLoading = false;
   bool _hasMoreData = true;
+  bool redirecting = false;
 
   @override
   void initState() {
     super.initState();
-    clientRequestedSessions();
+    getAllNotifications();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        clientRequestedSessions();
+        getAllNotifications();
       }
     });
   }
 
-  Future<void> clientRequestedSessions({
-    String? searchData,
-    int? status,
-  }) async {
+  Future<void> getAllNotifications() async {
     if (_isLoading || !_hasMoreData) return;
 
     setState(() {
@@ -43,25 +41,21 @@ class _NotificationPageState extends State<NotificationPage> {
     });
 
     try {
-      var response = await getCoachRequestedSessions(
-        page: _currentPage,
-        searchData: searchData,
-        status: status,
-      );
+      var response = await getNotifications(page: _currentPage);
 
       if (response?.status == true) {
         setState(() {
-          requestedSessions.addAll(response?.data ?? []);
+          notificationsList.addAll(response?.data ?? []);
           _currentPage++;
           _hasMoreData = (response?.pageDetails?.noOfRecords ?? 0) >
-              (requestedSessions.length);
+              (notificationsList.length);
         });
       } else {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
             response?.message ?? 'Something went wrong');
       }
     } catch (e) {
-      debugPrint('availableCoaches error: $e');
+      debugPrint('getNotifications error: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -69,13 +63,37 @@ class _NotificationPageState extends State<NotificationPage> {
     }
   }
 
+  Future<void> readThisNotification(int notificationId) async {
+    setState(() {
+      redirecting = false;
+    });
+    try {
+      var response = await readNotification(notificationId);
+
+      if (response?.status == true) {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
+            response?.message ?? 'Notification Read');
+        Navigator.of(context).pop(true);
+      } else {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+            response?.message ?? 'Something went wrong');
+      }
+    } catch (e) {
+      debugPrint('readNotification error: $e');
+    } finally {
+      setState(() {
+        redirecting = false;
+      });
+    }
+  }
+
   Future<void> _refreshBookingItems() async {
     setState(() {
       _currentPage = 1;
-      requestedSessions.clear();
+      notificationsList.clear();
       _hasMoreData = true;
     });
-    await clientRequestedSessions();
+    await getAllNotifications();
   }
 
   @override
@@ -109,36 +127,57 @@ class _NotificationPageState extends State<NotificationPage> {
         body: SafeArea(
           child: Stack(
             children: [
-              if (_isLoading && requestedSessions.isEmpty)
+              if (_isLoading && notificationsList.isEmpty)
                 const Center(child: CircularProgressIndicator())
               else
                 RefreshIndicator(
                   onRefresh: _refreshBookingItems,
-                  child: (!_isLoading && requestedSessions.isEmpty)
+                  child: (!_isLoading && notificationsList.isEmpty)
                       ? dataNotFoundWidget(context, onTap: _refreshBookingItems)
                       : ListView.builder(
                           controller: _scrollController,
-                          itemCount: requestedSessions.length,
+                          itemCount: notificationsList.length,
                           itemBuilder: (context, index) {
-                            if (index == requestedSessions.length) {
+                            if (index == notificationsList.length) {
                               return _isLoading
                                   ? const Center(
                                       child: CircularProgressIndicator())
                                   : const SizedBox.shrink();
                             }
                             return ListTile(
+                              onTap: () async {
+                                await readThisNotification(
+                                    notificationsList[index].id ?? -1);
+                              },
                               selectedTileColor: greenColor.withOpacity(0.1),
-                              selected: true,
+                              selected: notificationsList[index].isRead == 0,
+                              leading: redirecting
+                                  ? Transform.scale(
+                                      scale: 0.5,
+                                      child: const CircularProgressIndicator())
+                                  : const Icon(
+                                      Icons.notifications_active_outlined,
+                                      color: black,
+                                    ),
                               title: Text(
-                                'Notification Title',
+                                notificationsList[index].title ?? '',
                                 style: boldTextStyle(size: 15),
                               ),
-                              subtitle: const Text(
-                                'notification subtitle',
-                                style: TextStyle(fontSize: 12),
+                              dense: true,
+                              subtitle: Text(
+                                notificationsList[index].message ?? '',
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.grey),
                               ),
-                              trailing: Text(
-                                  '${formatDate(DateTime.now())} ${formatTimeCustom(DateTime.now())}'),
+                              trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    '${DateTimeUtils.formatToUSDateTime('${notificationsList[index].createdAt}')}',
+                                    style: const TextStyle(color: black),
+                                  ).paddingBottom(4),
+                                ],
+                              ),
                             );
                           }),
                 ),

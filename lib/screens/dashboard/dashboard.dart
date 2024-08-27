@@ -166,19 +166,22 @@ class DashboardState extends State<Dashboard> {
               Stack(
                 children: [
                   const Icon(Icons.notifications),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Container(
-                      width: 6,
-                      height: 6,
-                      decoration: boxDecorationDefault(color: redColor),
-                    ),
-                  ),
+                  // Positioned(
+                  //   top: 0,
+                  //   right: 0,
+                  //   child: Container(
+                  //     width: 6,
+                  //     height: 6,
+                  //     decoration: boxDecorationDefault(color: redColor),
+                  //   ),
+                  // ),
                 ],
-              ).onTap(() {
-                Navigator.of(context).push(MaterialPageRoute(
+              ).onTap(() async {
+                var res = await Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => const NotificationPage()));
+                if (res) {
+                  switchToFragment(1);
+                }
               }),
               if (currentIndex == 3)
                 Text(

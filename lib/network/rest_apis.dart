@@ -11,6 +11,7 @@ import 'package:jumpvalues/models/coach_dashboard_response_model.dart';
 import 'package:jumpvalues/models/coach_profile_response_model.dart';
 import 'package:jumpvalues/models/global_user_response_model.dart';
 import 'package:jumpvalues/models/login_response.dart';
+import 'package:jumpvalues/models/notification_response_model.dart';
 import 'package:jumpvalues/models/requested_sessions_response_model.dart';
 import 'package:jumpvalues/models/signup_response_model.dart';
 import 'package:jumpvalues/models/time_slots_list_response_model.dart';
@@ -477,6 +478,37 @@ Future<BaseResponseModel?> submitRating(var request) async {
     response = BaseResponseModel.fromJson(await handleResponse(
         await buildHttpResponse('rating/submit-rating',
             request: request, isAuth: true, method: HttpMethodType.post)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<NotificationResponseModel?> getNotifications(
+    {int page = 1, int limit = 10}) async {
+  NotificationResponseModel? response;
+  try {
+    var queryParams = {
+      'page': page,
+      'limit': limit,
+    };
+
+    response = NotificationResponseModel.fromJson(await handleResponse(
+      await buildHttpResponse('notification/listing',
+          isAuth: true, method: HttpMethodType.get, queryParams: queryParams),
+    ));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<BaseResponseModel?> readNotification(int notificationId) async {
+  BaseResponseModel? response;
+  try {
+    response = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('notification/read/$notificationId',
+            isAuth: true, method: HttpMethodType.patch)));
   } catch (e) {
     rethrow;
   }

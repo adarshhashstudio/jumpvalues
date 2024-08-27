@@ -126,6 +126,11 @@ class _OtpScreenState extends State<OtpScreen> {
 
     try {
       var request = {'email': widget.email, 'otp': otp?.text};
+      if (widget.isFrom == 'forgotPassword') {
+        request['purpose'] = 'FORGOT_PWD';
+      } else {
+        request['purpose'] = 'USER_VERIFICATION';
+      }
       var response = await verifyOtp(request);
       if (response.status == true) {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
