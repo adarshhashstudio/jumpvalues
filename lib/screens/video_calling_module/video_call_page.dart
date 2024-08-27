@@ -207,7 +207,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
     room.onParticipantConnected.listen((participant) {
       participentSid = participant.remoteParticipant.sid ?? '';
       debugPrint('++++++++++++++++> Participant connected: $participentSid');
-      
+
       _addRemoteParticipantListeners(participant.remoteParticipant);
 
       coachAcceptOrRejectSessions(
@@ -301,29 +301,22 @@ class _VideoCallPageState extends State<VideoCallPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    // Position for the draggable small video window
-    double _smallVideoTop = 50;
-    double _smallVideoLeft = 50;
-
-    // Dimensions of the small video window
-    final double smallVideoWidth = 100;
-    final double smallVideoHeight = 150;
-
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          (_remoteParticipantJoined && _remoteParticipantVideoTracks.isNotEmpty)
-              ? Positioned.fill(
-                  child: _remoteParticipantVideoTracks.values.first?.widget() ??
-                      Container(),
-                )
-              : Text(
-                  'Connecting...',
-                  style: boldTextStyle(color: white),
-                ).center(),
-          if (_localVideoTrack != null)
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            (_remoteParticipantJoined &&
+                    _remoteParticipantVideoTracks.isNotEmpty)
+                ? Positioned.fill(
+                    child:
+                        _remoteParticipantVideoTracks.values.first?.widget() ??
+                            Container(),
+                  )
+                : Text(
+                    'Connecting...',
+                    style: boldTextStyle(color: white),
+                  ).center(),
+            if (_localVideoTrack != null)
               Positioned(
                 top: 50,
                 left: 50,
@@ -335,15 +328,14 @@ class _VideoCallPageState extends State<VideoCallPage> {
                   child: _localVideoTrack!.widget(),
                 ),
               ),
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
-          controlButtons(),
-        ],
-      ),
-    );
-  }
+            if (_isLoading)
+              const Center(
+                child: CircularProgressIndicator(),
+              ),
+            controlButtons(),
+          ],
+        ),
+      );
 
   Widget controlButtons() => // Call control buttons
       Positioned(

@@ -7,6 +7,7 @@ import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_add_slots.dar
 import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_dashbaord.dart';
 import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_sessions.dart';
 import 'package:jumpvalues/screens/dashboard/common_profile.dart';
+import 'package:jumpvalues/screens/notification_page.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/images.dart';
@@ -162,13 +163,30 @@ class DashboardState extends State<Dashboard> {
                   fontSize: 20),
             ),
             actions: [
+              Stack(
+                children: [
+                  const Icon(Icons.notifications),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      width: 6,
+                      height: 6,
+                      decoration: boxDecorationDefault(color: redColor),
+                    ),
+                  ),
+                ],
+              ).onTap(() {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const NotificationPage()));
+              }),
               if (currentIndex == 3)
                 Text(
                   'Logout',
                   style: TextStyle(color: primaryColor),
                 ).onTap(() {
                   showLogoutConfirmationDialog(context);
-                }),
+                }).paddingLeft(10),
               PopupMenuButton<int>(
                 itemBuilder: (context) => [
                   PopupMenuItem(

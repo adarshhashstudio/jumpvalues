@@ -78,8 +78,8 @@ class _CoachMySlotsState extends State<CoachMySlots> {
       bool isUpdating) async {
     try {
       var rDate = formatDate(date);
-      var rStartTime = formatTime(startTime);
-      var rEndTime = formatTime(endTime);
+      var rStartTime = formatTimeCustom(startTime);
+      var rEndTime = formatTimeCustom(endTime);
 
       debugPrint('Date: $rDate');
       debugPrint('Start Time: $rStartTime');

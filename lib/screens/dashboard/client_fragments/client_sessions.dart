@@ -4,7 +4,6 @@ import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/dashboard/booking_item_component.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/configs.dart';
-import 'package:jumpvalues/utils/images.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -106,42 +105,7 @@ class _ClientSessionsState extends State<ClientSessions> {
             RefreshIndicator(
               onRefresh: _refreshBookingItems,
               child: (!_isLoading && requestedSessions.isEmpty)
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          empty,
-                          width: MediaQuery.of(context).size.width * 0.4,
-                        ),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.01,
-                        ),
-                        const Text(
-                          'Data Not Available.',
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.02,
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.refresh, color: primaryColor)
-                                .onTap(_refreshBookingItems),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.01,
-                            ),
-                            Text(
-                              'Reload',
-                              textAlign: TextAlign.center,
-                              style: boldTextStyle(color: primaryColor),
-                            ).onTap(_refreshBookingItems),
-                          ],
-                        ),
-                      ],
-                    ).center()
+                  ? dataNotFoundWidget(context, onTap: _refreshBookingItems)
                   : ListView.separated(
                       controller: _scrollController,
                       itemCount: requestedSessions.length,

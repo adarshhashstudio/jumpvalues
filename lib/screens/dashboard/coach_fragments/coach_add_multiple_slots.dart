@@ -91,8 +91,8 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
         'start_date':
             util.formatDate(selectedDateRange?.start ?? DateTime.now()),
         'end_date': util.formatDate(selectedDateRange?.end ?? DateTime.now()),
-        'start_time': util.formatTime(selectedStartTime),
-        'end_time': util.formatTime(selectedEndTime),
+        'start_time': util.formatTimeCustom(selectedStartTime),
+        'end_time': util.formatTimeCustom(selectedEndTime),
         'remark': remarkController.text,
         'selected_days': selectedWeekdays,
       };

@@ -98,32 +98,35 @@ class _CoachSessionsState extends State<CoachSessions> {
   @override
   Widget build(BuildContext context) => Stack(
         children: [
-          RefreshIndicator(
-            onRefresh: _refreshBookingItems,
-            child: (!_isLoading && requestedSessions.isEmpty)
-                ? dataNotFoundWidget(context, onTap: _refreshBookingItems)
-                : ListView.separated(
-                    controller: _scrollController,
-                    itemCount: requestedSessions.length,
-                    separatorBuilder: (context, index) => SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.03,
-                        ),
-                    itemBuilder: (context, index) {
-                      if (index == requestedSessions.length) {
-                        return _isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : const SizedBox.shrink();
-                      }
-                      return BookingItemComponent(
-                        showButtons: true,
-                        serviceResource: requestedSessions[index],
-                        index: index,
-                        onActionPerformed: () async {
-                          await _refreshBookingItems();
-                        },
-                      );
-                    }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),
-          ),
+          if (_isLoading && requestedSessions.isEmpty)
+            const Center(child: CircularProgressIndicator())
+          else
+            RefreshIndicator(
+              onRefresh: _refreshBookingItems,
+              child: (!_isLoading && requestedSessions.isEmpty)
+                  ? dataNotFoundWidget(context, onTap: _refreshBookingItems)
+                  : ListView.separated(
+                      controller: _scrollController,
+                      itemCount: requestedSessions.length,
+                      separatorBuilder: (context, index) => SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.03,
+                          ),
+                      itemBuilder: (context, index) {
+                        if (index == requestedSessions.length) {
+                          return _isLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : const SizedBox.shrink();
+                        }
+                        return BookingItemComponent(
+                          showButtons: true,
+                          serviceResource: requestedSessions[index],
+                          index: index,
+                          onActionPerformed: () async {
+                            await _refreshBookingItems();
+                          },
+                        );
+                      }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),
+            ),
           Positioned(
               top: 0,
               left: 0,
