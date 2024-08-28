@@ -47,7 +47,7 @@ class SocketAndNotifications {
     _socket?.on('notification', (data) {
       debugPrint('SOCKET IO ==> Data received from socket: $data');
       _socketResponseController.add(data.toString());
-      NotificationManager().showNotification('New Notification', data);
+      NotificationManager().showNotification(data['title'], data['message']);
     });
 
     _socket

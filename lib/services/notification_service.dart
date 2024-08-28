@@ -2,28 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/screens/dashboard/dashboard.dart';
-import 'package:nb_utils/nb_utils.dart';
 
 class NotificationManager {
-  static final NotificationManager _instance = NotificationManager._internal();
-  factory NotificationManager() => _instance;
-
-  late FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
-
   NotificationManager._internal() {
     _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     final initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        const AndroidInitializationSettings('@mipmap/ic_launcher');
     final initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
     );
     _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (notificationResponse) {
-        _onSelectNotification(notificationResponse);
-      },
+      onDidReceiveNotificationResponse: _onSelectNotification,
     );
   }
+  factory NotificationManager() => _instance;
+  static final NotificationManager _instance = NotificationManager._internal();
+
+  late FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
 
   /// Shows a notification with the given [title] and [body].
   Future<void> showNotification(String title, String body) async {

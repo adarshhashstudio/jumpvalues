@@ -200,7 +200,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '$date At $time',
+                    DateTimeUtils.formatToUSDateTime(date),
                     style: const TextStyle(fontSize: 12),
                     maxLines: 2,
                     textAlign: TextAlign.right,
@@ -309,8 +309,8 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
               onTapMaybeLater: () {
             Navigator.of(context).pop();
           });
-          widget.onActionPerformed();
         }
+        widget.onActionPerformed();
       }
     } else {
       debugPrint(
@@ -366,7 +366,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                 AppButton(
                   text: 'Accepted',
                   textColor: nb.white,
-                  color: primaryColor,
+                  color: getColorByStatus(status),
                   enabled: true,
                   onTap: () async {
                     await onCall(sessionId, coachId);
@@ -379,8 +379,8 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
               children: [
                 AppButton(
                   text: 'Rejected',
-                  textColor: Colors.black38,
-                  color: Colors.grey.withOpacity(0.5),
+                  textColor: nb.white,
+                  color: getColorByStatus(status),
                   onTap: () {},
                 ).expand(),
               ],
@@ -391,7 +391,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                 AppButton(
                   text: 'Abandoned',
                   textColor: Colors.black38,
-                  color: Colors.grey.withOpacity(0.5),
+                  color: getColorByStatus(status),
                   onTap: () {},
                 ).expand(),
               ],
@@ -402,7 +402,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                 AppButton(
                   text: 'Completed',
                   textColor: Colors.black38,
-                  color: Colors.grey.withOpacity(0.5),
+                  color: primaryColor,
                   onTap: () {},
                 ).expand(),
               ],
@@ -412,8 +412,8 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
               children: [
                 AppButton(
                   text: 'Expired',
-                  textColor: Colors.black38,
-                  color: Colors.grey.withOpacity(0.5),
+                  textColor: nb.white,
+                  color: getColorByStatus(status),
                   onTap: () {},
                 ).expand(),
               ],
@@ -423,8 +423,8 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
               children: [
                 AppButton(
                   text: 'Join Call',
-                  textColor: Colors.black38,
-                  color: Colors.grey.withOpacity(0.5),
+                  textColor: Colors.white,
+                  color: getColorByStatus(SessionStatus.completed),
                   onTap: () async {
                     await onCall(sessionId, coachId);
                   },
@@ -451,8 +451,8 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                       )
                     ],
                   ),
-                  textColor: nb.white,
-                  color: primaryColor,
+                  textColor: Colors.white,
+                  color: getColorByStatus(SessionStatus.completed),
                   onTap: () async {
                     await onCall(sessionId, coachId);
                   },
