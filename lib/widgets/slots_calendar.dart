@@ -417,63 +417,43 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
             ),
           AppButton(
             onTap: () {
-              var remarkText = remarkController.text.isEmpty
-                  ? 'Available Slot'
-                  : remarkController.text;
-
-              if (endTime.difference(startTime).inHours > 1) {
-                // If duration exceeds 1 hour, show an error or adjust automatically
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Error'),
-                    content: const Text('Slot duration cannot exceed 1 hour.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('OK'),
-                      ),
-                    ],
-                  ),
-                );
-              } else {
-                if (meeting == null) {
-                  setState(() {
-                    meetings.add(Meeting(remarkText, startTime, endTime,
-                        const Color(0xFF0F8644), -1));
-                  });
-                } else {
-                  setState(() {
-                    final index = meetings.indexOf(meeting);
-                    meetings[index] = Meeting(remarkText, startTime, endTime,
-                        const Color(0xFF0F8644), -1);
-                  });
-                }
+              // **Add Overlap Check Here**
+              if (!_isSlotOverlapping(meetings, startTime, endTime, meeting)) {
+                var remarkText = remarkController.text.isEmpty
+                    ? 'Available Slot'
+                    : remarkController.text;
+                onSlotSelected(selectedDate, startTime, endTime, remarkText,
+                    meetings, meeting?.timeSheetId ?? 0, true);
                 Navigator.of(context).pop();
-                onSlotSelected(
-                    selectedDate,
-                    startTime,
-                    endTime,
-                    remarkController.text.isEmpty
-                        ? 'Available Slot'
-                        : remarkController.text,
-                    meetings,
-                    meeting?.timeSheetId ?? -1,
-                    true);
+              } else {
+                SnackBarHelper.showStatusSnackBar(
+                    context,
+                    StatusIndicator.error,
+                    'Selected slot overlaps with an existing slot.');
               }
             },
-            padding: EdgeInsets.zero,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             shapeBorder: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(360)),
             textColor: white,
             color: primaryColor,
-            text: meeting == null ? 'Add' : 'Save',
+            text: 'Save Slot',
           ),
         ],
       ),
     );
+  }
+
+  bool _isSlotOverlapping(List<Meeting> meetings, DateTime startTime,
+      DateTime endTime, Meeting? meeting) {
+    for (var existingMeeting in meetings) {
+      if (meeting != null && existingMeeting == meeting) continue;
+      if (startTime.isBefore(existingMeeting.to) &&
+          endTime.isAfter(existingMeeting.from)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
