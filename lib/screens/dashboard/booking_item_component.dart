@@ -200,7 +200,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    DateTimeUtils.formatToUSDateTime(date),
+                    formatDateTimeCustom(date, time),
                     style: const TextStyle(fontSize: 12),
                     maxLines: 2,
                     textAlign: TextAlign.right,

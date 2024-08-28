@@ -35,7 +35,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
     setState(() {
       _isLoading = true;
     });
-    debugPrint('Initializing video call setup...');
+    debugPrint('VIDEO CALL ==> Initializing video call setup...');
     await _initCameraCapturer();
     await _initVideoPreview();
     await getTwilioAccessToken();
@@ -61,7 +61,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
         }
       }
     } catch (e) {
-      debugPrint('coachAcceptOrRejectSessions Error: $e');
+      debugPrint('VIDEO CALL ==> coachAcceptOrRejectSessions Error: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -71,10 +71,10 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
   Future<void> getTwilioAccessToken() async {
     try {
-      debugPrint('Fetching Twilio access token...');
+      debugPrint('VIDEO CALL ==> Fetching Twilio access token...');
       var response = await twilioAccessToken(widget.sessionId);
       if (response?.status == true) {
-        debugPrint('Twilio access token received successfully.');
+        debugPrint('VIDEO CALL ==> Twilio access token received successfully.');
         await _joinRoom(response!.token!, response.roomId!);
       } else {
         SnackBarHelper.showStatusSnackBar(
@@ -84,7 +84,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
         );
       }
     } catch (e) {
-      debugPrint('Error fetching Twilio access token: $e');
+      debugPrint('VIDEO CALL ==> Error fetching Twilio access token: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -94,32 +94,32 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
   Future<void> _initCameraCapturer() async {
     try {
-      debugPrint('Initializing camera capturer...');
+      debugPrint('VIDEO CALL ==> Initializing camera capturer...');
       var cameraSources = await CameraSource.getSources();
-      var backCameraSource =
-          cameraSources.firstWhere((source) => source.isBackFacing);
+      var frontCameraSource =
+          cameraSources.firstWhere((source) => source.isFrontFacing);
 
-      _cameraCapturer = CameraCapturer(backCameraSource);
+      _cameraCapturer = CameraCapturer(frontCameraSource);
       _currentCameraSource =
-          backCameraSource; // Initialize with the back camera
-      debugPrint('Camera capturer initialized.');
+          frontCameraSource; // Initialize with the front camera
+      debugPrint('VIDEO CALL ==> Camera capturer initialized.');
     } catch (e) {
-      debugPrint('Camera initialization failed: $e');
+      debugPrint('VIDEO CALL ==> Camera initialization failed: $e');
     }
   }
 
   Future<void> _initVideoPreview() async {
     try {
-      debugPrint('Initializing local video preview...');
+      debugPrint('VIDEO CALL ==> Initializing local video preview...');
       _localVideoTrack = LocalVideoTrack(
         true,
         _cameraCapturer!,
         name: 'preview-video',
       );
       await _localVideoTrack?.create();
-      debugPrint('Local Video Track created');
+      debugPrint('VIDEO CALL ==> Local Video Track created');
     } catch (e) {
-      debugPrint('VideoTrack creation failed: $e');
+      debugPrint('VIDEO CALL ==> VideoTrack creation failed: $e');
       SnackBarHelper.showStatusSnackBar(
         context,
         StatusIndicator.error,
@@ -134,7 +134,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
     });
 
     try {
-      debugPrint('Joining the room...');
+      debugPrint('VIDEO CALL ==> Joining the room...');
       _localAudioTrack = LocalAudioTrack(true, 'audio_track');
 
       var connectOptions = ConnectOptions(
@@ -147,7 +147,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
       _room = await TwilioProgrammableVideo.connect(connectOptions);
 
       _room?.onConnected.listen((Room room) {
-        debugPrint('Connected to room: ${room.name}');
+        debugPrint('VIDEO CALL ==> Connected to room: ${room.name}');
         SnackBarHelper.showStatusSnackBar(
           context,
           StatusIndicator.success,
@@ -206,7 +206,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
     room.onParticipantConnected.listen((participant) {
       participentSid = participant.remoteParticipant.sid ?? '';
-      debugPrint('++++++++++++++++> Participant connected: $participentSid');
+      debugPrint(
+          'VIDEO CALL ==> ++++++++++++++++> Participant connected: $participentSid');
 
       _addRemoteParticipantListeners(participant.remoteParticipant);
 
@@ -222,7 +223,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
       _remoteParticipantVideoTracks.clear();
       _remoteParticipantJoined = false;
     });
-    debugPrint('Current Remote ============>>>> ${event.room.state}');
+    debugPrint(
+        'VIDEO CALL ==> Current Remote ============>>>> ${event.room.state}');
   }
 
   void _addRemoteParticipantListeners(RemoteParticipant participant) {
@@ -255,7 +257,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
     // Listen for participant disconnect events
     participant.onVideoTrackDisabled.listen((event) {
-      debugPrint('Remote participant disconnected: ${participant.sid}');
+      debugPrint(
+          'VIDEO CALL ==> Remote participant disconnected: ${participant.sid}');
       setState(() {
         _remoteParticipantVideoTracks.remove(participant.sid!);
         _logRemoteParticipantVideoTracks();
@@ -274,7 +277,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
   }
 
   Future<void> _leaveRoom() async {
-    debugPrint('Leaving room...');
+    debugPrint('VIDEO CALL ==> Leaving room...');
     await _room?.disconnect();
     setState(() {
       _room = null;
@@ -393,56 +396,28 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
   Future<void> _switchCamera() async {
     try {
-      debugPrint('Switching camera...');
+      debugPrint('VIDEO CALL ==> Switching camera...');
 
-      // Fetch available camera sources
+      // Fetch all available camera sources
       var cameraSources = await CameraSource.getSources();
-      if (cameraSources.isEmpty) {
-        debugPrint('No camera sources available.');
-        return;
-      }
 
-      // Debug print all camera sources
-      cameraSources.forEach((source) {
-        debugPrint(
-            'Camera: ${source.cameraId}, isFrontFacing: ${source.isFrontFacing}');
-      });
+      // Identify the current camera source
+      var currentCameraSource = _currentCameraSource;
 
-      CameraSource? newCameraSource;
+      // Find the new camera source that is not the current one
+      var newCameraSource = cameraSources.firstWhere(
+        (source) => source.isFrontFacing != currentCameraSource?.isFrontFacing,
+      );
 
-      if (_currentCameraSource?.isBackFacing == true) {
-        // Try to switch to the front camera
-        var frontCameraSource =
-            cameraSources.firstWhere((source) => source.isFrontFacing);
-        if (frontCameraSource != null &&
-            _currentCameraSource?.cameraId != frontCameraSource.cameraId) {
-          newCameraSource = frontCameraSource;
-        }
-      } else {
-        // Try to switch to the back camera
-        var backCameraSource = cameraSources.firstWhere(
-          (source) => source.isBackFacing,
-        );
-        if (backCameraSource != null &&
-            _currentCameraSource?.cameraId != backCameraSource.cameraId) {
-          newCameraSource = backCameraSource;
-        }
-      }
-
-      if (newCameraSource != null) {
-        // Debug print the new camera information
-        debugPrint(
-            'Switching to camera: ${newCameraSource.cameraId}, isFrontFacing: ${newCameraSource.isFrontFacing}');
-
-        // Switch camera
-        await _cameraCapturer?.switchCamera(newCameraSource);
-        _currentCameraSource = newCameraSource;
-        debugPrint('Camera switched successfully.');
-      } else {
-        debugPrint('Already using the selected camera or no camera found.');
-      }
+      // Update the camera capturer with the new camera source
+      _cameraCapturer = CameraCapturer(newCameraSource);
+      _currentCameraSource =
+          newCameraSource; // Update the current camera source
+      setState(() {});
+      debugPrint(
+          'VIDEO CALL ==> Camera switched to ${newCameraSource.isFrontFacing ? "front" : "back"} camera.');
     } catch (e) {
-      debugPrint('Failed to switch camera: $e');
+      debugPrint('VIDEO CALL ==> Failed to switch camera: $e');
     }
   }
 }

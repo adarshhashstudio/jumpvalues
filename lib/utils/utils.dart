@@ -189,6 +189,16 @@ String formatDate(DateTime dateTime) =>
 /// 2024-08-05 13:00:00.000 -> 13:00
 String formatTimeCustom(DateTime dateTime) => DateFormat('HH:mm').format(dateTime);
 
+String formatDateTimeCustom(String date, String time) {
+  // Combine date and time strings into a single DateTime object
+  var dateTime = DateTime.parse('$date $time');
+
+  // Format DateTime into the desired format: MM/DD/YYYY hh:mm AM/PM
+  var formattedDateTime = DateFormat('MM/dd/yyyy hh:mm a').format(dateTime);
+
+  return formattedDateTime;
+}
+
 String getImageUrl(String? imageUrl) => '$domainUrl/${imageUrl ?? ''}';
 
 var maskFormatter = MaskTextInputFormatter(
@@ -232,15 +242,15 @@ String maskedTextToNumber(String maskedText) {
 
 class DateTimeUtils {
   /// Converts an ISO 8601 date string to the format `MM/DD/YYYY hh:mm AM/PM`.
-  /// 
+  ///
   /// - [isoDate]: The ISO 8601 date string.
-  /// 
+  ///
   /// Returns a formatted date string.
   static String formatToUSDateTime(String isoDate) {
     try {
       // Parse the ISO date string to a DateTime object and convert to local time
-      DateTime dateTime = DateTime.parse(isoDate).toLocal();
-      
+      var dateTime = DateTime.parse(isoDate).toLocal();
+
       // Format the DateTime object to the desired format
       return DateFormat('MM/dd/yyyy hh:mm a').format(dateTime);
     } catch (e) {
