@@ -180,7 +180,8 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
                         hideKeyboard(context);
                         final pickedRange = await showDateRangePicker(
                           context: context,
-                          firstDate: DateTime(2020),
+                          firstDate:
+                              DateTime.now().subtract(const Duration(days: 0)),
                           lastDate: DateTime(2101),
                         );
                         if (pickedRange != null) {
@@ -294,7 +295,7 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
                       alignment: Alignment.centerLeft,
                       isError: isTimeRangeError,
                       errorText: timeRangeErrorText,
-                      text: 'Tap to pick date',
+                      text: 'Tap to pick time',
                       onTap: () async {
                         hideKeyboard(context);
                         final selectedTimes =

@@ -400,22 +400,34 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
       // Fetch all available camera sources
       var cameraSources = await CameraSource.getSources();
+      if (cameraSources.isEmpty) {
+        debugPrint('No camera sources available.');
+        return;
+      }
 
-      // Identify the current camera source
       var currentCameraSource = _currentCameraSource;
 
-      // Find the new camera source that is not the current one
+      // Find a new camera source that is different from the current one
       var newCameraSource = cameraSources.firstWhere(
         (source) => source.isFrontFacing != currentCameraSource?.isFrontFacing,
       );
 
-      // Update the camera capturer with the new camera source
-      _cameraCapturer = CameraCapturer(newCameraSource);
-      _currentCameraSource =
-          newCameraSource; // Update the current camera source
-      setState(() {});
+      if (newCameraSource == null) {
+        debugPrint('No different camera source found.');
+        return;
+      }
+
+      // Switch the camera source
+      await _cameraCapturer?.switchCamera(newCameraSource);
+
+      // Update current camera source
+      _currentCameraSource = newCameraSource;
+
       debugPrint(
           'VIDEO CALL ==> Camera switched to ${newCameraSource.isFrontFacing ? "front" : "back"} camera.');
+
+      // Refresh UI if necessary
+      setState(() {});
     } catch (e) {
       debugPrint('VIDEO CALL ==> Failed to switch camera: $e');
     }
