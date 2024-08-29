@@ -140,9 +140,9 @@ class _CommonProfileState extends State<CommonProfile> {
     var request = <String, dynamic>{};
 
     void addIfNotEmpty(String key, String? value) {
-      if (value != null && value.isNotEmpty) {
+      // if (value != null && value.isNotEmpty) {
         request[key] = value;
-      }
+      // }
     }
 
     addIfNotEmpty('first_name', firstNameController?.text);

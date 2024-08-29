@@ -736,6 +736,7 @@ class _SignupScreenState extends State<SignupScreen>
                     labelContainer(
                       label: 'Categories',
                       labelTextBoxSpace: 8,
+                      isDisable: selectedSponsorId == null,
                       width: MediaQuery.of(context).size.width * 1,
                       height: MediaQuery.of(context).size.height * 0.06,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -747,28 +748,30 @@ class _SignupScreenState extends State<SignupScreen>
                               topRight: Radius.circular(20),
                             ),
                       onTap: () {
-                        hideKeyboard(context);
-                        showCategoryDialog(context, categoriesBySponsorIds,
-                            (categoriesFromDialogue) {
-                          setState(() {
-                            selectedCategoryBySponsorId =
-                                categoriesFromDialogue;
-                            selectCategoriesBySponsorError = false;
-                            if (categoriesFromDialogue.isEmpty) {
-                              selectCategoriesBySponsorError = true;
+                        if (selectedSponsorId != null) {
+                          hideKeyboard(context);
+                          showCategoryDialog(context, categoriesBySponsorIds,
+                              (categoriesFromDialogue) {
+                            setState(() {
+                              selectedCategoryBySponsorId =
+                                  categoriesFromDialogue;
+                              selectCategoriesBySponsorError = false;
+                              if (categoriesFromDialogue.isEmpty) {
+                                selectCategoriesBySponsorError = true;
+                              }
+                            });
+                            for (var category in selectedCategoryBySponsorId) {
+                              debugPrint(
+                                  'Selected Category By Sponsor: ${category.name} (ID: ${category.id})');
                             }
                           });
-                          for (var category in selectedCategoryBySponsorId) {
-                            debugPrint(
-                                'Selected Category By Sponsor: ${category.name} (ID: ${category.id})');
-                          }
-                        });
+                        }
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Tap to select categories  ${selectedCategoryBySponsorId.isEmpty ? '*' : ''}',
+                            'Tap to select categories ${selectedCategoryBySponsorId.isEmpty ? '*' : ''}',
                             style: TextStyle(
                                 color: selectCategoriesBySponsorError
                                     ? Colors.red

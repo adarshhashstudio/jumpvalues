@@ -12,7 +12,8 @@ class VideoCallPage extends StatefulWidget {
   _VideoCallPageState createState() => _VideoCallPageState();
 }
 
-class _VideoCallPageState extends State<VideoCallPage> {
+class _VideoCallPageState extends State<VideoCallPage>
+    with WidgetsBindingObserver {
   Room? _room;
   LocalVideoTrack? _localVideoTrack;
   LocalAudioTrack? _localAudioTrack;
@@ -28,7 +29,48 @@ class _VideoCallPageState extends State<VideoCallPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _init();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      debugPrint(
+          'VIDEO CALL ==> App is in background or inactive, pausing video...');
+      _pauseVideo();
+    } else if (state == AppLifecycleState.resumed) {
+      debugPrint('VIDEO CALL ==> App is resumed, resuming video...');
+      _resumeVideo();
+    }
+  }
+
+  Future<void> _pauseVideo() async {
+    try {
+      await _localVideoTrack?.enable(false); // Disable video track
+      debugPrint('VIDEO CALL ==> Video track paused.');
+    } catch (e) {
+      debugPrint('VIDEO CALL ==> Failed to pause video track: $e');
+    }
+  }
+
+  Future<void> _resumeVideo() async {
+    try {
+      await _localVideoTrack?.enable(true); // Enable video track
+      debugPrint('VIDEO CALL ==> Video track resumed.');
+    } catch (e) {
+      debugPrint('VIDEO CALL ==> Failed to resume video track: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _leaveRoom();
+    super.dispose();
   }
 
   Future<void> _init() async {
@@ -295,12 +337,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
     } else {
       Navigator.of(context).pop();
     }
-  }
-
-  @override
-  void dispose() {
-    _leaveRoom();
-    super.dispose();
   }
 
   @override
