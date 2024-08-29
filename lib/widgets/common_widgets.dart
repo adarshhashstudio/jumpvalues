@@ -417,7 +417,8 @@ void showRatingDialog(BuildContext context,
     void Function()? onTapMaybeLater,
     bool isShortDialogue = false,
     required int sessionId,
-    required int coachId}) {
+    required int coachId,
+    VoidCallback? onActionPerformed}) {
   var messageController = TextEditingController();
   var rating = 3.0;
   var rateLoading = false;
@@ -542,6 +543,9 @@ void showRatingDialog(BuildContext context,
                               rateLoading = false;
                             });
                             Navigator.of(context).pop();
+                            if (onActionPerformed != null) {
+                              onActionPerformed();
+                            }
                           }
                         },
                         text: 'Rate Now',
