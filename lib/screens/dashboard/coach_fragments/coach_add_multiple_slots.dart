@@ -278,6 +278,11 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
                                   } else {
                                     selectedWeekdays.remove(idx);
                                   }
+                                  if (selectedWeekdays.length >= 7) {
+                                    isSelectedAllWeekdays = true;
+                                  } else {
+                                    isSelectedAllWeekdays = false;
+                                  }
                                 });
                               },
                             ).paddingRight(10);
@@ -315,29 +320,37 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         mainAxisSpacing: 10,
-                        crossAxisSpacing: 15,
+                        crossAxisSpacing: 10,
                         mainAxisExtent: 50,
                       ),
                       itemCount: selectedTimeSlots.length,
                       itemBuilder: (context, index) {
                         final slot = selectedTimeSlots[index];
-                        return FilterChip(
-                          label: Text(
-                            '${slot.startTime.format(context)} - ${slot.endTime.format(context)}',
-                            style: const TextStyle(fontSize: 14),
+                        return SizedBox(
+                          width: double.infinity,
+                          child: FilterChip(
+                            label: Row(
+                              children: [
+                                Text(
+                                  '${slot.startTime.format(context)} - ${slot.endTime.format(context)}',
+                                  style: const TextStyle(fontSize: 14),
+                                  overflow: TextOverflow.ellipsis,
+                                ).expand(),
+                              ],
+                            ),
+                            deleteIcon: const Icon(
+                              Icons.cancel,
+                              color: redColor,
+                              size: 20,
+                            ),
+                            visualDensity: VisualDensity.standard,
+                            onDeleted: () {
+                              setState(() {
+                                selectedTimeSlots.removeAt(index);
+                              });
+                            },
+                            onSelected: (v) {},
                           ),
-                          deleteIcon: const Icon(
-                            Icons.cancel,
-                            color: redColor,
-                            size: 20,
-                          ),
-                          visualDensity: VisualDensity.standard,
-                          onDeleted: () {
-                            setState(() {
-                              selectedTimeSlots.removeAt(index);
-                            });
-                          },
-                          onSelected: (v) {},
                         );
                       },
                     ),
