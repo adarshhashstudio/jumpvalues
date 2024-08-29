@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -157,12 +158,14 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     textFormField(
-                      label: 'Remark',
-                      controller: remarkController,
-                      errorText: remarkErrorText,
-                      hintText: 'Enter Remark',
-                      textInputAction: TextInputAction.done,
-                    ),
+                        label: 'Remark',
+                        controller: remarkController,
+                        errorText: remarkErrorText,
+                        hintText: 'Enter Remark',
+                        textInputAction: TextInputAction.done,
+                        inputFormatters: [
+                          NoLeadingSpaceFormatter(),
+                        ]),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.02),
                     labelContainer(
                       label: 'Pick Date Range',

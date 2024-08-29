@@ -272,7 +272,10 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                     controller: remarkController,
                     label: 'Remark',
                     enabled: !isBooked,
-                    labelTextBoxSpace: 8),
+                    labelTextBoxSpace: 8,
+                    inputFormatters: [
+                      NoLeadingSpaceFormatter(),
+                    ]),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.02),
                 labelContainer(
                   label: 'Date',

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
@@ -187,7 +188,8 @@ String formatDate(DateTime dateTime) =>
 /// Common method to format DateTime to 'HH:mm'
 ///
 /// 2024-08-05 13:00:00.000 -> 13:00
-String formatTimeCustom(DateTime dateTime) => DateFormat('HH:mm').format(dateTime);
+String formatTimeCustom(DateTime dateTime) =>
+    DateFormat('HH:mm').format(dateTime);
 
 String formatDateTimeCustom(String date, String time) {
   // Combine date and time strings into a single DateTime object
@@ -258,5 +260,27 @@ class DateTimeUtils {
       print('Error formatting date: $e');
       return '';
     }
+  }
+}
+
+class NoLeadingSpaceFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.startsWith(' ')) {
+      final String trimedText = newValue.text.trimLeft();
+
+      return TextEditingValue(
+        text: trimedText,
+        selection: TextSelection(
+          baseOffset: trimedText.length,
+          extentOffset: trimedText.length,
+        ),
+      );
+    }
+
+    return newValue;
   }
 }
