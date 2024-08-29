@@ -170,6 +170,7 @@ Widget textFormField({
   double borderRadius = 20,
   String? errorText,
   double labelTextBoxSpace = 8,
+  bool enabled = true,
   required String label,
   bool isPassword = false, // New parameter to control password field
 }) =>
@@ -217,6 +218,7 @@ Widget textFormField({
             ),
             decoration: InputDecoration(
               counterText: '',
+              enabled: enabled,
               hintText: hintText,
               hintStyle: TextStyle(
                 color: hintColor,

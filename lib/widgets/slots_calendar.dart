@@ -246,13 +246,19 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
         onSlotSelected,
   ) {
     final remarkController = TextEditingController(text: meeting?.remark ?? '');
+    var isBooked = meeting != null && meeting.remark.contains('Booked');
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Column(
           children: [
-            Text(meeting == null ? 'Add Slot' : 'Edit Slot',
+            Text(
+                meeting == null
+                    ? 'Add Slot'
+                    : isBooked
+                        ? 'Booked Slot'
+                        : 'Edit Slot',
                 style: boldTextStyle(size: 18)),
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
             const Divider(height: 0, color: Colors.black12),
@@ -265,28 +271,35 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                 textFormField(
                     controller: remarkController,
                     label: 'Remark',
+                    enabled: !isBooked,
                     labelTextBoxSpace: 8),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.02),
                 labelContainer(
                   label: 'Date',
                   onTap: () async {
-                    var pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: startTime,
-                      firstDate: DateTime(
-                          DateTime.now().year,
-                          DateTime.now().month,
-                          DateTime.now().day,
-                          DateTime.now().hour,
-                          DateTime.now().minute),
-                      lastDate: DateTime(2101),
-                    );
-                    if (pickedDate != null) {
-                      setState(() {
-                        startTime = DateTime(pickedDate.year, pickedDate.month,
-                            pickedDate.day, startTime.hour, startTime.minute);
-                        endTime = startTime.add(const Duration(hours: 1));
-                      });
+                    if (!isBooked) {
+                      var pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: startTime,
+                        firstDate: DateTime(
+                            DateTime.now().year,
+                            DateTime.now().month,
+                            DateTime.now().day,
+                            DateTime.now().hour,
+                            DateTime.now().minute),
+                        lastDate: DateTime(2101),
+                      );
+                      if (pickedDate != null) {
+                        setState(() {
+                          startTime = DateTime(
+                              pickedDate.year,
+                              pickedDate.month,
+                              pickedDate.day,
+                              startTime.hour,
+                              startTime.minute);
+                          endTime = startTime.add(const Duration(hours: 1));
+                        });
+                      }
                     }
                   },
                   width: MediaQuery.of(context).size.width,
@@ -302,32 +315,34 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                     labelContainer(
                       label: 'Start Time:',
                       onTap: () async {
-                        var pickedTime = await showTimePicker(
-                          context: context,
-                          initialTime: TimeOfDay(
-                            hour: startTime.hour,
-                            minute: startTime.minute,
-                          ),
-                        );
-                        if (pickedTime != null) {
-                          var newStartTime = DateTime(
-                            startTime.year,
-                            startTime.month,
-                            startTime.day,
-                            pickedTime.hour,
-                            pickedTime.minute,
+                        if (!isBooked) {
+                          var pickedTime = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay(
+                              hour: startTime.hour,
+                              minute: startTime.minute,
+                            ),
                           );
-                          var duration = endTime.difference(newStartTime);
-                          if (duration.inHours > 1) {
-                            // If duration exceeds 1 hour, adjust end time
+                          if (pickedTime != null) {
+                            var newStartTime = DateTime(
+                              startTime.year,
+                              startTime.month,
+                              startTime.day,
+                              pickedTime.hour,
+                              pickedTime.minute,
+                            );
+                            var duration = endTime.difference(newStartTime);
+                            if (duration.inHours > 1) {
+                              // If duration exceeds 1 hour, adjust end time
+                              setState(() {
+                                endTime =
+                                    newStartTime.add(const Duration(hours: 1));
+                              });
+                            }
                             setState(() {
-                              endTime =
-                                  newStartTime.add(const Duration(hours: 1));
+                              startTime = newStartTime;
                             });
                           }
-                          setState(() {
-                            startTime = newStartTime;
-                          });
                         }
                       },
                       width: MediaQuery.of(context).size.width,
@@ -341,31 +356,34 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
                     labelContainer(
                       label: 'End Time:',
                       onTap: () async {
-                        var pickedTime = await showTimePicker(
-                          context: context,
-                          initialTime: TimeOfDay(
-                            hour: endTime.hour,
-                            minute: endTime.minute,
-                          ),
-                        );
-                        if (pickedTime != null) {
-                          var newEndTime = DateTime(
-                            startTime.year,
-                            startTime.month,
-                            startTime.day,
-                            pickedTime.hour,
-                            pickedTime.minute,
+                        if (!isBooked) {
+                          var pickedTime = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay(
+                              hour: endTime.hour,
+                              minute: endTime.minute,
+                            ),
                           );
-                          var duration = newEndTime.difference(startTime);
-                          if (duration.inHours > 1) {
-                            // If duration exceeds 1 hour, adjust end time
-                            setState(() {
-                              endTime = startTime.add(const Duration(hours: 1));
-                            });
-                          } else {
-                            setState(() {
-                              endTime = newEndTime;
-                            });
+                          if (pickedTime != null) {
+                            var newEndTime = DateTime(
+                              startTime.year,
+                              startTime.month,
+                              startTime.day,
+                              pickedTime.hour,
+                              pickedTime.minute,
+                            );
+                            var duration = newEndTime.difference(startTime);
+                            if (duration.inHours > 1) {
+                              // If duration exceeds 1 hour, adjust end time
+                              setState(() {
+                                endTime =
+                                    startTime.add(const Duration(hours: 1));
+                              });
+                            } else {
+                              setState(() {
+                                endTime = newEndTime;
+                              });
+                            }
                           }
                         }
                       },
@@ -390,7 +408,7 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
             child: Text('Cancel',
                 style: boldTextStyle(size: 16, color: primaryColor)),
           ),
-          if (meeting != null)
+          if (!isBooked && meeting != null)
             AppButton(
               onTap: () {
                 setState(() {
@@ -415,30 +433,32 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
               color: primaryColor,
               text: 'Delete Slot',
             ),
-          AppButton(
-            onTap: () {
-              // **Add Overlap Check Here**
-              if (!_isSlotOverlapping(meetings, startTime, endTime, meeting)) {
-                var remarkText = remarkController.text.isEmpty
-                    ? 'Available Slot'
-                    : remarkController.text;
-                onSlotSelected(selectedDate, startTime, endTime, remarkText,
-                    meetings, meeting?.timeSheetId ?? 0, true);
-                Navigator.of(context).pop();
-              } else {
-                SnackBarHelper.showStatusSnackBar(
-                    context,
-                    StatusIndicator.error,
-                    'Selected slot overlaps with an existing slot.');
-              }
-            },
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            shapeBorder: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(360)),
-            textColor: white,
-            color: primaryColor,
-            text: 'Save Slot',
-          ),
+          if (!isBooked)
+            AppButton(
+              onTap: () {
+                // **Add Overlap Check Here**
+                if (!_isSlotOverlapping(
+                    meetings, startTime, endTime, meeting)) {
+                  var remarkText = remarkController.text.isEmpty
+                      ? 'Available Slot'
+                      : remarkController.text;
+                  onSlotSelected(selectedDate, startTime, endTime, remarkText,
+                      meetings, meeting?.timeSheetId ?? 0, true);
+                  Navigator.of(context).pop();
+                } else {
+                  SnackBarHelper.showStatusSnackBar(
+                      context,
+                      StatusIndicator.error,
+                      'Selected slot overlaps with an existing slot.');
+                }
+              },
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              shapeBorder: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(360)),
+              textColor: white,
+              color: primaryColor,
+              text: 'Save Slot',
+            ),
         ],
       ),
     );
