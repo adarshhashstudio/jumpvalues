@@ -3,6 +3,7 @@ import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:twilio_programmable_video/twilio_programmable_video.dart';
+import 'package:uuid/uuid.dart';
 
 class VideoCallPage extends StatefulWidget {
   VideoCallPage({required this.sessionId});
@@ -12,8 +13,7 @@ class VideoCallPage extends StatefulWidget {
   _VideoCallPageState createState() => _VideoCallPageState();
 }
 
-class _VideoCallPageState extends State<VideoCallPage>
-    with WidgetsBindingObserver {
+class _VideoCallPageState extends State<VideoCallPage> {
   Room? _room;
   LocalVideoTrack? _localVideoTrack;
   LocalAudioTrack? _localAudioTrack;
@@ -29,46 +29,11 @@ class _VideoCallPageState extends State<VideoCallPage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _init();
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      debugPrint(
-          'VIDEO CALL ==> App is in background or inactive, pausing video...');
-      _pauseVideo();
-    } else if (state == AppLifecycleState.resumed) {
-      debugPrint('VIDEO CALL ==> App is resumed, resuming video...');
-      _resumeVideo();
-    }
-  }
-
-  Future<void> _pauseVideo() async {
-    try {
-      await _localVideoTrack?.enable(false); // Disable video track
-      debugPrint('VIDEO CALL ==> Video track paused.');
-    } catch (e) {
-      debugPrint('VIDEO CALL ==> Failed to pause video track: $e');
-    }
-  }
-
-  Future<void> _resumeVideo() async {
-    try {
-      await _localVideoTrack?.enable(true); // Enable video track
-      debugPrint('VIDEO CALL ==> Video track resumed.');
-    } catch (e) {
-      debugPrint('VIDEO CALL ==> Failed to resume video track: $e');
-    }
-  }
-
-  @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _leaveRoom();
     super.dispose();
   }
@@ -79,7 +44,6 @@ class _VideoCallPageState extends State<VideoCallPage>
     });
     debugPrint('VIDEO CALL ==> Initializing video call setup...');
     await _initCameraCapturer();
-    await _initVideoPreview();
     await getTwilioAccessToken();
   }
 
@@ -150,40 +114,53 @@ class _VideoCallPageState extends State<VideoCallPage>
     }
   }
 
-  Future<void> _initVideoPreview() async {
-    try {
-      debugPrint('VIDEO CALL ==> Initializing local video preview...');
-      _localVideoTrack = LocalVideoTrack(
-        true,
-        _cameraCapturer!,
-        name: 'preview-video',
-      );
-      await _localVideoTrack?.create();
-      debugPrint('VIDEO CALL ==> Local Video Track created');
-    } catch (e) {
-      debugPrint('VIDEO CALL ==> VideoTrack creation failed: $e');
-      SnackBarHelper.showStatusSnackBar(
-        context,
-        StatusIndicator.error,
-        'Failed to create video track: $e',
-      );
-    }
-  }
-
   Future<void> _joinRoom(String token, String roomId) async {
     setState(() {
       _isLoading = true;
     });
+    await TwilioProgrammableVideo.setAudioSettings(
+        speakerphoneEnabled: true, bluetoothPreferred: true);
+    var trackId = const Uuid().v4();
 
     try {
       debugPrint('VIDEO CALL ==> Joining the room...');
-      _localAudioTrack = LocalAudioTrack(true, 'audio_track');
+
+      _localAudioTrack = LocalAudioTrack(true, 'audio_track-$trackId');
+
+      try {
+        debugPrint('VIDEO CALL ==> Initializing local video preview...');
+        _localVideoTrack = LocalVideoTrack(
+          true,
+          _cameraCapturer!,
+          name: 'preview-video',
+        );
+        await _localVideoTrack?.create();
+        debugPrint('VIDEO CALL ==> Local Video Track created');
+      } catch (e) {
+        debugPrint('VIDEO CALL ==> VideoTrack creation failed: $e');
+        SnackBarHelper.showStatusSnackBar(
+          context,
+          StatusIndicator.error,
+          'Failed to create video track: $e',
+        );
+      }
 
       var connectOptions = ConnectOptions(
         token,
         roomName: roomId,
+        preferredAudioCodecs: [OpusCodec()],
         audioTracks: [_localAudioTrack!],
+        dataTracks: [
+          LocalDataTrack(
+            DataTrackOptions(ordered: true, name: 'data_track-$trackId'),
+          )
+        ],
         videoTracks: [_localVideoTrack!],
+        enableNetworkQuality: true,
+        networkQualityConfiguration: NetworkQualityConfiguration(
+          remote: NetworkQualityVerbosity.NETWORK_QUALITY_VERBOSITY_MINIMAL,
+        ),
+        enableDominantSpeaker: true,
       );
 
       _room = await TwilioProgrammableVideo.connect(connectOptions);
@@ -344,6 +321,7 @@ class _VideoCallPageState extends State<VideoCallPage>
         backgroundColor: Colors.black,
         body: Stack(
           children: [
+            
             (_remoteParticipantJoined &&
                     _remoteParticipantVideoTracks.isNotEmpty)
                 ? Positioned.fill(
@@ -357,15 +335,11 @@ class _VideoCallPageState extends State<VideoCallPage>
                   ).center(),
             if (_localVideoTrack != null)
               Positioned(
-                top: 50,
-                left: 50,
-                width: 100,
-                height: 150,
-                child: Draggable(
-                  feedback: _localVideoTrack!.widget(),
-                  axis: Axis.vertical,
+                  top: 50,
+                  left: 50,
+                  width: 100,
+                  height: 150,
                   child: _localVideoTrack!.widget(),
-                ),
               ),
             if (_isLoading)
               const Center(

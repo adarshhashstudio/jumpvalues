@@ -58,7 +58,7 @@ Future<Response<dynamic>> buildHttpResponse(
     late Response response;
     var dio = Dio();
 
-    dio.options.connectTimeout = const Duration(seconds: 10);
+    dio.options.connectTimeout = const Duration(minutes: 3);
 
     try {
       response = await dio.request(
@@ -77,25 +77,22 @@ Future<Response<dynamic>> buildHttpResponse(
           requestOptions: RequestOptions(path: endPoint),
           data: e.response?.data,
         );
+        debugPrint('NETWORK UTILS EXCEPTIONS ==> ${response.data}');
       } else {
         response = Response(
           statusCode: StatusCode.defaultError,
           requestOptions: RequestOptions(path: endPoint),
-          data: {
-            'error': {'message': handleDioError(e)}
-          },
+          data: {'message': handleDioError(e)},
         );
+        debugPrint('NETWORK UTILS EXCEPTIONS ==> ${response.data}');
       }
     } catch (e) {
       response = Response(
         statusCode: StatusCode.defaultError,
         requestOptions: RequestOptions(path: endPoint),
-        data: {
-          'error': {
-            'message': e.toString()
-          } // TODO: change as something went wrong
-        },
+        data: {'message': e.toString()},
       );
+      debugPrint('NETWORK UTILS EXCEPTIONS ==> ${response.data}');
     }
 
     apidebugPrint(

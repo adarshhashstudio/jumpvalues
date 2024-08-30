@@ -62,7 +62,8 @@ String? passwordValidate(String password) {
 
 class SnackBarHelper {
   static void showStatusSnackBar(
-      BuildContext context, StatusIndicator status, String text) {
+      BuildContext context, StatusIndicator status, String text,
+      {Duration duration = const Duration(seconds: 3)}) {
     Color backgroundColor;
     Color textColor;
 
@@ -82,7 +83,7 @@ class SnackBarHelper {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        duration: const Duration(seconds: 3),
+        duration: duration,
         backgroundColor: backgroundColor,
         content: Text(
           text,

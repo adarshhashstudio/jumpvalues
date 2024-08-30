@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:jumpvalues/screens/splash_screen.dart';
+import 'package:jumpvalues/services/network_manager.dart';
 import 'package:jumpvalues/services/socket_service.dart';
 import 'package:jumpvalues/store/app_store.dart';
 import 'package:jumpvalues/store/goals_data_hive.dart';
@@ -100,8 +101,19 @@ Future<void> main() async {
   });
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    NetworkManager().initialize();
+  }
 
   @override
   Widget build(BuildContext context) => RestartAppWidget(

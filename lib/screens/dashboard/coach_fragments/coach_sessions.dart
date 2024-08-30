@@ -107,16 +107,25 @@ class _CoachSessionsState extends State<CoachSessions> {
                   ? dataNotFoundWidget(context, onTap: _refreshBookingItems)
                   : ListView.separated(
                       controller: _scrollController,
-                      itemCount: requestedSessions.length,
+                      itemCount: requestedSessions.length +
+                          1, // Add 1 to show the loader at the end
                       separatorBuilder: (context, index) => SizedBox(
                             height: MediaQuery.of(context).size.height * 0.03,
                           ),
                       itemBuilder: (context, index) {
+                        // If the current index is the last one (the additional one), show the loader
                         if (index == requestedSessions.length) {
-                          return _isLoading
-                              ? const Center(child: CircularProgressIndicator())
+                          // Check if there is more data to load; if not, return an empty SizedBox
+                          return _hasMoreData
+                              ? const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
                               : const SizedBox.shrink();
                         }
+                        // Otherwise, return the usual BookingItemComponent
                         return BookingItemComponent(
                           showButtons: true,
                           serviceResource: requestedSessions[index],

@@ -26,6 +26,13 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
+	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Your message to user when the camera is accessed for the first time</string>
 	<key>NSMicrophoneUsageDescription</key>
@@ -53,12 +60,5 @@
 	</array>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-    	<key>NSAllowsArbitraryLoads</key>
-    	<true/>
-    	<key>NSAllowsArbitraryLoadsInWebContent</key>
-    	<true/>
-	</dict>
 </dict>
 </plist>
