@@ -141,14 +141,14 @@ class _CommonProfileState extends State<CommonProfile> {
 
     void addIfNotEmpty(String key, String? value) {
       // if (value != null && value.isNotEmpty) {
-        request[key] = value;
+      request[key] = value;
       // }
     }
 
     addIfNotEmpty('first_name', firstNameController?.text);
     addIfNotEmpty('last_name', lastNameController?.text);
     addIfNotEmpty('country_code', sCountryCode);
-    addIfNotEmpty('phone', sPhoneNumber);
+    addIfNotEmpty('phone', maskedTextToNumber(phoneNumberController.text));
     addIfNotEmpty('education', educationController.text);
     addIfNotEmpty('philosophy', philosophyController.text);
     addIfNotEmpty('certifications', certificationController.text);
@@ -315,6 +315,10 @@ class _CommonProfileState extends State<CommonProfile> {
             coachProfileResponseModel?.data?.coachProfile?.experience ?? 0);
         await appStore.setUserNiche(
             coachProfileResponseModel?.data?.coachProfile?.niche ?? '');
+        await appStore
+            .setUserContactNumber(coachProfileResponseModel?.data?.phone ?? '');
+        await appStore.setUserContactCountryCode(
+            coachProfileResponseModel?.data?.countryCode ?? '+1');
         try {
           final phoneNumberType = phoneNumberParser.PhoneNumber.parse(
               '${appStore.userContactCountryCode}${appStore.userContactNumber}');
@@ -344,6 +348,14 @@ class _CommonProfileState extends State<CommonProfile> {
             clientProfileResponseModel?.data?.phone ?? '');
         await appStore
             .setUserProfilePic(clientProfileResponseModel?.data?.dp ?? '');
+        await appStore.setUserPosition(
+            clientProfileResponseModel?.data?.clientProfile?.position ?? '');
+        await appStore.setUserAboutMe(
+            clientProfileResponseModel?.data?.clientProfile?.aboutMe ?? '');
+        await appStore.setUserContactNumber(
+            clientProfileResponseModel?.data?.phone ?? '');
+        await appStore.setUserContactCountryCode(
+            clientProfileResponseModel?.data?.countryCode ?? '+1');
         try {
           final phoneNumberType = phoneNumberParser.PhoneNumber.parse(
               '${appStore.userContactCountryCode}${appStore.userContactNumber}');
@@ -770,32 +782,31 @@ class _CommonProfileState extends State<CommonProfile> {
                 height: MediaQuery.of(context).size.height * 0.02,
               ),
             textFormField(
-              label: 'Phone Number',
-              labelTextBoxSpace: 8,
-              controller: phoneNumberController,
-              focusNode: phoneNumberFocusNode,
-              errorText: fieldErrors['phone'],
-              prefixIcon: IconButton(
-                onPressed: () {},
-                icon: Text(
-                  '+1',
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 15,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.w400,
+                label: 'Phone Number',
+                labelTextBoxSpace: 8,
+                controller: phoneNumberController,
+                focusNode: phoneNumberFocusNode,
+                errorText: fieldErrors['phone'],
+                prefixIcon: IconButton(
+                  onPressed: () {},
+                  icon: Text(
+                    '+1',
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 15,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 ),
-              ),
-              inputFormatters: [maskFormatter],
-              onChanged: (phoneNumber) {
-                setState(() {
-                  sPhoneNumber = maskedTextToNumber(phoneNumber);
-                  // sCountryCode = phoneNumber.countryCode;
-                  sCountryCode = '+1';
-                });
-              }
-            ),
+                inputFormatters: [maskFormatter],
+                onChanged: (phoneNumber) {
+                  setState(() {
+                    sPhoneNumber = maskedTextToNumber(phoneNumber);
+                    // sCountryCode = phoneNumber.countryCode;
+                    sCountryCode = '+1';
+                  });
+                }),
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.02,
             ),
