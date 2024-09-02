@@ -7,15 +7,19 @@ part 'goals_store.g.dart';
 class GoalsStore = _GoalsStore with _$GoalsStore;
 
 abstract class _GoalsStore with Store {
-  _GoalsStore(this.goalsBox);
-  Box<GoalsData> goalsBox;
+  _GoalsStore(this.goalsBox, this.currentUserId);
+
+  final Box<GoalsData> goalsBox;
+  final String currentUserId; // Current logged-in user's ID
 
   @observable
   ObservableList<GoalsData> goalsList = ObservableList<GoalsData>();
 
   @action
   void loadGoals() {
-    goalsList = ObservableList.of(goalsBox.values);
+    goalsList = ObservableList.of(
+      goalsBox.values.where((goal) => goal.userId == currentUserId).toList(),
+    );
   }
 
   @action

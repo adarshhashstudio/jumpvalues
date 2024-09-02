@@ -24,7 +24,7 @@ class ClientDashboard extends StatefulWidget {
 }
 
 class _ClientDashboardState extends State<ClientDashboard> {
-  final goalsStore = GoalsStore(goalsBox);
+  final goalsStore = GoalsStore(goalsBox, appStore.userId.toString());
   bool loader = false;
   ClientDashboardResponseModel? clientDashboardResponseModel;
 
@@ -167,11 +167,12 @@ class _ClientDashboardState extends State<ClientDashboard> {
                 ),
                 goalsStore.goalsList.isEmpty
                     ? dataNotFoundWidget(context,
-                        text:
-                            'Write Your Goals, Watch Your Life Grow.\nEg. Procrastination, Confidence,...').onTap((){
-                              debugPrint('SOCKET IO : Notification Test');
-                              notificationTest();
-                            })
+                            text:
+                                'Write Your Goals, Watch Your Life Grow.\nEg. Procrastination, Confidence,...')
+                        .onTap(() {
+                        debugPrint('SOCKET IO : Notification Test');
+                        notificationTest();
+                      })
                     : ListView.separated(
                         itemCount: goalsStore.goalsList.length,
                         physics: const NeverScrollableScrollPhysics(),
@@ -273,15 +274,13 @@ class _ClientDashboardState extends State<ClientDashboard> {
                                 StatusIndicator.error,
                                 'Goal text should not be empty.');
                           } else {
-                            // 'Confidence',
-                            // 'Listen actively',
-                            // 'Wake up early',
-                            // 'Procrastination',
-                            // 'Be proactive'
                             setState(() {
                               var newGoal = GoalsData(
-                                  goalId: Random().nextInt(100),
-                                  goalName: goalController.text);
+                                goalId: Random().nextInt(100),
+                                goalName: goalController.text,
+                                userId: appStore.userId
+                                    .toString(), // Set the userId for the goal
+                              );
 
                               goalsStore.addGoal(newGoal);
                             });

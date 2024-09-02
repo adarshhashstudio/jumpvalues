@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
+import 'package:jumpvalues/store/goals_store.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
@@ -104,6 +105,7 @@ void isTokenAvailable(BuildContext context) async {
 
 void tokenExpired(BuildContext context) async {
   await appStore.clearData();
+  GoalsStore(goalsBox, ''); // Clear the userId on logout
   isTokenAvailable(context);
 }
 

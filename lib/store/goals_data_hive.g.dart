@@ -19,19 +19,22 @@ class GoalsDataAdapter extends TypeAdapter<GoalsData> {
     return GoalsData(
       goalId: fields[0] as int,
       goalName: fields[1] as String,
-      goalSelected: fields[2] as bool,
+      userId: fields[2] as String,
+      goalSelected: fields[3] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, GoalsData obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.goalId)
       ..writeByte(1)
       ..write(obj.goalName)
       ..writeByte(2)
+      ..write(obj.userId)
+      ..writeByte(3)
       ..write(obj.goalSelected);
   }
 

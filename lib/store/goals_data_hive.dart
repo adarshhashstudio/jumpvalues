@@ -7,8 +7,10 @@ class GoalsData {
   GoalsData({
     required this.goalId,
     required this.goalName,
+    required this.userId,
     this.goalSelected = false,
   });
+
   @HiveField(0)
   final int goalId;
 
@@ -16,5 +18,8 @@ class GoalsData {
   final String goalName;
 
   @HiveField(2)
+  final String userId; // Add userId to link goals with a specific user
+
+  @HiveField(3)
   bool goalSelected;
 }
