@@ -321,7 +321,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
         backgroundColor: Colors.black,
         body: Stack(
           children: [
-            
             (_remoteParticipantJoined &&
                     _remoteParticipantVideoTracks.isNotEmpty)
                 ? Positioned.fill(
@@ -335,11 +334,11 @@ class _VideoCallPageState extends State<VideoCallPage> {
                   ).center(),
             if (_localVideoTrack != null)
               Positioned(
-                  top: 50,
-                  left: 50,
-                  width: 100,
-                  height: 150,
-                  child: _localVideoTrack!.widget(),
+                top: 50,
+                left: 50,
+                width: 100,
+                height: 150,
+                child: _localVideoTrack!.widget(),
               ),
             if (_isLoading)
               const Center(
@@ -432,6 +431,16 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
       // Update current camera source
       _currentCameraSource = newCameraSource;
+
+      _localVideoTrack = LocalVideoTrack(
+        true,
+        _cameraCapturer!,
+        name: 'preview-video${const Uuid().v4()}',
+      );
+      await _localVideoTrack?.create();
+      await _localVideoTrack?.publish();
+
+      setState(() {});
 
       debugPrint(
           'VIDEO CALL ==> Camera switched to ${newCameraSource.isFrontFacing ? "front" : "back"} camera.');
