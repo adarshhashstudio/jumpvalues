@@ -102,16 +102,24 @@ class _ClientAllCoachesState extends State<ClientAllCoaches> {
                   ? dataNotFoundWidget(context, onTap: _refreshCoachItems)
                   : ListView.separated(
                       controller: _scrollController,
-                      itemCount: availableCoachList.length,
+                      itemCount: availableCoachList.length + 1,
                       separatorBuilder: (context, index) => SizedBox(
                             height: MediaQuery.of(context).size.height * 0.03,
                           ),
                       itemBuilder: (context, index) {
+                        // If the current index is the last one (the additional one), show the loader
                         if (index == availableCoachList.length) {
-                          return _isLoading
-                              ? const Center(child: CircularProgressIndicator())
+                          // Check if there is more data to load; if not, return an empty SizedBox
+                          return _hasMoreData
+                              ? const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
                               : const SizedBox.shrink();
                         }
+                        // Otherwise, return the usual BookingItemComponent
                         return CoachItemComponent(
                           coachDetail: availableCoachList[index],
                           index: index,

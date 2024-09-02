@@ -136,7 +136,7 @@ class _NotificationPageState extends State<NotificationPage> {
                       ? dataNotFoundWidget(context, onTap: _refreshBookingItems)
                       : ListView.builder(
                           controller: _scrollController,
-                          itemCount: notificationsList.length,
+                          itemCount: notificationsList.length + 1,
                           itemBuilder: (context, index) {
                             if (index == notificationsList.length) {
                               return _isLoading
