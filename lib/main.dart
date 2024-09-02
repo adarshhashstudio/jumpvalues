@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:jumpvalues/screens/splash_screen.dart';
-import 'package:jumpvalues/services/network_manager.dart';
 import 'package:jumpvalues/services/socket_service.dart';
 import 'package:jumpvalues/store/app_store.dart';
 import 'package:jumpvalues/store/goals_data_hive.dart';
@@ -112,7 +111,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    NetworkManager().initialize();
+    // NetworkManager().initialize(); // For Network check socket - Singleton class
   }
 
   @override

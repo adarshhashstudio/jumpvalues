@@ -45,70 +45,8 @@ Future<Response<dynamic>> buildHttpResponse(
   bool isAuth = false,
   bool isJsonEncode = false,
 }) async {
-  if (await isNetworkAvailable()) {
-    Map<String, dynamic>? headerReq;
-    if (appStore.isLoggedIn) {
-      headerReq = {'Authorization': 'Bearer ${appStore.token}'};
-    } else {
-      headerReq = null;
-    }
-    var headers = buildHeaderTokens(extraKeys: isAuth ? headerReq : {});
-    var url = buildBaseUrl(endPoint);
-
-    late Response response;
-    var dio = Dio();
-
-    dio.options.connectTimeout = const Duration(minutes: 3);
-
-    try {
-      response = await dio.request(
-        url.toString(),
-        data: request,
-        queryParameters: queryParams,
-        options: Options(
-          method: method.name,
-          headers: headers,
-        ),
-      );
-    } on DioException catch (e) {
-      if (e.response != null) {
-        response = Response(
-          statusCode: e.response?.statusCode ?? StatusCode.defaultError,
-          requestOptions: RequestOptions(path: endPoint),
-          data: e.response?.data,
-        );
-        debugPrint('NETWORK UTILS EXCEPTIONS ==> ${response.data}');
-      } else {
-        response = Response(
-          statusCode: StatusCode.defaultError,
-          requestOptions: RequestOptions(path: endPoint),
-          data: {'message': handleDioError(e)},
-        );
-        debugPrint('NETWORK UTILS EXCEPTIONS ==> ${response.data}');
-      }
-    } catch (e) {
-      response = Response(
-        statusCode: StatusCode.defaultError,
-        requestOptions: RequestOptions(path: endPoint),
-        data: {'message': e.toString()},
-      );
-      debugPrint('NETWORK UTILS EXCEPTIONS ==> ${response.data}');
-    }
-
-    apidebugPrint(
-      url: url.toString(),
-      endPoint: endPoint,
-      headers: jsonEncode(headers),
-      queryParams: jsonEncode(queryParams),
-      hasRequest: method == HttpMethodType.post || method == HttpMethodType.put,
-      request: jsonEncode(request),
-      statusCode: response.statusCode!,
-      responseBody: jsonEncode(response.data),
-      methodtype: method.name,
-    );
-
-    return response;
-  } else {
+  // Check for network availability at the start
+  if (!await isNetworkAvailable()) {
     return Response(
       statusCode: StatusCode.noInternetConnection,
       requestOptions: RequestOptions(path: endPoint),
@@ -117,6 +55,69 @@ Future<Response<dynamic>> buildHttpResponse(
       },
     );
   }
+
+  Map<String, dynamic>? headerReq;
+  if (appStore.isLoggedIn) {
+    headerReq = {'Authorization': 'Bearer ${appStore.token}'};
+  } else {
+    headerReq = null;
+  }
+  var headers = buildHeaderTokens(extraKeys: isAuth ? headerReq : {});
+  var url = buildBaseUrl(endPoint);
+
+  late Response response;
+  var dio = Dio();
+
+  dio.options.connectTimeout = const Duration(minutes: 3);
+
+  try {
+    response = await dio.request(
+      url.toString(),
+      data: request,
+      queryParameters: queryParams,
+      options: Options(
+        method: method.name,
+        headers: headers,
+      ),
+    );
+  } on DioException catch (e) {
+    if (e.response != null) {
+      response = Response(
+        statusCode: e.response?.statusCode ?? StatusCode.defaultError,
+        requestOptions: RequestOptions(path: endPoint),
+        data: e.response?.data,
+      );
+      debugPrint('NETWORK UTILS EXCEPTIONS ==> ${response.data}');
+    } else {
+      response = Response(
+        statusCode: StatusCode.defaultError,
+        requestOptions: RequestOptions(path: endPoint),
+        data: {'message': handleDioError(e)},
+      );
+      debugPrint('NETWORK UTILS EXCEPTIONS ==> ${response.data}');
+    }
+  } catch (e) {
+    response = Response(
+      statusCode: StatusCode.defaultError,
+      requestOptions: RequestOptions(path: endPoint),
+      data: {'message': e.toString()},
+    );
+    debugPrint('NETWORK UTILS EXCEPTIONS ==> ${response.data}');
+  }
+
+  apidebugPrint(
+    url: url.toString(),
+    endPoint: endPoint,
+    headers: jsonEncode(headers),
+    queryParams: jsonEncode(queryParams),
+    hasRequest: method == HttpMethodType.post || method == HttpMethodType.put,
+    request: jsonEncode(request),
+    statusCode: response.statusCode!,
+    responseBody: jsonEncode(response.data),
+    methodtype: method.name,
+  );
+
+  return response;
 }
 
 void apidebugPrint({
@@ -165,6 +166,17 @@ Map<String, String> buildHeaderTokens({
 
 Future<Response<dynamic>> uploadImage(Uri url, File imageFile,
     {Map<String, String>? fields, bool isAuth = false}) async {
+  // Check for network availability at the start
+  if (!await isNetworkAvailable()) {
+    return Response(
+      statusCode: StatusCode.noInternetConnection,
+      requestOptions: RequestOptions(path: url.toString()),
+      data: {
+        'error': {'message': 'No internet connection available'}
+      },
+    );
+  }
+
   late Response<dynamic> response;
   var dio = Dio();
   var formData = FormData();

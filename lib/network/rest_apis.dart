@@ -17,18 +17,22 @@ import 'package:jumpvalues/models/signup_response_model.dart';
 import 'package:jumpvalues/models/time_slots_list_response_model.dart';
 import 'package:jumpvalues/models/twilio_access_token_response_model.dart';
 import 'package:jumpvalues/network/network_utils.dart';
+import 'package:jumpvalues/network/status_codes.dart';
 import 'package:jumpvalues/utils/utils.dart';
 
 Future<Map<String, dynamic>> handleResponse(Response response) async {
   if (response.statusCode == 200 || response.statusCode == 201) {
     return response.data;
+  } else if (response.statusCode == StatusCode.noInternetConnection) {
+    return {
+      'status': false,
+      'message': 'No internet connection available',
+    };
   } else if (response.statusCode == 403) {
     tokenExpired(NavigationService.navigatorKey.currentState!.context);
     return response.data;
-  } else if (response.statusCode != 200 || response.statusCode != 201) {
-    return response.data;
   } else {
-    throw Exception('Error: ${response.data}');
+    return response.data;
   }
 }
 
