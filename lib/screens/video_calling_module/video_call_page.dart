@@ -132,9 +132,10 @@ class _VideoCallPageState extends State<VideoCallPage> {
         _localVideoTrack = LocalVideoTrack(
           true,
           _cameraCapturer!,
-          name: 'preview-video',
+          name: 'preview-video-$trackId',
         );
         await _localVideoTrack?.create();
+        await _localVideoTrack?.publish();
         debugPrint('VIDEO CALL ==> Local Video Track created');
       } catch (e) {
         debugPrint('VIDEO CALL ==> VideoTrack creation failed: $e');

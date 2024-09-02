@@ -794,13 +794,7 @@ class _CommonProfileState extends State<CommonProfile> {
                   // sCountryCode = phoneNumber.countryCode;
                   sCountryCode = '+1';
                 });
-              },
-              validator: (phoneNumber) {
-                if (phoneNumber == null || phoneNumber.isEmpty) {
-                  return 'Phone number is required';
-                }
-                return null;
-              },
+              }
             ),
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.02,
