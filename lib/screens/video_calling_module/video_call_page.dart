@@ -135,15 +135,15 @@ class _VideoCallPageState extends State<VideoCallPage> {
           name: 'preview-video-$trackId',
         );
         await _localVideoTrack?.create();
-        await _localVideoTrack?.publish();
+        // await _localVideoTrack?.publish();
         debugPrint('VIDEO CALL ==> Local Video Track created');
       } catch (e) {
         debugPrint('VIDEO CALL ==> VideoTrack creation failed: $e');
-        SnackBarHelper.showStatusSnackBar(
-          context,
-          StatusIndicator.error,
-          'Failed to create video track: $e',
-        );
+        // SnackBarHelper.showStatusSnackBar(
+        //   context,
+        //   StatusIndicator.error,
+        //   'Failed to create video track: $e',
+        // );
       }
 
       var connectOptions = ConnectOptions(
@@ -386,12 +386,11 @@ class _VideoCallPageState extends State<VideoCallPage> {
             Container(
               decoration: boxDecorationDefault(color: white.withOpacity(0.2)),
               child: IconButton(
-                icon: const Icon(
-                  Icons.switch_camera,
-                  color: Colors.white,
-                ),
-                onPressed: _switchCamera,
-              ),
+                  icon: const Icon(
+                    Icons.switch_camera,
+                    color: Colors.white,
+                  ),
+                  onPressed: _switchCamera),
             ),
           ],
         ),

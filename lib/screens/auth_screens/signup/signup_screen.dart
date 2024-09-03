@@ -1467,7 +1467,6 @@ class _SignupScreenState extends State<SignupScreen>
                 SafeArea(
                   child: Form(
                     key: _formKey,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     child: TabBarView(
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
