@@ -6,6 +6,7 @@ import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/client_dashboard_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/client_screens/select_screen.dart';
+import 'package:jumpvalues/screens/dashboard/video_player_screen.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/store/goals_data_hive.dart';
@@ -27,6 +28,7 @@ class _ClientDashboardState extends State<ClientDashboard> {
   final goalsStore = GoalsStore(goalsBox, appStore.userId.toString());
   bool loader = false;
   ClientDashboardResponseModel? clientDashboardResponseModel;
+  List<VideoRow>? videos = [];
 
   @override
   void initState() {
@@ -47,6 +49,10 @@ class _ClientDashboardState extends State<ClientDashboard> {
       if (response?.status == true) {
         setState(() {
           clientDashboardResponseModel = response;
+          if (clientDashboardResponseModel?.data?.client?.videos?.count !=
+              null) {
+            videos = clientDashboardResponseModel?.data?.client?.videos?.rows;
+          }
         });
       } else {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
@@ -101,7 +107,7 @@ class _ClientDashboardState extends State<ClientDashboard> {
                                   isFromProfile: false,
                                   initialSelectedValues:
                                       clientDashboardResponseModel
-                                              ?.data?.coreValues ??
+                                              ?.data?.client?.coreValues ??
                                           [])));
                         }),
                       ],
@@ -111,6 +117,10 @@ class _ClientDashboardState extends State<ClientDashboard> {
                     height: MediaQuery.of(context).size.height * 0.03,
                   ),
                   buildGoalsWidget(context),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.03,
+                  ),
+                  buildVideoListWidget(context),
                 ],
               ),
             ),
@@ -118,11 +128,79 @@ class _ClientDashboardState extends State<ClientDashboard> {
         ),
       );
 
+  Widget buildVideoListWidget(BuildContext context) => Container(
+        width: MediaQuery.of(context).size.width * 1,
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height * 0.1,
+        ),
+        decoration: boxDecorationDefault(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Tutorial Videos',
+                      style: boldTextStyle(),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.01,
+                ),
+                divider(),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.02,
+                ),
+              ],
+            ),
+            (videos == null || videos!.isEmpty)
+                ? dataNotFoundWidget(context, showImage: false).onTap(() {})
+                : ListView.builder(
+                    itemCount: videos?.length,
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      final video = videos?[index];
+                      return ListTile(
+                        leading: IconButton(
+                          icon: const Icon(Icons.video_file, size: 35),
+                          onPressed: () {},
+                        ),
+                        trailing: const Icon(
+                          Icons.arrow_right,
+                          size: 30,
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: Text(video?.title ?? ''),
+                        subtitle: Text(video?.slug ?? ''),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VideoPlayerScreen(
+                                videoUrl: video?.url ?? '',
+                                title: video?.title ?? '',
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+          ],
+        ).paddingSymmetric(horizontal: 16, vertical: 16),
+      );
+
   Observer buildGoalsWidget(BuildContext context) => Observer(
       builder: (_) => Container(
             width: MediaQuery.of(context).size.width * 1,
             constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height * 0.35,
+              minHeight: MediaQuery.of(context).size.height * 0.1,
             ),
             decoration: boxDecorationDefault(),
             child: Column(
@@ -169,9 +247,8 @@ class _ClientDashboardState extends State<ClientDashboard> {
                     ? dataNotFoundWidget(context,
                             text:
                                 'Write Your Goals, Watch Your Life Grow.\nEg. Procrastination, Confidence,...')
-                        .onTap(() {
-                        debugPrint('SOCKET IO : Notification Test');
-                        notificationTest();
+                        .onTap(() async {
+                        await showAddGoalsDialogue(context);
                       })
                     : ListView.separated(
                         itemCount: goalsStore.goalsList.length,
@@ -353,7 +430,7 @@ class _ClientDashboardState extends State<ClientDashboard> {
                 ],
               ),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.02,
+                height: MediaQuery.of(context).size.height * 0.01,
               ),
               Text(
                 title,
@@ -363,7 +440,7 @@ class _ClientDashboardState extends State<ClientDashboard> {
                     fontSize: 14),
               ).withHeight(MediaQuery.of(context).size.height * 0.11),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.03,
+                height: MediaQuery.of(context).size.height * 0.01,
               ),
               Container(
                 width: MediaQuery.of(context).size.width,
@@ -380,9 +457,6 @@ class _ClientDashboardState extends State<ClientDashboard> {
                         color: textColor.withOpacity(0.7)),
                   ),
                 ),
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.02,
               ),
             ],
           ),

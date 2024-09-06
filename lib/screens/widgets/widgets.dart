@@ -298,7 +298,7 @@ class CoachItemComponent extends StatelessWidget {
                 ),
                 SizedBox(width: MediaQuery.of(context).size.width * 0.01),
                 PannableRatingBar.builder(
-                  rate: '${rating??0}'.toDouble(),
+                  rate: '${rating ?? 0}'.toDouble(),
                   alignment: WrapAlignment.center,
                   spacing: 2,
                   runSpacing: 2,
@@ -536,18 +536,20 @@ class _AppButtonState extends State<AppButton>
 }
 
 Widget dataNotFoundWidget(BuildContext context,
-        {void Function()? onTap, String? text}) =>
+        {void Function()? onTap, String? text, bool showImage = true}) =>
     Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Image.asset(
-          empty,
-          width: MediaQuery.of(context).size.width * 0.4,
-        ),
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.01,
-        ),
+        if (showImage)
+          Image.asset(
+            empty,
+            width: MediaQuery.of(context).size.width * 0.2,
+          ),
+        if (showImage)
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.01,
+          ),
         Text(
           text ?? 'Data Not Available.',
           textAlign: TextAlign.center,
