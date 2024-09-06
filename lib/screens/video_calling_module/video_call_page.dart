@@ -317,36 +317,61 @@ class _VideoCallPageState extends State<VideoCallPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        backgroundColor: Colors.black,
-        body: Stack(
-          children: [
-            (_remoteParticipantJoined &&
-                    _remoteParticipantVideoTracks.isNotEmpty)
-                ? Positioned.fill(
-                    child:
-                        _remoteParticipantVideoTracks.values.first?.widget() ??
-                            Container(),
-                  )
-                : Text(
-                    'Connecting...',
-                    style: boldTextStyle(color: white),
-                  ).center(),
-            if (_localVideoTrack != null)
-              Positioned(
-                top: 50,
-                left: 50,
-                width: 100,
-                height: 150,
-                child: _localVideoTrack!.widget(),
-              ),
-            if (_isLoading)
-              const Center(
-                child: CircularProgressIndicator(),
-              ),
-            controlButtons(),
+  Future<bool> _onWillPop() async =>
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Are you Confirm?'),
+          content: const Text('Are you sure you want to leave the call?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // Stay on the page
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: _leaveRoom,
+              child: const Text('Okay'),
+            ),
           ],
+        ),
+      ) ??
+      false;
+
+  @override
+  Widget build(BuildContext context) => WillPopScope(
+        onWillPop: _onWillPop,
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: Stack(
+            children: [
+              (_remoteParticipantJoined &&
+                      _remoteParticipantVideoTracks.isNotEmpty)
+                  ? Positioned.fill(
+                      child: _remoteParticipantVideoTracks.values.first
+                              ?.widget() ??
+                          Container(),
+                    )
+                  : Text(
+                      'Connecting...',
+                      style: boldTextStyle(color: white),
+                    ).center(),
+              // if (_localVideoTrack != null)
+              //   Positioned(
+              //     top: 50,
+              //     left: 50,
+              //     width: 100,
+              //     height: 150,
+              //     child: _localVideoTrack!.widget(),
+              //   ),
+              if (_isLoading)
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              controlButtons(),
+            ],
+          ),
         ),
       );
 
