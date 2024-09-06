@@ -368,7 +368,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   color: getColorByStatus(status),
                   enabled: true,
                   onTap: () async {
-                    await onCall(sessionId, coachId);
+                    // await onCall(sessionId, coachId);
                   },
                 ).expand(),
               ],
