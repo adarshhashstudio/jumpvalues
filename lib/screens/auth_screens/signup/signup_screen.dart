@@ -186,7 +186,7 @@ class _SignupScreenState extends State<SignupScreen>
   }
 
   void _handleTabChange() {
-    hideAppKeyboard(context);
+    hideKeyboard(context);
     setState(() {
       submitButtonEnabled = false;
       coachSubmitButtonEnabled = false;
@@ -920,7 +920,7 @@ class _SignupScreenState extends State<SignupScreen>
                   ],
                 ),
                 button(context, onPressed: () async {
-                  hideAppKeyboard(context);
+                  hideKeyboard(context);
                   if (loader) {
                   } else {
                     await signup(isCoach: false);
@@ -1380,7 +1380,7 @@ class _SignupScreenState extends State<SignupScreen>
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: button(context, onPressed: () async {
-              hideAppKeyboard(context);
+              hideKeyboard(context);
               if (loader) {
               } else {
                 //       if (selectedCategories.isEmpty) {

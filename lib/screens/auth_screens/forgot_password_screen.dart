@@ -174,7 +174,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   child: Column(
                     children: [
                       button(context, onPressed: () async {
-                        hideAppKeyboard(context);
+                        hideKeyboard(context);
                         if (loader) {
                         } else {
                           await forgotPass();

@@ -163,7 +163,7 @@ class _GenerateOtpScreenState extends State<GenerateOtpScreen> {
                 child: Column(
                   children: [
                     button(context, onPressed: () async {
-                      hideAppKeyboard(context);
+                      hideKeyboard(context);
                       if (loader) {
                       } else {
                         await sendOtp();

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -433,28 +432,28 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
     return [];
   }
 
-  void _createSlots() {
-    final slots = <Meeting>[];
+  // void _createSlots() {
+  //   final slots = <Meeting>[];
 
-    final startDate = selectedDateRange!.start;
-    final endDate = selectedDateRange!.end;
+  //   final startDate = selectedDateRange!.start;
+  //   final endDate = selectedDateRange!.end;
 
-    for (var day = startDate;
-        day.isBefore(endDate) || day.isAtSameMomentAs(endDate);
-        day = day.add(const Duration(days: 1))) {
-      if (selectedWeekdays.contains(day.weekday)) {
-        for (var slot in selectedTimeSlots) {
-          final startDateTime = DateTime(day.year, day.month, day.day,
-              slot.startTime.hour, slot.startTime.minute);
-          final endDateTime = startDateTime.add(const Duration(hours: 1));
-          slots.add(Meeting('Available Slot', startDateTime, endDateTime,
-              const Color(0xFF0F8644), 1));
-        }
-      }
-    }
+  //   for (var day = startDate;
+  //       day.isBefore(endDate) || day.isAtSameMomentAs(endDate);
+  //       day = day.add(const Duration(days: 1))) {
+  //     if (selectedWeekdays.contains(day.weekday)) {
+  //       for (var slot in selectedTimeSlots) {
+  //         final startDateTime = DateTime(day.year, day.month, day.day,
+  //             slot.startTime.hour, slot.startTime.minute);
+  //         final endDateTime = startDateTime.add(const Duration(hours: 1));
+  //         slots.add(Meeting('Available Slot', startDateTime, endDateTime,
+  //             const Color(0xFF0F8644), 1));
+  //       }
+  //     }
+  //   }
 
-    Navigator.pop(context, slots); // Returning the list directly
-  }
+  //   Navigator.pop(context, slots); // Returning the list directly
+  // }
 }
 
 class TimeSlot {

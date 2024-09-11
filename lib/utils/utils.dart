@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -22,9 +20,6 @@ enum SessionStatus {
   expired,
   abandoned,
 }
-
-void hideAppKeyboard(context) =>
-    FocusScope.of(context).requestFocus(FocusNode());
 
 String? validateEmail(String email) {
   if (RegExp(
@@ -168,19 +163,19 @@ int getSessionStatusCode(SessionStatus status) =>
 SessionStatus getSessionStatusFromCode(int statusCode) =>
     sessionStatusFromCodes[statusCode] ?? SessionStatus.all;
 
-class Debouncer {
-  Debouncer({required this.milliseconds});
-  final int milliseconds;
-  VoidCallback? action;
-  Timer? _timer;
+// class Debouncer {
+//   Debouncer({required this.milliseconds});
+//   final int milliseconds;
+//   VoidCallback? action;
+//   Timer? _timer;
 
-  run(VoidCallback action) {
-    if (_timer != null) {
-      _timer!.cancel();
-    }
-    _timer = Timer(Duration(milliseconds: milliseconds), action);
-  }
-}
+//   run(VoidCallback action) {
+//     if (_timer != null) {
+//       _timer!.cancel();
+//     }
+//     _timer = Timer(Duration(milliseconds: milliseconds), action);
+//   }
+// }
 
 /// Common method to format DateTime to 'yyyy/MM/dd'
 ///
@@ -215,7 +210,7 @@ String numberToMaskedText(String number) {
   // Apply the mask (###) ###-#### to the first 10 digits
   final buffer = StringBuffer();
 
-  if (number.length > 0) {
+  if (number.isNotEmpty) {
     buffer.write('(');
     buffer.write(number.substring(0, number.length < 3 ? number.length : 3));
     buffer.write(')');
@@ -260,7 +255,7 @@ class DateTimeUtils {
       return DateFormat('MM/dd/yyyy hh:mm a').format(dateTime);
     } catch (e) {
       // If parsing or formatting fails, print an error and return an empty string
-      print('Error formatting date: $e');
+      debugPrint('Error formatting date: $e');
       return '';
     }
   }
@@ -273,7 +268,7 @@ class NoLeadingSpaceFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     if (newValue.text.startsWith(' ')) {
-      final String trimedText = newValue.text.trimLeft();
+      final trimedText = newValue.text.trimLeft();
 
       return TextEditingValue(
         text: trimedText,

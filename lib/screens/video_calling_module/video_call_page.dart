@@ -19,7 +19,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
   LocalAudioTrack? _localAudioTrack;
   CameraCapturer? _cameraCapturer;
   bool _isLoading = false;
-  Map<String, RemoteVideoTrack?> _remoteParticipantVideoTracks = {};
+  final Map<String, RemoteVideoTrack?> _remoteParticipantVideoTracks = {};
   bool _isMuted = false;
   bool _remoteParticipantJoined = false;
   CameraSource? _currentCameraSource;
@@ -445,11 +445,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
       var newCameraSource = cameraSources.firstWhere(
         (source) => source.isFrontFacing != currentCameraSource?.isFrontFacing,
       );
-
-      if (newCameraSource == null) {
-        debugPrint('No different camera source found.');
-        return;
-      }
 
       // Switch the camera source
       await _cameraCapturer?.switchCamera(newCameraSource);

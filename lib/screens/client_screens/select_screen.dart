@@ -257,7 +257,7 @@ class _SelectScreenState extends State<SelectScreen> {
                                 context,
                                 text: tone.name,
                                 onTap: () {
-                                  hideAppKeyboard(context);
+                                  hideKeyboard(context);
                                   setState(() {
                                     if (selectedTones.any((selectedTone) =>
                                         selectedTone.id == tone.id)) {
