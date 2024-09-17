@@ -9,7 +9,6 @@ environment:
   sdk: '>=3.3.0 <4.0.0'
 
 dependencies:
-  better_player: ^0.0.84
   cached_network_image: ^3.3.1
   dio: ^5.4.2+1
   firebase_core: ^3.4.0
@@ -37,8 +36,8 @@ dependencies:
   syncfusion_flutter_calendar: ^26.1.38
   twilio_programmable_video: ^1.1.1
   uuid: ^4.4.2
-  webview_flutter: ^4.7.0
-  youtube_player_flutter: ^9.0.3
+  webview_flutter: ^4.9.0
+  youtube_player_flutter: ^8.1.2
 
 dev_dependencies:
   build_runner: ^2.4.6

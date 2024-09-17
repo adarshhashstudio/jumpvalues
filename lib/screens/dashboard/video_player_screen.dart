@@ -1,4 +1,3 @@
-import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -13,47 +12,24 @@ class VideoPlayerScreen extends StatefulWidget {
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  late BetterPlayerController _betterPlayerController;
   late YoutubePlayerController _youtubePlayerController;
-  bool isYoutube = false;
-  bool _isFullScreen = false; // Add this line
+  bool _isFullScreen = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Check if the URL is a YouTube link
-    isYoutube = _isYoutubeUrl(widget.videoUrl);
-
-    if (isYoutube) {
-      // Initialize YouTube Player
-      final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl);
+    // Initialize YouTube Player
+    final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl);
+    if (videoId != null) {
       _youtubePlayerController = YoutubePlayerController(
-        initialVideoId: videoId!,
+        initialVideoId: videoId,
         flags: const YoutubePlayerFlags(
           autoPlay: true,
           mute: false,
           enableCaption: false,
         ),
       )..addListener(_youtubePlayerListener); // Add listener here
-    } else {
-      // Initialize BetterPlayer for normal video links
-      var betterPlayerDataSource = BetterPlayerDataSource(
-        BetterPlayerDataSourceType.network,
-        widget.videoUrl,
-      );
-      _betterPlayerController = BetterPlayerController(
-        const BetterPlayerConfiguration(
-          aspectRatio: 16 / 9,
-          autoPlay: true,
-          controlsConfiguration: BetterPlayerControlsConfiguration(
-            enableFullscreen: true,
-            enablePlayPause: true,
-            enableMute: true,
-          ),
-        ),
-        betterPlayerDataSource: betterPlayerDataSource,
-      );
     }
   }
 
@@ -67,20 +43,15 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   @override
   void dispose() {
-    if (isYoutube) {
-      _youtubePlayerController
-          .removeListener(_youtubePlayerListener); // Remove listener
-      _youtubePlayerController.dispose();
-    } else {
-      _betterPlayerController.dispose();
-    }
+    _youtubePlayerController.removeListener(_youtubePlayerListener); // Remove listener
+    _youtubePlayerController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => WillPopScope(
         onWillPop: () async {
-          if (isYoutube && _youtubePlayerController.value.isFullScreen) {
+          if (_youtubePlayerController.value.isFullScreen) {
             _youtubePlayerController.toggleFullScreenMode();
             return false; // Prevents the page from popping
           }
@@ -99,8 +70,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   ),
                   leading: GestureDetector(
                     onTap: () {
-                      if (isYoutube &&
-                          _youtubePlayerController.value.isFullScreen) {
+                      if (_youtubePlayerController.value.isFullScreen) {
                         _youtubePlayerController.toggleFullScreenMode();
                       } else {
                         Navigator.of(context).pop();
@@ -120,8 +90,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         fontSize: 20),
                   ),
                 ),
-          backgroundColor: blackColor,
-          body: isYoutube ? _buildYoutubePlayer() : _buildBetterPlayer(),
+          backgroundColor: Colors.black,
+          body: _buildYoutubePlayer(),
         ),
       );
 
@@ -130,16 +100,4 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         controller: _youtubePlayerController,
         showVideoProgressIndicator: true,
       ).center();
-
-  // Better Player widget
-  Widget _buildBetterPlayer() => AspectRatio(
-        aspectRatio: 16 / 9,
-        child: BetterPlayer(
-          controller: _betterPlayerController,
-        ),
-      ).center();
-
-  // Check if the URL is from YouTube
-  bool _isYoutubeUrl(String url) =>
-      url.contains('youtube.com') || url.contains('youtu.be');
 }
