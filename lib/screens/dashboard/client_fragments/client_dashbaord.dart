@@ -67,62 +67,71 @@ class _ClientDashboardState extends State<ClientDashboard> {
     }
   }
 
+  Future<void> _refreshData() async {
+    isTokenAvailable(context);
+    await getClientDashboard();
+    goalsStore.loadGoals();
+  }
+
   @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        gradientContainer(context,
-                            startColor: const Color(0xFFF69273),
-                            endColor: const Color(0xFFFF6E7A),
-                            icon: learnImage,
-                            title:
-                                'Start your Journey by learning more about personal values.',
-                            buttonTitle: 'Learn ( Values )', onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const WebViewScreen(
-                                    url: learnSectionUrl,
-                                  )));
-                        }),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.035,
-                        ),
-                        gradientContainer(context,
-                            startColor: const Color(0xFF95cfd3),
-                            endColor: const Color(0xFF96d3c5),
-                            icon: selectImage,
-                            title:
-                                'Click to select your values from our comprehensive list.',
-                            buttonTitle: 'Select ( Values )', onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => SelectScreen(
-                                  isFromProfile: false,
-                                  initialSelectedValues:
-                                      clientDashboardResponseModel
-                                              ?.data?.client?.coreValues ??
-                                          [])));
-                        }),
-                      ],
+  Widget build(BuildContext context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: RefreshIndicator(
+            onRefresh: _refreshData,
+            child: ListView(
+              children: [
+                Column(
+                  children: [
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          gradientContainer(context,
+                              startColor: const Color(0xFFF69273),
+                              endColor: const Color(0xFFFF6E7A),
+                              icon: learnImage,
+                              title:
+                                  'Start your Journey by learning more about personal values.',
+                              buttonTitle: 'Learn ( Values )', onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const WebViewScreen(
+                                      url: learnSectionUrl,
+                                    )));
+                          }),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.035,
+                          ),
+                          gradientContainer(context,
+                              startColor: const Color(0xFF95cfd3),
+                              endColor: const Color(0xFF96d3c5),
+                              icon: selectImage,
+                              title:
+                                  'Click to select your values from our comprehensive list.',
+                              buttonTitle: 'Select ( Values )', onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => SelectScreen(
+                                    isFromProfile: false,
+                                    initialSelectedValues:
+                                        clientDashboardResponseModel
+                                                ?.data?.client?.coreValues ??
+                                            [])));
+                          }),
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.03,
-                  ),
-                  buildGoalsWidget(context),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.03,
-                  ),
-                  buildVideoListWidget(context),
-                ],
-              ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.03,
+                    ),
+                    buildGoalsWidget(context),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.03,
+                    ),
+                    buildVideoListWidget(context),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

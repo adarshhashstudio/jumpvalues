@@ -37,6 +37,7 @@ class DashboardData {
     this.todaySessions,
     this.completedSessions,
     this.recentRequests,
+    this.videos,
   });
 
   factory DashboardData.fromJson(Map<String, dynamic> json) => DashboardData(
@@ -44,15 +45,17 @@ class DashboardData {
         todaySessions: json['todaySessions'] as int?,
         completedSessions: json['completedSessions'] as int?,
         recentRequests: (json['recentRequests'] as List<dynamic>?)
-            ?.map((item) => RequestedSession.fromJson(
-                item as Map<String, dynamic>))
+            ?.map((item) =>
+                RequestedSession.fromJson(item as Map<String, dynamic>))
             .toList(),
+        videos: json['videos'] != null ? Videos.fromJson(json['videos']) : null,
       );
 
   int? upcomingSessions;
   int? todaySessions;
   int? completedSessions;
   List<RequestedSession>? recentRequests;
+  Videos? videos;
 
   Map<String, dynamic> toJson() => {
         'upcomingSessions': upcomingSessions,
@@ -60,54 +63,66 @@ class DashboardData {
         'completedSessions': completedSessions,
         'recentRequests':
             recentRequests?.map((session) => session.toJson()).toList(),
+        'videos': videos?.toJson(),
       };
 }
 
-// class DashboardRecentSessions {
-//   DashboardRecentSessions({
-//     this.id,
-//     this.status,
-//     this.userId,
-//     this.userDp,
-//     this.name,
-//     this.startTime,
-//     this.endTime,
-//     this.remark,
-//     this.date,
-//   });
+class Videos {
+  Videos({this.count, this.rows});
 
-//   factory DashboardRecentSessions.fromJson(Map<String, dynamic> json) =>
-//       DashboardRecentSessions(
-//         id: json['id'] as int?,
-//         status: json['status'] as int?,
-//         userId: json['user_id'] as int?,
-//         userDp: json['user_dp'] as String?,
-//         name: json['name'] as String?,
-//         startTime: json['start_time'] as String?,
-//         endTime: json['end_time'] as String?,
-//         remark: json['remark'] as String?,
-//         date: json['date'] as String?,
-//       );
+  // From JSON
+  factory Videos.fromJson(Map<String, dynamic> json) {
+    var rowsList = json['rows'] as List<dynamic>?;
+    return Videos(
+      count: json['count'] as int?,
+      rows: rowsList != null
+          ? rowsList.map((item) => VideoRow.fromJson(item)).toList()
+          : null,
+    );
+  }
+  int? count;
+  List<VideoRow>? rows;
 
-//   int? id;
-//   int? status;
-//   int? userId;
-//   String? userDp;
-//   String? name;
-//   String? startTime;
-//   String? endTime;
-//   String? remark;
-//   String? date;
+  // To JSON
+  Map<String, dynamic> toJson() => {
+        'count': count,
+        'rows': rows?.map((item) => item.toJson()).toList(),
+      };
+}
 
-//   Map<String, dynamic> toJson() => {
-//         'id': id,
-//         'status': status,
-//         'user_id': userId,
-//         'user_dp': userDp,
-//         'name': name,
-//         'start_time': startTime,
-//         'end_time': endTime,
-//         'remark': remark,
-//         'date': date,
-//       };
-// }
+class VideoRow {
+  VideoRow({
+    this.id,
+    this.title,
+    this.slug,
+    this.url,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  // From JSON
+  factory VideoRow.fromJson(Map<String, dynamic> json) => VideoRow(
+        id: json['id'] as int?,
+        title: json['title'] as String?,
+        slug: json['slug'] as String?,
+        url: json['URL'] as String?,
+        createdAt: json['created_at'] as String?,
+        updatedAt: json['updated_at'] as String?,
+      );
+  int? id;
+  String? title;
+  String? slug;
+  String? url;
+  String? createdAt;
+  String? updatedAt;
+
+  // To JSON
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'slug': slug,
+        'URL': url,
+        'created_at': createdAt,
+        'updated_at': updatedAt,
+      };
+}

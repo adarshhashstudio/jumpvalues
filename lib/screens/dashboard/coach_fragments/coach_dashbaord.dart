@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/models/coach_dashboard_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
-import 'package:jumpvalues/screens/dashboard/booking_item_component.dart';
+import 'package:jumpvalues/screens/dashboard/video_player_screen.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/images.dart';
 import 'package:jumpvalues/utils/utils.dart';
+import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class CoachDashboard extends StatefulWidget {
@@ -17,6 +18,7 @@ class CoachDashboard extends StatefulWidget {
 class _CoachDashboardState extends State<CoachDashboard> {
   bool loader = false;
   CoachDashboardResponseModel? coachDashboardResponseModel;
+  List<VideoRow>? videos = [];
 
   @override
   void initState() {
@@ -36,6 +38,9 @@ class _CoachDashboardState extends State<CoachDashboard> {
       if (response?.status == true) {
         setState(() {
           coachDashboardResponseModel = response;
+          if (coachDashboardResponseModel?.data?.videos?.count != null) {
+            videos = coachDashboardResponseModel?.data?.videos?.rows;
+          }
         });
       } else {
         SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
@@ -50,87 +55,134 @@ class _CoachDashboardState extends State<CoachDashboard> {
     }
   }
 
+  Future<void> _refreshData() async {
+    isTokenAvailable(context);
+    await getCoachDashboard();
+  }
+
   @override
   Widget build(BuildContext context) => Stack(
         children: [
-          SingleChildScrollView(
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          RefreshIndicator(
+            onRefresh:
+                _refreshData, // Define this function to refresh your data
+            child: ListView(
+              padding: const EdgeInsets.all(16.0),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.02,
+                ),
+                todaySession(context,
+                    total:
+                        '${coachDashboardResponseModel?.data?.todaySessions ?? '0'}'),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.03,
+                ),
+                Row(
                   children: [
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.02,
-                    ),
-                    todaySession(context,
+                    Expanded(
+                      child: TotalWidget(
+                        icon: icUpcoming,
+                        title: 'Upcoming Sessions',
                         total:
-                            '${coachDashboardResponseModel?.data?.todaySessions ?? '0'}'),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.03,
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TotalWidget(
-                            icon: icUpcoming,
-                            title: 'Upcoming Sessions',
-                            total:
-                                '${coachDashboardResponseModel?.data?.upcomingSessions ?? '0'}',
-                            color: white,
-                          ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.05,
-                        ),
-                        Expanded(
-                          child: TotalWidget(
-                            icon: icCompleted,
-                            title: 'Completed Sessions',
-                            total:
-                                '${coachDashboardResponseModel?.data?.completedSessions ?? '0'}',
-                            color: white,
-                          ),
-                        ),
-                      ],
+                            '${coachDashboardResponseModel?.data?.upcomingSessions ?? '0'}',
+                        color: white,
+                      ),
                     ),
                     SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.04,
+                      width: MediaQuery.of(context).size.width * 0.05,
                     ),
-                    Row(
-                      children: [
-                        Text('Recent Requests ', style: boldTextStyle()),
-                      ],
+                    Expanded(
+                      child: TotalWidget(
+                        icon: icCompleted,
+                        title: 'Completed Sessions',
+                        total:
+                            '${coachDashboardResponseModel?.data?.completedSessions ?? '0'}',
+                        color: white,
+                      ),
                     ),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.02,
-                    ),
-                    ListView.separated(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: coachDashboardResponseModel
-                                ?.data?.recentRequests?.length ??
-                            0,
-                        separatorBuilder: (context, index) => SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.01,
-                            ),
-                        itemBuilder: (context, index) => BookingItemComponent(
-                              showButtons: false,
-                              serviceResource: coachDashboardResponseModel
-                                  ?.data?.recentRequests?[index],
-                              index: index,
-                              onActionPerformed: () {},
-                            )),
                   ],
                 ),
-              ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.04,
+                ),
+                buildVideoListWidget(context),
+              ],
             ),
           ),
           if (loader)
             const Positioned.fill(
                 child: Center(
               child: CircularProgressIndicator(),
-            ))
+            )),
         ],
+      );
+
+  Widget buildVideoListWidget(BuildContext context) => Container(
+        width: MediaQuery.of(context).size.width * 1,
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height * 0.1,
+        ),
+        decoration: boxDecorationDefault(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Tutorial Videos',
+                      style: boldTextStyle(),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.01,
+                ),
+                divider(),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.02,
+                ),
+              ],
+            ),
+            (videos == null || videos!.isEmpty)
+                ? dataNotFoundWidget(context, showImage: false).onTap(() {})
+                : ListView.builder(
+                    itemCount: videos?.length,
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      final video = videos?[index];
+                      return ListTile(
+                        leading: IconButton(
+                          icon: const Icon(Icons.video_file, size: 35),
+                          onPressed: () {},
+                        ),
+                        trailing: const Icon(
+                          Icons.arrow_right,
+                          size: 30,
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: Text(video?.title ?? ''),
+                        subtitle: Text(video?.slug ?? ''),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VideoPlayerScreen(
+                                videoUrl: video?.url ?? '',
+                                title: video?.title ?? '',
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+          ],
+        ).paddingSymmetric(horizontal: 16, vertical: 16),
       );
 }
