@@ -96,6 +96,8 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
     ) onSlotBooking,
     required bool startBooking,
   }) {
+    var currentTime = DateTime.now();
+
     if (details.targetElement == CalendarElement.calendarCell) {
       if (startBooking) {
         SnackBarHelper.showStatusSnackBar(
@@ -110,16 +112,36 @@ class _SlotsCalendarState extends State<SlotsCalendar> {
             selectedDate.minute,
             selectedDate.second);
         var endTime = startTime.add(const Duration(hours: 1));
-        _showSlotDialog(context, null, selectedDate, startTime, endTime,
-            meetings, onSlotSelected);
+
+        // Check if the slot is in the past
+        if (startTime.isBefore(currentTime)) {
+          SnackBarHelper.showStatusSnackBar(
+            context,
+            StatusIndicator.error,
+            'Slot is no longer available.',
+          );
+        } else {
+          _showSlotDialog(context, null, selectedDate, startTime, endTime,
+              meetings, onSlotSelected);
+        }
       }
     } else if (details.targetElement == CalendarElement.appointment) {
       final Meeting meeting = details.appointments?.first;
-      if (startBooking) {
-        _showSlotBookingDialog(context, meeting, onSlotBooking);
+
+      // Check if the meeting's start time is in the past
+      if (meeting.from.isBefore(currentTime)) {
+        SnackBarHelper.showStatusSnackBar(
+          context,
+          StatusIndicator.error,
+          'This slot has already passed.',
+        );
       } else {
-        _showSlotDialog(context, meeting, meeting.from, meeting.from,
-            meeting.to, meetings, onSlotSelected);
+        if (startBooking) {
+          _showSlotBookingDialog(context, meeting, onSlotBooking);
+        } else {
+          _showSlotDialog(context, meeting, meeting.from, meeting.from,
+              meeting.to, meetings, onSlotSelected);
+        }
       }
     }
   }
@@ -495,7 +517,7 @@ class MeetingDataSource extends CalendarDataSource {
   String getSubject(int index) => _getMeetingData(index).remark;
 
   @override
-  Color getColor(int index) => _getMeetingData(index).background;
+  Color getColor(int index) => DateTime.parse(_getMeetingData(index).from.toString()).isBefore(DateTime.now()) ? gray : _getMeetingData(index).background;
 
   int getTimeSheetId(int index) => _getMeetingData(index).timeSheetId;
 
