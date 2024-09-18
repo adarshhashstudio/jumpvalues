@@ -20,6 +20,8 @@ class _CoachMySlotsState extends State<CoachMySlots> {
   List<Meeting> globalMeetings = [];
   List<TimeSlotListItem> serverTimeSlotsList = [];
   bool loader = false;
+  // Map to store error messages for each field
+  Map<String, dynamic> fieldErrors = {};
 
   @override
   void initState() {
@@ -131,8 +133,32 @@ class _CoachMySlotsState extends State<CoachMySlots> {
             response?.message ?? 'Slot Updated Successfully');
         await getAllTimeSlotsForCoach();
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong.');
+        if (response?.errors?.isNotEmpty ?? false) {
+          // Set field errors and focus on the first error field
+          response?.errors?.forEach((e) {
+            fieldErrors[e.field ?? '0'] = e.message ?? '0';
+          });
+          // Focus on the first error
+          if (fieldErrors.containsKey('start_time')) {
+            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+                fieldErrors['start_time'] ?? 'Something went wrong.');
+          } else if (fieldErrors.containsKey('end_time')) {
+            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+                fieldErrors['end_time'] ?? 'Something went wrong.');
+          } else if (fieldErrors.containsKey('remark')) {
+            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+                fieldErrors['remark'] ?? 'Something went wrong.');
+          } else if (fieldErrors.containsKey('date')) {
+            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+                fieldErrors['date'] ?? 'Something went wrong.');
+          } else if (fieldErrors.containsKey('user_id')) {
+            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+                fieldErrors['user_id'] ?? 'Something went wrong.');
+          }
+        } else {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? 'Something went wrong.');
+        }
       }
     } catch (e) {
       debugPrint('createSingleTimeSlot error: $e');
