@@ -126,7 +126,7 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${widget.coachDetail.firstName} ${widget.coachDetail.lastName}',
+                  '${widget.coachDetail.firstName ?? ''} ${widget.coachDetail.lastName ?? ''}',
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
@@ -160,27 +160,28 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.01,
                 ),
-                Row(
-                  children: [
-                    if (widget.coachDetail.preferVia == 2)
-                      const Icon(
-                        Icons.check_circle,
-                        color: greenColor,
-                        size: 20,
-                      ),
-                    if (widget.coachDetail.preferVia == 2)
+                if (widget.coachDetail.countryCode != null)
+                  Row(
+                    children: [
+                      if (widget.coachDetail.preferVia == 2)
+                        const Icon(
+                          Icons.check_circle,
+                          color: greenColor,
+                          size: 20,
+                        ),
+                      if (widget.coachDetail.preferVia == 2)
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.02,
+                        ),
                       SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.02,
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: Text(
+                          '${widget.coachDetail.countryCode ?? ''} ${numberToMaskedText(widget.coachDetail.phone.toString())}',
+                          style: TextStyle(fontSize: 14, color: primaryColor),
+                        ),
                       ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: Text(
-                        '${widget.coachDetail.countryCode ?? ''} ${numberToMaskedText(widget.coachDetail.phone.toString())}',
-                        style: TextStyle(fontSize: 14, color: primaryColor),
-                      ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
               ],
             ),
           ],

@@ -208,7 +208,7 @@ class CoachItemComponent extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${coachDetail?.firstName} ${coachDetail?.lastName}',
+                        '${coachDetail?.firstName ?? ''} ${coachDetail?.lastName ?? ''}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: textSecondaryColor,
