@@ -24,6 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController? emailController;
   TextEditingController? passwordController;
+  final FocusNode emailFocusNode = FocusNode();
+  final FocusNode passwordFocusNode = FocusNode();
   bool submitButtonEnabled = false;
   bool showPassword = false;
   bool _obscureText = true;
@@ -73,6 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> login() async {
     setState(() {
       loader = true;
+      fieldErrors.clear();
     });
 
     var request = <String, dynamic>{
@@ -126,10 +129,10 @@ class _LoginScreenState extends State<LoginScreen> {
             response?.errors?.forEach((e) {
               fieldErrors[e.field ?? '0'] = e.message ?? '0';
             });
-
             if (fieldErrors.containsKey('email')) {
-              SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-                  fieldErrors['email'] ?? errorSomethingWentWrong);
+              FocusScope.of(context).requestFocus(emailFocusNode);
+            } else if (fieldErrors.containsKey('password')) {
+              FocusScope.of(context).requestFocus(passwordFocusNode);
             }
           } else {
             SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
@@ -229,6 +232,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               label: 'Email',
                               autofocus: true,
                               controller: emailController,
+                              focusNode: emailFocusNode,
+                              errorText: fieldErrors['email'],
                               onChanged: (value) {
                                 enableSubmitButton();
                               },
@@ -253,13 +258,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             const SizedBox(
-                              height: 16,
+                              height: 8,
                             ),
                             TextFormField(
                               controller: passwordController,
                               onChanged: (value) {
                                 enableSubmitButton();
                               },
+                              focusNode: passwordFocusNode,
                               cursorColor: Colors.grey,
                               obscureText:
                                   _obscureText, // Use the _obscureText variable here
@@ -289,6 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 filled: true,
                                 errorStyle:
                                     const TextStyle(color: Color(0xffff3333)),
+                                errorText: fieldErrors['password'],
                                 focusedBorder: OutlineInputBorder(
                                   borderSide:
                                       BorderSide(width: 1, color: primaryColor),

@@ -517,7 +517,12 @@ class MeetingDataSource extends CalendarDataSource {
   String getSubject(int index) => _getMeetingData(index).remark;
 
   @override
-  Color getColor(int index) => DateTime.parse(_getMeetingData(index).from.toString()).isBefore(DateTime.now()) ? gray : _getMeetingData(index).background;
+  Color getColor(int index) => DateTime.parse(
+              _getMeetingData(index).from.toString())
+          .isBefore(DateTime.now())
+      ? gray
+      : _getMeetingData(index)
+          .background; // if slot is passed out with current time it will be gray color
 
   int getTimeSheetId(int index) => _getMeetingData(index).timeSheetId;
 
