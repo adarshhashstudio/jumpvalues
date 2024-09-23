@@ -44,8 +44,12 @@ class DashboardState extends State<Dashboard> {
     super.initState();
     fragmentList = [
       appStore.userTypeCoach ? const CoachDashboard() : const ClientDashboard(),
-      appStore.userTypeCoach ? const CoachSessions() : const ClientSessions(),
-      appStore.userTypeCoach ? const CoachMySlots() : const ClientAllCoaches(),
+      if (appStore.additionalSponsor.isEmpty)
+        appStore.userTypeCoach ? const CoachSessions() : const ClientSessions(),
+      if (appStore.additionalSponsor.isEmpty)
+        appStore.userTypeCoach
+            ? const CoachMySlots()
+            : const ClientAllCoaches(),
       const CommonProfile(),
     ];
     init();
@@ -279,18 +283,20 @@ class DashboardState extends State<Dashboard> {
                         icHomeFilled.iconImage(color: context.primaryColor),
                     label: 'Home',
                   ),
-                  NavigationDestination(
-                    icon: icSession.iconImage(color: textColor),
-                    selectedIcon:
-                        icSessionFilled.iconImage(color: context.primaryColor),
-                    label: 'Session',
-                  ),
-                  NavigationDestination(
-                    icon: icFeedback.iconImage(color: textColor),
-                    selectedIcon:
-                        icFeedbackFilled.iconImage(color: context.primaryColor),
-                    label: 'Slots',
-                  ),
+                  if (appStore.additionalSponsor.isEmpty)
+                    NavigationDestination(
+                      icon: icSession.iconImage(color: textColor),
+                      selectedIcon: icSessionFilled.iconImage(
+                          color: context.primaryColor),
+                      label: 'Session',
+                    ),
+                  if (appStore.additionalSponsor.isEmpty)
+                    NavigationDestination(
+                      icon: icFeedback.iconImage(color: textColor),
+                      selectedIcon: icFeedbackFilled.iconImage(
+                          color: context.primaryColor),
+                      label: 'Slots',
+                    ),
                   NavigationDestination(
                     icon: icUser.iconImage(color: textColor),
                     selectedIcon:
@@ -298,7 +304,15 @@ class DashboardState extends State<Dashboard> {
                     label: 'Profile',
                   ),
                 ],
-                onDestinationSelected: switchToFragment,
+                onDestinationSelected: (index) {
+                  if (appStore.additionalSponsor.isEmpty) {
+                    if (index == 1) {
+                      switchToFragment(3); // go to profile - on 3 index
+                    }
+                  } else {
+                    switchToFragment(index);
+                  }
+                },
               ),
             ),
           ),

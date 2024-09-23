@@ -27,6 +27,7 @@ class Data {
     this.verified,
     this.otp,
     this.dp,
+    this.additionalSponsor,
     this.createdBy,
     this.updatedBy,
     this.deletedAt,
@@ -54,6 +55,7 @@ class Data {
       verified: json['verified'],
       otp: json['otp'],
       dp: json['dp'],
+      additionalSponsor: json['additional_sponsor'],
       createdBy: json['created_by'],
       updatedBy: json['updated_by'],
       deletedAt: json['deleted_at'],
@@ -85,6 +87,7 @@ class Data {
   final bool? verified;
   final int? otp;
   final String? dp;
+  final String? additionalSponsor;
   final int? createdBy;
   final int? updatedBy;
   final String? deletedAt;

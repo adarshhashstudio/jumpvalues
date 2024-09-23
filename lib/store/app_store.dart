@@ -37,6 +37,9 @@ abstract class _AppStore with Store {
   String userLastName = '';
 
   @observable
+  String additionalSponsor = '';
+
+  @observable
   String userContactNumber = '';
 
   @observable
@@ -141,6 +144,13 @@ abstract class _AppStore with Store {
   }
 
   @action
+  Future<void> setAdditionalSponsor(String val,
+      {bool isInitializing = false}) async {
+    additionalSponsor = val;
+    if (!isInitializing) await setValue(ADDITIONAL_SPONSOR, val);
+  }
+
+  @action
   Future<void> setUserContactNumber(String val,
       {bool isInitializing = false}) async {
     userContactNumber = val;
@@ -240,6 +250,7 @@ abstract class _AppStore with Store {
       await setUserId(response?.data?.id ?? -1);
       await setUserFirstName(response?.data?.firstName ?? '');
       await setUserLastName(response?.data?.lastName ?? '');
+      await setAdditionalSponsor(response?.data?.additionalSponsor ?? '');
       await setUserContactNumber(response?.data?.phone ?? '');
       await setUserContactCountryCode(response?.data?.countryCode ?? '');
       await setUserEmail(response?.data?.email ?? '');
@@ -279,6 +290,7 @@ abstract class _AppStore with Store {
     userType = '';
     userFirstName = '';
     userLastName = '';
+    additionalSponsor = '';
     userContactNumber = '';
     userContactCountryCode = '';
     userEmail = '';

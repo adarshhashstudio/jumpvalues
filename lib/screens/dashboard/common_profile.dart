@@ -255,7 +255,9 @@ class _CommonProfileState extends State<CommonProfile> {
           : 'Phone'; // Default to 'Phone' if the value is not valid
     } else {
       // ----- Client Data
-      sponsorName = appStore.sponsorName;
+      sponsorName = appStore.additionalSponsor.isEmpty
+          ? appStore.sponsorName
+          : appStore.additionalSponsor;
       positionController = TextEditingController(text: appStore.userPosition);
       aboutController = TextEditingController(text: appStore.userAboutMe);
     }
@@ -642,7 +644,9 @@ class _CommonProfileState extends State<CommonProfile> {
             ),
             if (!appStore.userTypeCoach)
               labelContainer(
-                  label: 'Sponsor',
+                  label: appStore.additionalSponsor.isEmpty
+                      ? 'Sponsor'
+                      : 'Company',
                   width: MediaQuery.of(context).size.width * 1,
                   height: MediaQuery.of(context).size.height * 0.05,
                   isDisable: true,

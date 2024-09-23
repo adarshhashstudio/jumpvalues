@@ -165,6 +165,22 @@ mixin _$AppStore on _AppStore, Store {
     });
   }
 
+  late final _$additionalSponsorAtom =
+      Atom(name: '_AppStore.additionalSponsor', context: context);
+
+  @override
+  String get additionalSponsor {
+    _$additionalSponsorAtom.reportRead();
+    return super.additionalSponsor;
+  }
+
+  @override
+  set additionalSponsor(String value) {
+    _$additionalSponsorAtom.reportWrite(value, super.additionalSponsor, () {
+      super.additionalSponsor = value;
+    });
+  }
+
   late final _$userContactNumberAtom =
       Atom(name: '_AppStore.userContactNumber', context: context);
 
@@ -473,6 +489,15 @@ mixin _$AppStore on _AppStore, Store {
         .run(() => super.setUserLastName(val, isInitializing: isInitializing));
   }
 
+  late final _$setAdditionalSponsorAsyncAction =
+      AsyncAction('_AppStore.setAdditionalSponsor', context: context);
+
+  @override
+  Future<void> setAdditionalSponsor(String val, {bool isInitializing = false}) {
+    return _$setAdditionalSponsorAsyncAction.run(
+        () => super.setAdditionalSponsor(val, isInitializing: isInitializing));
+  }
+
   late final _$setUserContactNumberAsyncAction =
       AsyncAction('_AppStore.setUserContactNumber', context: context);
 
@@ -631,6 +656,7 @@ sponsorName: ${sponsorName},
 userType: ${userType},
 userFirstName: ${userFirstName},
 userLastName: ${userLastName},
+additionalSponsor: ${additionalSponsor},
 userContactNumber: ${userContactNumber},
 userContactCountryCode: ${userContactCountryCode},
 userContactCountryIsoCode: ${userContactCountryIsoCode},

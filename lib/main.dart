@@ -71,6 +71,8 @@ Future<void> main() async {
         isInitializing: true);
     await appStore.setUserLastName(getStringAsync(USER_LAST_NAME),
         isInitializing: true);
+    await appStore.setAdditionalSponsor(getStringAsync(ADDITIONAL_SPONSOR),
+        isInitializing: true);
     await appStore.setUserEmail(getStringAsync(USER_EMAIL),
         isInitializing: true);
     await appStore.setUserContactNumber(getStringAsync(USER_CONTACT_NUMBER),
