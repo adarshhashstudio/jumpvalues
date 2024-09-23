@@ -121,7 +121,7 @@ class _CommonProfileState extends State<CommonProfile> {
     // Dispose focus nodes
     firstNameFocusNode.dispose();
     lastNameFocusNode.dispose();
-    emailController?.dispose();
+    emailFocusNode.dispose();
     positionFocusNode.dispose();
     aboutFocusNode.dispose();
     educationFocusNode.dispose();
@@ -666,9 +666,10 @@ class _CommonProfileState extends State<CommonProfile> {
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.02,
               ),
-            if (!appStore.userTypeCoach &&
-                clientProfileResponseModel?.data?.sponsorChanged == true)
-              textFormField(
+            Visibility(
+              visible: !appStore.userTypeCoach &&
+                  clientProfileResponseModel?.data?.sponsorChanged == true,
+              child: textFormField(
                 controller: emailController,
                 label: 'Email',
                 focusNode: emailFocusNode,
@@ -678,6 +679,7 @@ class _CommonProfileState extends State<CommonProfile> {
                 hintText: 'Enter Email',
                 validator: (email) => validateEmail(email ?? ''),
               ),
+            ),
             if (!appStore.userTypeCoach)
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.02,

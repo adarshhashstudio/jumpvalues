@@ -306,9 +306,11 @@ class DashboardState extends State<Dashboard> {
                   ),
                 ],
                 onDestinationSelected: (index) {
-                  if (appStore.additionalSponsor.isEmpty) {
-                    if (index == 1) {
-                      switchToFragment(3); // go to profile - on 3 index
+                  if (appStore.additionalSponsor.isNotEmpty) {
+                    if (index == 0) {
+                      switchToFragment(0); // go to home
+                    } else {
+                      switchToFragment(1); // go to profile
                     }
                   } else {
                     switchToFragment(index);
