@@ -228,7 +228,8 @@ Widget textFormField({
                 fontWeight: FontWeight.w400,
               ),
               enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(width: 0, color: color ?? secondaryColor),
+                borderSide:
+                    BorderSide(width: 0, color: color ?? secondaryColor),
                 borderRadius: BorderRadius.circular(borderRadius),
               ),
               filled: true,
@@ -249,7 +250,8 @@ Widget textFormField({
                 borderRadius: BorderRadius.circular(borderRadius),
               ),
               border: OutlineInputBorder(
-                borderSide: BorderSide(width: 0, color: color ?? secondaryColor),
+                borderSide:
+                    BorderSide(width: 0, color: color ?? secondaryColor),
                 borderRadius: BorderRadius.circular(borderRadius),
               ),
               fillColor: color ?? secondaryColor,

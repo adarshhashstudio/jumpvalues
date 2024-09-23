@@ -107,6 +107,11 @@ class _SignupScreenState extends State<SignupScreen>
   List<Category> selectedCategoryBySponsorId = [];
   bool selectCategoriesBySponsorError = false;
 
+  TextEditingController otherSponsorController = TextEditingController();
+  final FocusNode otherSponsorFocusNode = FocusNode();
+  bool isOtherSelected = false;
+  String? otherSponsorErrorText;
+
   @override
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
@@ -270,6 +275,9 @@ class _SignupScreenState extends State<SignupScreen>
         setState(() {
           categories.clear();
           categories = response?.data ?? [];
+          if (isOtherSelected) {
+            categoriesBySponsorIds = response?.data ?? [];
+          }
         });
       } else {
         if (response?.message != null) {
@@ -554,9 +562,6 @@ class _SignupScreenState extends State<SignupScreen>
     }
   }
 
-  TextEditingController otherSponsorController = TextEditingController();
-  bool isOtherSelected = false;
-
   Widget buildClientForm(BuildContext context) => Column(
         children: [
           Expanded(
@@ -734,12 +739,11 @@ class _SignupScreenState extends State<SignupScreen>
                                 selectedSponsorId = value;
                                 isOtherSelected = (value?.id == 0);
                               });
-
+                              // Backend sponsor selected
+                              categoriesBySponsorIds.clear();
+                              selectedCategoryBySponsorId.clear();
                               if (!isOtherSelected &&
                                   selectedSponsorId != null) {
-                                // Backend sponsor selected
-                                categoriesBySponsorIds.clear();
-                                selectedCategoryBySponsorId.clear();
                                 try {
                                   await getCategoryBySponsorDropdown(
                                       selectedSponsorId!.id!.toString());
@@ -747,6 +751,8 @@ class _SignupScreenState extends State<SignupScreen>
                                   debugPrint(
                                       'Error fetching categories for sponsor: $e');
                                 }
+                              } else {
+                                await getCategoriesDropdown();
                               }
                             },
                           ),
@@ -757,7 +763,16 @@ class _SignupScreenState extends State<SignupScreen>
                                   isLabel: false,
                                   label: '',
                                   controller: otherSponsorController,
+                                  focusNode: otherSponsorFocusNode,
+                                  errorText: otherSponsorErrorText,
                                   hintText: 'Enter Name',
+                                  onChanged: (v) {
+                                    if (v.isNotEmpty) {
+                                      setState(() {
+                                        otherSponsorErrorText = null;
+                                      });
+                                    }
+                                  },
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
                                       return 'This field is required.';
@@ -810,7 +825,7 @@ class _SignupScreenState extends State<SignupScreen>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Tap to select categories ${selectedCategoryBySponsorId.isEmpty ? '*' : ''}',
+                            'Tap to select categories',
                             style: TextStyle(
                                 color: selectCategoriesBySponsorError
                                     ? Colors.red
@@ -962,7 +977,19 @@ class _SignupScreenState extends State<SignupScreen>
                   hideKeyboard(context);
                   if (loader) {
                   } else {
-                    await signup(isCoach: false);
+                    if (selectedSponsorId?.id == 0 &&
+                        otherSponsorController.text.isEmpty) {
+                      setState(() {
+                        FocusScope.of(context)
+                            .requestFocus(otherSponsorFocusNode);
+                        otherSponsorErrorText = 'This field is required';
+                      });
+                    } else {
+                      setState(() {
+                        otherSponsorErrorText = null;
+                      });
+                      await signup(isCoach: false);
+                    }
                   }
                 },
                     isLoading: loader,
