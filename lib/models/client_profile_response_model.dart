@@ -43,6 +43,8 @@ class ClientData {
     this.verified,
     this.otp,
     this.dp,
+    this.additionalSponsor,
+    this.sponsorChanged,
     this.createdBy,
     this.updatedBy,
     this.deletedAt,
@@ -65,6 +67,8 @@ class ClientData {
         verified: json['verified'] as bool?,
         otp: json['otp'] as int?,
         dp: json['dp'] as String?,
+        additionalSponsor: json['additional_sponsor'],
+        sponsorChanged: json['sponsor_changed'],
         createdBy: json['created_by'] as int?,
         updatedBy: json['updated_by'] as int?,
         deletedAt: json['deleted_at'] as String?,
@@ -92,6 +96,8 @@ class ClientData {
   final bool? verified;
   final int? otp;
   final String? dp;
+  final String? additionalSponsor;
+  final bool? sponsorChanged;
   final int? createdBy;
   final int? updatedBy;
   final String? deletedAt;
@@ -113,6 +119,8 @@ class ClientData {
         'verified': verified,
         'otp': otp,
         'dp': dp,
+        'additional_sponsor': additionalSponsor,
+        'sponsor_changed': sponsorChanged,
         'created_by': createdBy,
         'updated_by': updatedBy,
         'deleted_at': deletedAt,

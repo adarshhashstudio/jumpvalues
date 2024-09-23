@@ -36,12 +36,14 @@ class _CommonProfileState extends State<CommonProfile> {
   // Declare controllers
   TextEditingController? firstNameController;
   TextEditingController? lastNameController;
+  TextEditingController? emailController;
   TextEditingController? positionController;
   TextEditingController? aboutController;
 
   // Declare focus nodes
   final FocusNode firstNameFocusNode = FocusNode();
   final FocusNode lastNameFocusNode = FocusNode();
+  final FocusNode emailFocusNode = FocusNode();
   final FocusNode positionFocusNode = FocusNode();
   final FocusNode aboutFocusNode = FocusNode();
 
@@ -104,6 +106,7 @@ class _CommonProfileState extends State<CommonProfile> {
     // Dispose controllers
     firstNameController?.dispose();
     lastNameController?.dispose();
+    emailController?.dispose();
     positionController?.dispose();
     aboutController?.dispose();
     phoneNumberController.dispose();
@@ -118,6 +121,7 @@ class _CommonProfileState extends State<CommonProfile> {
     // Dispose focus nodes
     firstNameFocusNode.dispose();
     lastNameFocusNode.dispose();
+    emailController?.dispose();
     positionFocusNode.dispose();
     aboutFocusNode.dispose();
     educationFocusNode.dispose();
@@ -159,6 +163,7 @@ class _CommonProfileState extends State<CommonProfile> {
     if (appStore.userTypeCoach) {
       request['prefer_via'] = selectedPreferVia == 'Phone' ? 2 : 1;
     } else {
+      addIfNotEmpty('email', emailController?.text);
       addIfNotEmpty('position', positionController?.text);
       addIfNotEmpty('about_me', aboutController?.text);
     }
@@ -207,6 +212,8 @@ class _CommonProfileState extends State<CommonProfile> {
             FocusScope.of(context).requestFocus(coachingYearsFocusNode);
           } else if (fieldErrors.containsKey('niche')) {
             FocusScope.of(context).requestFocus(nicheFocusNode);
+          } else if (fieldErrors.containsKey('email')) {
+            FocusScope.of(context).requestFocus(emailFocusNode);
           } else if (fieldErrors.containsKey('position')) {
             FocusScope.of(context).requestFocus(positionFocusNode);
           } else if (fieldErrors.containsKey('about_me')) {
@@ -258,6 +265,7 @@ class _CommonProfileState extends State<CommonProfile> {
       sponsorName = appStore.additionalSponsor.isEmpty
           ? appStore.sponsorName
           : appStore.additionalSponsor;
+      emailController = TextEditingController(text: appStore.userEmail);
       positionController = TextEditingController(text: appStore.userPosition);
       aboutController = TextEditingController(text: appStore.userAboutMe);
     }
@@ -653,6 +661,23 @@ class _CommonProfileState extends State<CommonProfile> {
                   labelTextBoxSpace: 8,
                   text: sponsorName,
                   alignment: Alignment.centerLeft),
+            if (!appStore.userTypeCoach &&
+                clientProfileResponseModel?.data?.sponsorChanged == true)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.02,
+              ),
+            if (!appStore.userTypeCoach &&
+                clientProfileResponseModel?.data?.sponsorChanged == true)
+              textFormField(
+                controller: emailController,
+                label: 'Email',
+                focusNode: emailFocusNode,
+                errorText: fieldErrors['email'],
+                labelTextBoxSpace: 8,
+                keyboardType: TextInputType.emailAddress,
+                hintText: 'Enter Email',
+                validator: (email) => validateEmail(email ?? ''),
+              ),
             if (!appStore.userTypeCoach)
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.02,

@@ -187,7 +187,8 @@ class DashboardState extends State<Dashboard> {
                   switchToFragment(1);
                 }
               }),
-              if (currentIndex == 3)
+              if (currentIndex == 3 ||
+                  (appStore.additionalSponsor.isNotEmpty && currentIndex == 1))
                 Text(
                   'Logout',
                   style: TextStyle(color: primaryColor),
