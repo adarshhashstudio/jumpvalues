@@ -111,6 +111,7 @@ class _SignupScreenState extends State<SignupScreen>
   final FocusNode otherSponsorFocusNode = FocusNode();
   bool isOtherSelected = false;
   String? otherSponsorErrorText;
+  String? selectSponsorError;
 
   @override
   void initState() {
@@ -700,7 +701,7 @@ class _SignupScreenState extends State<SignupScreen>
                           ? MediaQuery.of(context).size.height * 0.15
                           : MediaQuery.of(context).size.height * 0.06,
                       isError: fieldClientErrors.containsKey('sponsor_id'),
-                      errorText: fieldClientErrors['sponsor_id'],
+                      errorText: selectSponsorError,
                       child: Column(
                         children: [
                           DropdownButton<Category>(
@@ -980,6 +981,7 @@ class _SignupScreenState extends State<SignupScreen>
                     if (selectedSponsorId?.id == 0 &&
                         otherSponsorController.text.isEmpty) {
                       setState(() {
+                        selectSponsorError = null;
                         FocusScope.of(context)
                             .requestFocus(otherSponsorFocusNode);
                         otherSponsorErrorText = 'This field is required';
@@ -987,8 +989,19 @@ class _SignupScreenState extends State<SignupScreen>
                     } else {
                       setState(() {
                         otherSponsorErrorText = null;
+                        selectSponsorError = null;
                       });
                       await signup(isCoach: false);
+
+                      if (selectedSponsorId?.id == null) {
+                        setState(() {
+                          selectSponsorError = 'Sponsor selection is required.';
+                        });
+                      } else {
+                        setState(() {
+                          selectSponsorError = null;
+                        });
+                      }
                     }
                   }
                 },
