@@ -29,17 +29,16 @@ class CategoryDropdownResponse {
 }
 
 class Category {
-  Category({
-    this.id,
-    this.name,
-    this.isSelected = false,
-  });
+  // Default to false
 
   factory Category.fromJson(Map<String, dynamic> json) => Category(
         id: json['id'] as int?,
         name: json['name'] as String?,
-        isSelected: false,
-      );
+        isSelected: json['isSelected'] as bool? ??
+            false, // Optional, if you want to initialize from JSON
+      ); // Add this line to include isSelected
+
+  Category({this.id, this.name, this.isSelected = false});
   final int? id;
   final String? name;
   bool isSelected;
@@ -47,6 +46,14 @@ class Category {
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
-        'isSelected': isSelected,
+        'isSelected': isSelected, // Include isSelected in JSON
       };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Category && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

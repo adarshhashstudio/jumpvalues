@@ -434,6 +434,9 @@ class _SignupScreenState extends State<SignupScreen>
       addIfNotEmpty('about_me', aboutControllerClient?.text);
       addIfNotEmptyInt('sponsor_id', selectedSponsorId?.id);
       addIfNotEmptyList('categoryIds', requestSelectedCategoryBySponsorId);
+      if (selectedSponsorId?.id != null && selectedSponsorId?.id == 0) {
+        addIfNotEmpty('additional_sponsor', otherSponsorController.text);
+      }
     }
 
     var endPoint = isCoach ? 'auth/coach/register' : 'auth/client/register';
@@ -550,6 +553,9 @@ class _SignupScreenState extends State<SignupScreen>
       });
     }
   }
+
+  TextEditingController otherSponsorController = TextEditingController();
+  bool isOtherSelected = false;
 
   Widget buildClientForm(BuildContext context) => Column(
         children: [
@@ -682,52 +688,85 @@ class _SignupScreenState extends State<SignupScreen>
                       height: 20,
                     ),
                     labelContainer(
-                      label: 'Sponser',
+                      label: 'Sponsor',
                       labelTextBoxSpace: 8,
                       width: MediaQuery.of(context).size.width * 1,
-                      height: MediaQuery.of(context).size.height * 0.06,
+                      height: isOtherSelected
+                          ? MediaQuery.of(context).size.height * 0.15
+                          : MediaQuery.of(context).size.height * 0.06,
                       isError: fieldClientErrors.containsKey('sponsor_id'),
                       errorText: fieldClientErrors['sponsor_id'],
-                      child: DropdownButton<Category>(
-                        value: selectedSponsorId,
-                        isExpanded: true,
-                        underline: const SizedBox(),
-                        focusNode: selectedSponsorIdFocusNode,
-                        hint: Text(
-                          'Select Sponser',
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 15,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w400,
+                      child: Column(
+                        children: [
+                          DropdownButton<Category>(
+                            value: selectedSponsorId,
+                            isExpanded: true,
+                            underline: const SizedBox(),
+                            focusNode: selectedSponsorIdFocusNode,
+                            hint: Text(
+                              'Select Sponsor',
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: 15,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 15,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w400,
+                            ),
+                            items: [
+                              ...sponsors.map((Category value) =>
+                                  DropdownMenuItem<Category>(
+                                    value: value,
+                                    child: Text(value.name ?? ''),
+                                  )),
+                              DropdownMenuItem<Category>(
+                                value: Category(id: 0, name: 'Other'),
+                                child: const Text('Other'),
+                              ),
+                            ],
+                            onChanged: (Category? value) async {
+                              setState(() {
+                                selectedSponsorId = value;
+                                isOtherSelected = (value?.id == 0);
+                              });
+
+                              if (!isOtherSelected &&
+                                  selectedSponsorId != null) {
+                                // Backend sponsor selected
+                                categoriesBySponsorIds.clear();
+                                selectedCategoryBySponsorId.clear();
+                                try {
+                                  await getCategoryBySponsorDropdown(
+                                      selectedSponsorId!.id!.toString());
+                                } catch (e) {
+                                  debugPrint(
+                                      'Error fetching categories for sponsor: $e');
+                                }
+                              }
+                            },
                           ),
-                        ),
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 15,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
-                        ),
-                        items: sponsors
-                            .map((Category value) => DropdownMenuItem<Category>(
-                                  value: value,
-                                  child: Text(value.name ?? ''),
-                                ))
-                            .toList(),
-                        onChanged: (Category? value) async {
-                          setState(() {
-                            selectedSponsorId = value;
-                          });
-                          categoriesBySponsorIds.clear();
-                          selectedCategoryBySponsorId.clear();
-                          try {
-                            await getCategoryBySponsorDropdown(
-                                selectedSponsorId!.id!.toString());
-                          } catch (e) {
-                            debugPrint(
-                                'on tap sponsor id to get category by sponsor dropdown error: $e');
-                          }
-                        },
+                          if (isOtherSelected)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: textFormField(
+                                  isLabel: false,
+                                  label: '',
+                                  controller: otherSponsorController,
+                                  hintText: 'Enter Name',
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'This field is required.';
+                                    }
+                                    return null;
+                                  },
+                                  color: white),
+                            ),
+                        ],
                       ),
                     ),
                     const SizedBox(

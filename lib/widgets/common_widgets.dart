@@ -172,6 +172,7 @@ Widget textFormField({
   double labelTextBoxSpace = 8,
   bool enabled = true,
   required String label,
+  Color? color,
   bool isPassword = false, // New parameter to control password field
 }) =>
     Column(
@@ -227,14 +228,14 @@ Widget textFormField({
                 fontWeight: FontWeight.w400,
               ),
               enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(width: 0, color: secondaryColor),
+                borderSide: BorderSide(width: 0, color: color ?? secondaryColor),
                 borderRadius: BorderRadius.circular(borderRadius),
               ),
               filled: true,
               errorText: errorText,
               errorStyle: const TextStyle(color: Color(0xffff3333)),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(width: 1, color: primaryColor),
+                borderSide: BorderSide(width: 1, color: color ?? primaryColor),
                 borderRadius: BorderRadius.circular(borderRadius),
               ),
               focusedErrorBorder: OutlineInputBorder(
@@ -248,11 +249,11 @@ Widget textFormField({
                 borderRadius: BorderRadius.circular(borderRadius),
               ),
               border: OutlineInputBorder(
-                borderSide: BorderSide(width: 0, color: secondaryColor),
+                borderSide: BorderSide(width: 0, color: color ?? secondaryColor),
                 borderRadius: BorderRadius.circular(borderRadius),
               ),
-              fillColor: secondaryColor,
-              focusColor: secondaryColor,
+              fillColor: color ?? secondaryColor,
+              focusColor: color ?? secondaryColor,
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 20,
                 vertical: maxLines! > 1 ? 10 : 0,
