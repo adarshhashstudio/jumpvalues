@@ -700,7 +700,7 @@ class _SignupScreenState extends State<SignupScreen>
                       height: isOtherSelected
                           ? MediaQuery.of(context).size.height * 0.15
                           : MediaQuery.of(context).size.height * 0.06,
-                      isError: fieldClientErrors.containsKey('sponsor_id'),
+                      isError: selectSponsorError != null,
                       errorText: selectSponsorError,
                       child: Column(
                         children: [
@@ -739,6 +739,7 @@ class _SignupScreenState extends State<SignupScreen>
                               setState(() {
                                 selectedSponsorId = value;
                                 isOtherSelected = (value?.id == 0);
+                                selectSponsorError = null;
                               });
                               // Backend sponsor selected
                               categoriesBySponsorIds.clear();

@@ -160,7 +160,7 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.01,
                 ),
-                if (widget.coachDetail.countryCode != null)
+                if (widget.coachDetail.countryCode != null && widget.coachDetail.phone != null)
                   Row(
                     children: [
                       if (widget.coachDetail.preferVia == 2)

@@ -202,7 +202,7 @@ String formatDateTimeCustom(String date, String time) {
 String getImageUrl(String? imageUrl) => '$domainUrl/${imageUrl ?? ''}';
 
 var maskFormatter = MaskTextInputFormatter(
-    mask: '(###) ###-#######',
+    mask: '(###) ###-####',
     filter: {'#': RegExp(r'[0-9]')},
     type: MaskAutoCompletionType.lazy);
 
