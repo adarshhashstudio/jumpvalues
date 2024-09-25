@@ -694,7 +694,7 @@ class _SignupScreenState extends State<SignupScreen>
                       height: 20,
                     ),
                     labelContainer(
-                      label: 'Sponsor',
+                      label: 'Company Sponsor',
                       labelTextBoxSpace: 8,
                       width: MediaQuery.of(context).size.width * 1,
                       height: isOtherSelected
@@ -731,8 +731,8 @@ class _SignupScreenState extends State<SignupScreen>
                                     child: Text(value.name ?? ''),
                                   )),
                               DropdownMenuItem<Category>(
-                                value: Category(id: 0, name: 'Other'),
-                                child: const Text('Other'),
+                                value: Category(id: 0, name: 'No Sponsor'),
+                                child: const Text('No Sponsor'),
                               ),
                             ],
                             onChanged: (Category? value) async {
@@ -767,7 +767,7 @@ class _SignupScreenState extends State<SignupScreen>
                                   controller: otherSponsorController,
                                   focusNode: otherSponsorFocusNode,
                                   errorText: otherSponsorErrorText,
-                                  hintText: 'Enter Name',
+                                  hintText: 'Enter company sponsor',
                                   onChanged: (v) {
                                     if (v.isNotEmpty) {
                                       setState(() {
@@ -873,7 +873,7 @@ class _SignupScreenState extends State<SignupScreen>
                       height: 20,
                     ),
                     textFormField(
-                      label: 'Position',
+                      label: 'My Company Role',
                       labelTextBoxSpace: 8,
                       controller: positionControllerClient,
                       focusNode: positionClientFocusNode,
@@ -882,7 +882,7 @@ class _SignupScreenState extends State<SignupScreen>
                         enableSubmitButton();
                       },
                       keyboardType: TextInputType.name,
-                      hintText: 'Enter Position',
+                      hintText: 'Enter company role',
                     ),
                     const SizedBox(
                       height: 20,
