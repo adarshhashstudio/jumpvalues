@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/available_coaches_response_model.dart';
 import 'package:jumpvalues/models/client_profile_response_model.dart';
 import 'package:jumpvalues/screens/dashboard/client_fragments/client_add_slots.dart';
@@ -70,12 +71,16 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16.0, vertical: 8.0),
                     child: button(context, onPressed: () async {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => ClientAddSlots(
-                              coachId: widget.coachDetail.id ?? -1),
-                        ),
-                      );
+                      if (appStore.additionalSponsor.isNotEmpty) {
+                        showUpgradeSponsorshipDialog(context);
+                      } else {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => ClientAddSlots(
+                                coachId: widget.coachDetail.id ?? -1),
+                          ),
+                        );
+                      }
                     }, text: 'Hire Me'),
                   ),
                 ],
@@ -160,7 +165,8 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.01,
                 ),
-                if (widget.coachDetail.countryCode != null && widget.coachDetail.phone != null)
+                if (widget.coachDetail.countryCode != null &&
+                    widget.coachDetail.phone != null)
                   Row(
                     children: [
                       if (widget.coachDetail.preferVia == 2)

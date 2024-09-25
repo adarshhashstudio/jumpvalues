@@ -296,7 +296,7 @@ class DashboardState extends State<Dashboard> {
                       icon: icFeedback.iconImage(color: textColor),
                       selectedIcon: icFeedbackFilled.iconImage(
                           color: context.primaryColor),
-                      label: 'Slots',
+                      label: appStore.userTypeCoach ? 'Slots' : 'Coaches',
                     ),
                   NavigationDestination(
                     icon: icUser.iconImage(color: textColor),

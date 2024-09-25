@@ -6,6 +6,7 @@ import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/client_dashboard_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/client_screens/select_screen.dart';
+import 'package:jumpvalues/screens/dashboard/client_fragments/client_all_coaches.dart';
 import 'package:jumpvalues/screens/dashboard/video_player_screen.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
@@ -123,6 +124,17 @@ class _ClientDashboardState extends State<ClientDashboard> {
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.03,
                   ),
+                  if (appStore.additionalSponsor.isNotEmpty)
+                    button(context, onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const ClientAllCoaches()));
+                    },
+                        text: 'Ask to Hire',
+                        borderRadius: BorderRadius.circular(8)),
+                  if (appStore.additionalSponsor.isNotEmpty)
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.03,
+                    ),
                   buildGoalsWidget(context),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.03,

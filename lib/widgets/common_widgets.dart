@@ -368,6 +368,7 @@ Widget button(
   String? text,
   bool isEnabled = true,
   bool isBordered = false,
+  BorderRadiusGeometry? borderRadius,
 }) =>
     ElevatedButton(
       style: ButtonStyle(
@@ -383,7 +384,7 @@ Widget button(
             side: isBordered
                 ? BorderSide(color: Theme.of(context).primaryColor)
                 : BorderSide.none,
-            borderRadius: BorderRadius.circular(20.0),
+            borderRadius: borderRadius ?? BorderRadius.circular(20.0),
           ),
         ),
       ),
@@ -569,6 +570,119 @@ void showRatingDialog(BuildContext context,
             )),
     actions: [
       // maybeLaterButton,
+    ],
+  );
+
+  showDialog(
+    context: context,
+    useSafeArea: true,
+    barrierDismissible: true,
+    builder: (BuildContext context) => alertDialog,
+  );
+}
+
+void showUpgradeSponsorshipDialog(BuildContext context,
+    {void Function()? onTap, void Function()? onCancel}) {
+  var loading = false;
+
+  var alertDialog = AlertDialog(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    shadowColor: Theme.of(context).colorScheme.surface,
+    surfaceTintColor: Theme.of(context).colorScheme.surface,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+    title: Text(
+      'Request to Hire Coach',
+      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+          fontSize: 18,
+          color: Theme.of(context).brightness == Brightness.light
+              ? textColor
+              : secondaryColor),
+    ).center(),
+    content: StatefulBuilder(
+        builder: (context, setState) => Container(
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withOpacity(0.1)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      'To proceed with hiring this coach, please send a request. A representative will get in touch with you shortly.',
+                      maxLines: 4,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  50.height,
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.62,
+                    child: AppButton(
+                      onTap: () async {
+                        hideKeyboard(context);
+                        setState(() {
+                          loading = true;
+                        });
+                        try {
+                          var response = await consentRaise();
+                          if (response?.status == true) {
+                            SnackBarHelper.showStatusSnackBar(
+                                context,
+                                StatusIndicator.success,
+                                response?.message ?? 'Sent Successfully');
+                          } else {
+                            SnackBarHelper.showStatusSnackBar(
+                                context,
+                                StatusIndicator.error,
+                                response?.message ?? 'Something went wrong');
+                          }
+                        } catch (e) {
+                          debugPrint('Consent Raise error: $e');
+                        } finally {
+                          setState(() {
+                            loading = false;
+                          });
+                          Navigator.of(context).pop();
+                          //// if want to perform call back action
+                          // if (onActionPerformed != null) {
+                          //   onActionPerformed();
+                          // }
+                        }
+                      },
+                      text: 'Send Request',
+                      child: loading
+                          ? Transform.scale(
+                              scale: 0.6,
+                              child: CircularProgressIndicator(
+                                color: primaryColor,
+                              ).center(),
+                            )
+                          : null,
+                    ),
+                  ),
+                  20.height,
+                ],
+              ),
+            )),
+    actions: [
+      InkWell(
+        onTap: () {
+          if (onCancel != null) {
+            onCancel();
+          } else {
+            Navigator.of(context).pop();
+          }
+        },
+        child: Text(
+          'Cancel',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.9),
+              fontSize: 13),
+        ).center(),
+      ),
     ],
   );
 
