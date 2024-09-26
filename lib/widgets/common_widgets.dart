@@ -592,7 +592,7 @@ void showUpgradeSponsorshipDialog(BuildContext context,
     surfaceTintColor: Theme.of(context).colorScheme.surface,
     contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
     title: Text(
-      'Request to Hire Coach',
+      'Your Personal Coaching Portal',
       style: Theme.of(context).textTheme.displayLarge?.copyWith(
           fontSize: 18,
           color: Theme.of(context).brightness == Brightness.light
@@ -612,7 +612,7 @@ void showUpgradeSponsorshipDialog(BuildContext context,
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
-                      'To proceed with hiring this coach, please send a request. A representative will get in touch with you shortly.',
+                      'Interested in coaching? Contact us to learn how executive coaching can help you and your organization achieve your goals.',
                       maxLines: 4,
                       textAlign: TextAlign.center,
                     ),

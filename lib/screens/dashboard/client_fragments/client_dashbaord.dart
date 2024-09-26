@@ -126,10 +126,13 @@ class _ClientDashboardState extends State<ClientDashboard> {
                   ),
                   if (appStore.additionalSponsor.isNotEmpty)
                     button(context, onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => const ClientAllCoaches()));
+                      // Navigator.of(context).push(MaterialPageRoute(
+                      //     builder: (context) => const ClientAllCoaches()));
+                      if (appStore.additionalSponsor.isNotEmpty) {
+                        showUpgradeSponsorshipDialog(context);
+                      }
                     },
-                        text: 'Ask to Hire',
+                        text: 'Your Personal Coaching Portal',
                         borderRadius: BorderRadius.circular(8)),
                   if (appStore.additionalSponsor.isNotEmpty)
                     SizedBox(

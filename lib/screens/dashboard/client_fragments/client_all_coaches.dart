@@ -93,122 +93,123 @@ class _ClientAllCoachesState extends State<ClientAllCoaches> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: appStore.additionalSponsor.isEmpty
-            ? null
-            : AppBar(
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(4.0),
-                  child: Container(
-                    color: Colors.grey,
-                    height: 0.5,
-                  ),
-                ),
-                leading: GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Padding(
-                    padding: EdgeInsets.only(left: 14.0),
-                    child: Icon(Icons.arrow_back_ios_new),
-                  ),
-                ),
-                centerTitle: true,
-                title: Text(
-                  'Available Coaches',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: textColor.withOpacity(0.8),
-                      fontSize: 20),
-                ),
-              ),
-        body: Stack(
-          children: [
-            if (_isLoading && availableCoachList.isEmpty)
-              const Center(child: CircularProgressIndicator())
-            else
-              RefreshIndicator(
-                onRefresh: _refreshCoachItems,
-                child: (!_isLoading && availableCoachList.isEmpty)
-                    ? dataNotFoundWidget(context, onTap: _refreshCoachItems)
-                    : ListView.separated(
-                        controller: _scrollController,
-                        itemCount: availableCoachList.length + 1,
-                        separatorBuilder: (context, index) => SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.03,
-                            ),
-                        itemBuilder: (context, index) {
-                          // If the current index is the last one (the additional one), show the loader
-                          if (index == availableCoachList.length) {
-                            // Check if there is more data to load; if not, return an empty SizedBox
-                            return _hasMoreData
-                                ? const Center(
-                                    child: Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 16),
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  )
-                                : const SizedBox.shrink();
-                          }
-                          // Otherwise, return the usual BookingItemComponent
-                          return CoachItemComponent(
-                            coachDetail: availableCoachList[index],
-                            index: index,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => CoachDetailsScreen(
-                                      coachDetail: availableCoachList[index]),
-                                ),
-                              );
-                            },
-                          );
-                        }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),
-              ),
-            Positioned(
-                top: 8,
-                left: 0,
-                right: 0,
-                child: Container(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                          child: textFormField(
-                        controller: searchController,
-                        label: '',
-                        isLabel: false,
-                        hintText: 'Search Coach',
-                        suffix: isSearched
-                            ? GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    hideKeyboard(context);
-                                    searchController.clear();
-                                    isSearched = false;
-                                    _refreshCoachItems();
-                                  });
-                                },
-                                child: const Icon(Icons.clear),
-                              )
-                            : null,
-                        borderRadius: 8,
-                        onChanged: (value) {
-                          _debouncer.run(() {
-                            setState(() {
-                              isSearched = true;
-                              _refreshCoachItems();
-                            });
+  Widget build(BuildContext context) =>
+      // Scaffold(
+      // appBar: appStore.additionalSponsor.isEmpty
+      //     ? null
+      //     : AppBar(
+      //         bottom: PreferredSize(
+      //           preferredSize: const Size.fromHeight(4.0),
+      //           child: Container(
+      //             color: Colors.grey,
+      //             height: 0.5,
+      //           ),
+      //         ),
+      //         leading: GestureDetector(
+      //           onTap: () {
+      //             Navigator.of(context).pop();
+      //           },
+      //           child: const Padding(
+      //             padding: EdgeInsets.only(left: 14.0),
+      //             child: Icon(Icons.arrow_back_ios_new),
+      //           ),
+      //         ),
+      //         centerTitle: true,
+      //         title: Text(
+      //           'Available Coaches',
+      //           style: TextStyle(
+      //               fontWeight: FontWeight.w600,
+      //               color: textColor.withOpacity(0.8),
+      //               fontSize: 20),
+      //         ),
+      //       ),
+      // body:
+      Stack(
+        children: [
+          if (_isLoading && availableCoachList.isEmpty)
+            const Center(child: CircularProgressIndicator())
+          else
+            RefreshIndicator(
+              onRefresh: _refreshCoachItems,
+              child: (!_isLoading && availableCoachList.isEmpty)
+                  ? dataNotFoundWidget(context, onTap: _refreshCoachItems)
+                  : ListView.separated(
+                      controller: _scrollController,
+                      itemCount: availableCoachList.length + 1,
+                      separatorBuilder: (context, index) => SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.03,
+                          ),
+                      itemBuilder: (context, index) {
+                        // If the current index is the last one (the additional one), show the loader
+                        if (index == availableCoachList.length) {
+                          // Check if there is more data to load; if not, return an empty SizedBox
+                          return _hasMoreData
+                              ? const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              : const SizedBox.shrink();
+                        }
+                        // Otherwise, return the usual BookingItemComponent
+                        return CoachItemComponent(
+                          coachDetail: availableCoachList[index],
+                          index: index,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => CoachDetailsScreen(
+                                    coachDetail: availableCoachList[index]),
+                              ),
+                            );
+                          },
+                        );
+                      }).paddingOnly(left: 16, right: 16, bottom: 0, top: 70),
+            ),
+          Positioned(
+              top: 8,
+              left: 0,
+              right: 0,
+              child: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: textFormField(
+                      controller: searchController,
+                      label: '',
+                      isLabel: false,
+                      hintText: 'Search Coach',
+                      suffix: isSearched
+                          ? GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  hideKeyboard(context);
+                                  searchController.clear();
+                                  isSearched = false;
+                                  _refreshCoachItems();
+                                });
+                              },
+                              child: const Icon(Icons.clear),
+                            )
+                          : null,
+                      borderRadius: 8,
+                      onChanged: (value) {
+                        _debouncer.run(() {
+                          setState(() {
+                            isSearched = true;
+                            _refreshCoachItems();
                           });
-                        },
-                      )),
-                    ],
-                  ),
-                )),
-          ],
-        ),
+                        });
+                      },
+                    )),
+                  ],
+                ),
+              )),
+        ],
       );
+  // );
 }
