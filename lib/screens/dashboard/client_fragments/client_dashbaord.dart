@@ -7,7 +7,7 @@ import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/client_dashboard_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/client_screens/select_screen.dart';
-import 'package:jumpvalues/screens/dashboard/client_fragments/client_all_coaches.dart';
+import 'package:jumpvalues/screens/dashboard/dashboard.dart';
 import 'package:jumpvalues/screens/dashboard/video_player_screen.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
@@ -125,46 +125,49 @@ class _ClientDashboardState extends State<ClientDashboard> {
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.03,
                   ),
-                  if (appStore.additionalSponsor.isNotEmpty)
-                    button(context, onPressed: () {
-                      // Navigator.of(context).push(MaterialPageRoute(
-                      //     builder: (context) => const ClientAllCoaches()));
+                  // if (appStore.additionalSponsor.isNotEmpty)
+                  button(context, onPressed: () {
+                    // Navigator.of(context).push(MaterialPageRoute(
+                    //     builder: (context) => const ClientAllCoaches()));
 
-                      if (appStore.additionalSponsor.isNotEmpty) {
-                        showUpgradeSponsorshipDialog(context,
-                            showSendRequest: !(clientDashboardResponseModel
-                                    ?.data?.client?.consentRaised ??
-                                false),
-                            title: !(clientDashboardResponseModel
-                                        ?.data?.client?.consentRaised ??
-                                    false)
-                                ? null
-                                : 'Consent submitted, You\'re all set!',
-                            subTitle: !(clientDashboardResponseModel
-                                        ?.data?.client?.consentRaised ??
-                                    false)
-                                ? null
-                                : 'Thank you for your interest! We\'ve received your consent for executive coaching, and we\'ll reach out to help you achieve your goals.',
-                            onActionPerformed: () async {
-                          await _refreshData();
-                        });
-                      }
-                    },
-                        color: (clientDashboardResponseModel
-                                    ?.data?.client?.consentRaised ??
-                                false)
-                            ? Colors.green
-                            : null,
-                        text: (clientDashboardResponseModel
-                                    ?.data?.client?.consentRaised ??
-                                false)
-                            ? 'Consent submitted, You\'re all set!'
-                            : 'Your Personal Coaching Portal',
-                        borderRadius: BorderRadius.circular(8)),
-                  if (appStore.additionalSponsor.isNotEmpty)
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.03,
-                    ),
+                    if (appStore.additionalSponsor.isNotEmpty) {
+                      showUpgradeSponsorshipDialog(context,
+                          showSendRequest: !(clientDashboardResponseModel
+                                  ?.data?.client?.consentRaised ??
+                              false),
+                          title: !(clientDashboardResponseModel
+                                      ?.data?.client?.consentRaised ??
+                                  false)
+                              ? null
+                              : 'Consent submitted, You\'re all set!',
+                          subTitle: !(clientDashboardResponseModel
+                                      ?.data?.client?.consentRaised ??
+                                  false)
+                              ? null
+                              : 'Thank you for your interest! We\'ve received your consent for executive coaching, and we\'ll reach out to help you achieve your goals.',
+                          onActionPerformed: () async {
+                        await _refreshData();
+                      });
+                    } else {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => Dashboard(index: 2, isRedirect: true,)));
+                    }
+                  },
+                      color: (clientDashboardResponseModel
+                                  ?.data?.client?.consentRaised ??
+                              false)
+                          ? Colors.green
+                          : null,
+                      text: (clientDashboardResponseModel
+                                  ?.data?.client?.consentRaised ??
+                              false)
+                          ? 'Consent Submitted, You\'re All Set!'
+                          : 'Your Personal Coaching Portal',
+                      borderRadius: BorderRadius.circular(8)),
+
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.03,
+                  ),
                   buildGoalsWidget(context),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.03,
