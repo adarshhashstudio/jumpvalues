@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/available_coaches_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/client_screens/coach_details_screen.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
-import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';

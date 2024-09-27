@@ -185,7 +185,7 @@ class CoachItemComponent extends StatelessWidget {
                       fit: BoxFit.cover,
                       height: 70,
                       width: 70,
-                      placeholder: (context, _) => Center(
+                      placeholder: (context, v) => Center(
                         child: Icon(
                           Icons.person,
                           size: 40,

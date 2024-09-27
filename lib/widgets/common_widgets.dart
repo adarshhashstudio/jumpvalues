@@ -585,6 +585,9 @@ void showRatingDialog(BuildContext context,
 void showUpgradeSponsorshipDialog(BuildContext context,
     {void Function()? onTap,
     void Function()? onCancel,
+    bool showSendRequest = true,
+    String? title,
+    String? subTitle,
     VoidCallback? onActionPerformed}) {
   var loading = false;
 
@@ -595,7 +598,7 @@ void showUpgradeSponsorshipDialog(BuildContext context,
     surfaceTintColor: Theme.of(context).colorScheme.surface,
     contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
     title: Text(
-      'Your Personal Coaching Portal',
+      title ?? 'Your Personal Coaching Portal',
       style: Theme.of(context).textTheme.displayLarge?.copyWith(
           fontSize: 18,
           color: Theme.of(context).brightness == Brightness.light
@@ -612,60 +615,62 @@ void showUpgradeSponsorshipDialog(BuildContext context,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 20),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
-                      'Interested in coaching? Contact us to learn how executive coaching can help you and your organization achieve your goals.',
+                      subTitle ??
+                          'Interested in coaching? Contact us to learn how executive coaching can help you and your organization achieve your goals.',
                       maxLines: 4,
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  50.height,
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.62,
-                    child: AppButton(
-                      onTap: () async {
-                        hideKeyboard(context);
-                        setState(() {
-                          loading = true;
-                        });
-                        try {
-                          var response = await consentRaise();
-                          if (response?.status == true) {
-                            SnackBarHelper.showStatusSnackBar(
-                                context,
-                                StatusIndicator.success,
-                                response?.message ?? 'Sent Successfully');
-                          } else {
-                            SnackBarHelper.showStatusSnackBar(
-                                context,
-                                StatusIndicator.error,
-                                response?.message ?? 'Something went wrong');
-                          }
-                        } catch (e) {
-                          debugPrint('Consent Raise error: $e');
-                        } finally {
+                  if (showSendRequest) 50.height,
+                  if (showSendRequest)
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.62,
+                      child: AppButton(
+                        onTap: () async {
+                          hideKeyboard(context);
                           setState(() {
-                            loading = false;
+                            loading = true;
                           });
-                          Navigator.of(context).pop();
-                          // if want to perform call back action
-                          if (onActionPerformed != null) {
-                            onActionPerformed();
+                          try {
+                            var response = await consentRaise();
+                            if (response?.status == true) {
+                              SnackBarHelper.showStatusSnackBar(
+                                  context,
+                                  StatusIndicator.success,
+                                  response?.message ?? 'Sent Successfully');
+                            } else {
+                              SnackBarHelper.showStatusSnackBar(
+                                  context,
+                                  StatusIndicator.error,
+                                  response?.message ?? 'Something went wrong');
+                            }
+                          } catch (e) {
+                            debugPrint('Consent Raise error: $e');
+                          } finally {
+                            setState(() {
+                              loading = false;
+                            });
+                            Navigator.of(context).pop();
+                            // if want to perform call back action
+                            if (onActionPerformed != null) {
+                              onActionPerformed();
+                            }
                           }
-                        }
-                      },
-                      text: 'Send Request',
-                      child: loading
-                          ? Transform.scale(
-                              scale: 0.6,
-                              child: CircularProgressIndicator(
-                                color: primaryColor,
-                              ).center(),
-                            )
-                          : null,
+                        },
+                        text: 'Send Request',
+                        child: loading
+                            ? Transform.scale(
+                                scale: 0.6,
+                                child: CircularProgressIndicator(
+                                  color: primaryColor,
+                                ).center(),
+                              )
+                            : null,
+                      ),
                     ),
-                  ),
                   20.height,
                 ],
               ),

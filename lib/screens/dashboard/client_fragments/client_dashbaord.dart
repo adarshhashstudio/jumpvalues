@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:jumpvalues/main.dart';
@@ -128,27 +129,36 @@ class _ClientDashboardState extends State<ClientDashboard> {
                     button(context, onPressed: () {
                       // Navigator.of(context).push(MaterialPageRoute(
                       //     builder: (context) => const ClientAllCoaches()));
-                      var check = clientDashboardResponseModel
-                              ?.data?.client?.consentRaised ??
-                          false;
-                      if (!check) {
-                        if (appStore.additionalSponsor.isNotEmpty) {
-                          showUpgradeSponsorshipDialog(context,
-                              onActionPerformed: () async {
-                            await _refreshData();
-                          });
-                        }
+
+                      if (appStore.additionalSponsor.isNotEmpty) {
+                        showUpgradeSponsorshipDialog(context,
+                            showSendRequest: !(clientDashboardResponseModel
+                                    ?.data?.client?.consentRaised ??
+                                false),
+                            title: !(clientDashboardResponseModel
+                                        ?.data?.client?.consentRaised ??
+                                    false)
+                                ? null
+                                : 'Consent submitted, You\'re all set!',
+                            subTitle: !(clientDashboardResponseModel
+                                        ?.data?.client?.consentRaised ??
+                                    false)
+                                ? null
+                                : 'Thank you for your interest! We\'ve received your consent for executive coaching, and we\'ll reach out to help you achieve your goals.',
+                            onActionPerformed: () async {
+                          await _refreshData();
+                        });
                       }
                     },
                         color: (clientDashboardResponseModel
                                     ?.data?.client?.consentRaised ??
                                 false)
-                            ? greenColor
+                            ? Colors.green
                             : null,
                         text: (clientDashboardResponseModel
                                     ?.data?.client?.consentRaised ??
                                 false)
-                            ? 'You have already raised consent...'
+                            ? 'Consent submitted, You\'re all set!'
                             : 'Your Personal Coaching Portal',
                         borderRadius: BorderRadius.circular(8)),
                   if (appStore.additionalSponsor.isNotEmpty)
@@ -204,10 +214,29 @@ class _ClientDashboardState extends State<ClientDashboard> {
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
                       final video = videos?[index];
+                      var videoId = convertUrlToId(video?.url ?? '');
+                      var thumbnailUrl = getThumbnail(videoId: videoId ?? '');
                       return ListTile(
-                        leading: IconButton(
-                          icon: const Icon(Icons.video_file, size: 35),
-                          onPressed: () {},
+                        leading: Stack(
+                          children: [
+                            CachedNetworkImage(
+                              width: MediaQuery.of(context).size.width * 0.2,
+                              height: MediaQuery.of(context).size.height * 0.13,
+                              imageUrl: '$thumbnailUrl',
+                              placeholder: (context, v) => Container(
+                                color: grey,
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                color: grey,
+                              ),
+                            ),
+                            Positioned.fill(
+                                child: Center(
+                                    child: Icon(
+                              Icons.play_circle_fill,
+                              color: white.withOpacity(0.8),
+                            )))
+                          ],
                         ),
                         trailing: const Icon(
                           Icons.arrow_right,
@@ -215,7 +244,7 @@ class _ClientDashboardState extends State<ClientDashboard> {
                         ),
                         contentPadding: EdgeInsets.zero,
                         dense: true,
-                        title: Text(video?.title ?? ''),
+                        title: Text(video?.title ?? '', style: boldTextStyle()),
                         subtitle: Text(video?.slug ?? ''),
                         onTap: () {
                           Navigator.push(
