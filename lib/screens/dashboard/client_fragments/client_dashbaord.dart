@@ -128,11 +128,28 @@ class _ClientDashboardState extends State<ClientDashboard> {
                     button(context, onPressed: () {
                       // Navigator.of(context).push(MaterialPageRoute(
                       //     builder: (context) => const ClientAllCoaches()));
-                      if (appStore.additionalSponsor.isNotEmpty) {
-                        showUpgradeSponsorshipDialog(context);
+                      var check = clientDashboardResponseModel
+                              ?.data?.client?.consentRaised ??
+                          false;
+                      if (!check) {
+                        if (appStore.additionalSponsor.isNotEmpty) {
+                          showUpgradeSponsorshipDialog(context,
+                              onActionPerformed: () async {
+                            await _refreshData();
+                          });
+                        }
                       }
                     },
-                        text: 'Your Personal Coaching Portal',
+                        color: (clientDashboardResponseModel
+                                    ?.data?.client?.consentRaised ??
+                                false)
+                            ? greenColor
+                            : null,
+                        text: (clientDashboardResponseModel
+                                    ?.data?.client?.consentRaised ??
+                                false)
+                            ? 'You have already raised consent...'
+                            : 'Your Personal Coaching Portal',
                         borderRadius: BorderRadius.circular(8)),
                   if (appStore.additionalSponsor.isNotEmpty)
                     SizedBox(

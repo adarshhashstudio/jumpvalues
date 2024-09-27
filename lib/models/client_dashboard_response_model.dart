@@ -44,15 +44,21 @@ class DashboardData {
 
 class Client {
   Client(
-      {this.id, this.firstName, this.lastName, this.coreValues, this.videos});
+      {this.id,
+      this.firstName,
+      this.lastName,
+      this.consentRaised,
+      this.coreValues,
+      this.videos});
 
   // From JSON
   factory Client.fromJson(Map<String, dynamic> json) {
     var coreValuesList = json['core_values'] as List<dynamic>?;
     return Client(
       id: json['id'] as int?,
-      firstName: json['first_name'] as String?,
-      lastName: json['last_name'] as String?,
+      firstName: json['first_name'] ?? '',
+      lastName: json['last_name'] ?? '',
+      consentRaised: json['consent_raised'] ?? false,
       coreValues: coreValuesList != null
           ? coreValuesList.map((item) => CoreValue.fromJson(item)).toList()
           : null,
@@ -62,6 +68,7 @@ class Client {
   int? id;
   String? firstName;
   String? lastName;
+  bool? consentRaised;
   List<CoreValue>? coreValues;
   Videos? videos;
 
@@ -70,6 +77,7 @@ class Client {
         'id': id,
         'first_name': firstName,
         'last_name': lastName,
+        'consent_raised': consentRaised,
         'core_values': coreValues?.map((item) => item.toJson()).toList(),
         'videos': videos?.toJson(),
       };

@@ -368,6 +368,7 @@ Widget button(
   String? text,
   bool isEnabled = true,
   bool isBordered = false,
+  Color? color,
   BorderRadiusGeometry? borderRadius,
 }) =>
     ElevatedButton(
@@ -377,7 +378,7 @@ Widget button(
                 ? Theme.of(context).scaffoldBackgroundColor
                 : disableColor)
             : WidgetStateProperty.all(isEnabled
-                ? Theme.of(context).colorScheme.primary
+                ? color ?? Theme.of(context).colorScheme.primary
                 : disableColor),
         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
@@ -582,7 +583,9 @@ void showRatingDialog(BuildContext context,
 }
 
 void showUpgradeSponsorshipDialog(BuildContext context,
-    {void Function()? onTap, void Function()? onCancel}) {
+    {void Function()? onTap,
+    void Function()? onCancel,
+    VoidCallback? onActionPerformed}) {
   var loading = false;
 
   var alertDialog = AlertDialog(
@@ -646,10 +649,10 @@ void showUpgradeSponsorshipDialog(BuildContext context,
                             loading = false;
                           });
                           Navigator.of(context).pop();
-                          //// if want to perform call back action
-                          // if (onActionPerformed != null) {
-                          //   onActionPerformed();
-                          // }
+                          // if want to perform call back action
+                          if (onActionPerformed != null) {
+                            onActionPerformed();
+                          }
                         }
                       },
                       text: 'Send Request',
