@@ -150,7 +150,10 @@ class _ClientDashboardState extends State<ClientDashboard> {
                       });
                     } else {
                       Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => Dashboard(index: 2, isRedirect: true,)));
+                          builder: (context) => Dashboard(
+                                index: 2,
+                                isRedirect: true,
+                              )));
                     }
                   },
                       color: (clientDashboardResponseModel
@@ -302,6 +305,7 @@ class _ClientDashboardState extends State<ClientDashboard> {
                           ],
                         ).onTap(() async {
                           await showAddGoalsDialogue(context);
+                          //  await notificationTest();
                         })
                       ],
                     ),

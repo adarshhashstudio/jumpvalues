@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/services/notification_service.dart';
 import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/utils.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class SocketAndNotifications {
@@ -54,8 +55,9 @@ class SocketAndNotifications {
         ?.onDisconnect((_) => debugPrint('SOCKET IO ==> Socket disconnected'));
 
     // Handle other events if necessary
-    _socket?.on('notification', (data) {
+    _socket?.on('account_upgraded', (data) {
       debugPrint('SOCKET IO ==> Received from server: $data');
+      tokenExpired(NavigationService.navigatorKey.currentState!.context);
     });
   }
 
