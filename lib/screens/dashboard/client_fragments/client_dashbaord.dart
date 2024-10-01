@@ -127,9 +127,6 @@ class _ClientDashboardState extends State<ClientDashboard> {
                   ),
                   // if (appStore.additionalSponsor.isNotEmpty)
                   button(context, onPressed: () {
-                    // Navigator.of(context).push(MaterialPageRoute(
-                    //     builder: (context) => const ClientAllCoaches()));
-
                     if (appStore.additionalSponsor.isNotEmpty) {
                       showUpgradeSponsorshipDialog(context,
                           showSendRequest: !(clientDashboardResponseModel
@@ -305,7 +302,6 @@ class _ClientDashboardState extends State<ClientDashboard> {
                           ],
                         ).onTap(() async {
                           await showAddGoalsDialogue(context);
-                          //  await notificationTest();
                         })
                       ],
                     ),

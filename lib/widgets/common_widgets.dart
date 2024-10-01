@@ -6,6 +6,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
+import 'package:jumpvalues/screens/client_screens/consent_raise_screen.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -77,7 +78,7 @@ Widget labelContainer(
         bool isDisable = false,
         required String label,
         required double width,
-        required double? height,
+        double? height,
         Color? color,
         void Function()? onTap,
         BorderRadiusGeometry? borderRadius,
@@ -631,34 +632,37 @@ void showUpgradeSponsorshipDialog(BuildContext context,
                       child: AppButton(
                         onTap: () async {
                           hideKeyboard(context);
-                          setState(() {
-                            loading = true;
-                          });
-                          try {
-                            var response = await consentRaise();
-                            if (response?.status == true) {
-                              SnackBarHelper.showStatusSnackBar(
-                                  context,
-                                  StatusIndicator.success,
-                                  response?.message ?? 'Sent Successfully');
-                            } else {
-                              SnackBarHelper.showStatusSnackBar(
-                                  context,
-                                  StatusIndicator.error,
-                                  response?.message ?? 'Something went wrong');
-                            }
-                          } catch (e) {
-                            debugPrint('Consent Raise error: $e');
-                          } finally {
-                            setState(() {
-                              loading = false;
-                            });
-                            Navigator.of(context).pop();
-                            // if want to perform call back action
-                            if (onActionPerformed != null) {
-                              onActionPerformed();
-                            }
-                          }
+                          // setState(() {
+                          //   loading = true;
+                          // });
+                          // try {
+                          //   var response = await consentRaise();
+                          //   if (response?.status == true) {
+                          //     SnackBarHelper.showStatusSnackBar(
+                          //         context,
+                          //         StatusIndicator.success,
+                          //         response?.message ?? 'Sent Successfully');
+                          //   } else {
+                          //     SnackBarHelper.showStatusSnackBar(
+                          //         context,
+                          //         StatusIndicator.error,
+                          //         response?.message ?? 'Something went wrong');
+                          //   }
+                          // } catch (e) {
+                          //   debugPrint('Consent Raise error: $e');
+                          // } finally {
+                          //   setState(() {
+                          //     loading = false;
+                          //   });
+                          //   Navigator.of(context).pop();
+                          //   // if want to perform call back action
+                          //   if (onActionPerformed != null) {
+                          //     onActionPerformed();
+                          //   }
+                          // }
+                          Navigator.of(context).pop();
+                          await Navigator.of(context).push(MaterialPageRoute(
+                              builder: (contextt) => ConsentRaiseScreen()));
                         },
                         text: 'Send Request',
                         child: loading
