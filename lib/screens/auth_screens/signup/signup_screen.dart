@@ -443,9 +443,10 @@ class _SignupScreenState extends State<SignupScreen>
       addIfNotEmpty('about_me', aboutControllerClient?.text);
       addIfNotEmptyInt('sponsor_id', selectedSponsorId?.id);
       addIfNotEmptyList('categoryIds', requestSelectedCategoryBySponsorId);
-      if (selectedSponsorId?.id != null && selectedSponsorId?.id == 0) {
-        addIfNotEmpty('additional_sponsor', otherSponsorController.text);
-      }
+      // if (selectedSponsorId?.id != null && selectedSponsorId?.id == 0) {
+      //   addIfNotEmpty('additional_sponsor', otherSponsorController.text);
+      // }
+      addIfNotEmpty('additional_sponsor', otherSponsorController.text);
     }
 
     var endPoint = isCoach ? 'auth/coach/register' : 'auth/client/register';
@@ -631,7 +632,7 @@ class _SignupScreenState extends State<SignupScreen>
                       height: 20,
                     ),
                     textFormField(
-                      label: 'Password',
+                      label: 'Create Password',
                       labelTextBoxSpace: 8,
                       controller: passwordControllerClient,
                       focusNode: passwordClientFocusNode,
@@ -643,7 +644,7 @@ class _SignupScreenState extends State<SignupScreen>
                         FilteringTextInputFormatter.deny(RegExp(r'\s'))
                       ],
                       keyboardType: TextInputType.visiblePassword,
-                      hintText: 'Enter Password',
+                      hintText: 'Create Password',
                       validator: (value) => passwordValidate(value ?? ''),
                       obscureText: _obscureText,
                       unHidePassword: (value) {
@@ -693,211 +694,239 @@ class _SignupScreenState extends State<SignupScreen>
                     const SizedBox(
                       height: 20,
                     ),
-                    labelContainer(
-                      label: 'Company Sponsor',
+                    textFormField(
+                      label: 'Company',
                       labelTextBoxSpace: 8,
-                      width: MediaQuery.of(context).size.width * 1,
-                      height: isOtherSelected
-                          ? MediaQuery.of(context).size.height * 0.15
-                          : MediaQuery.of(context).size.height * 0.06,
-                      isError: selectSponsorError != null,
-                      errorText: selectSponsorError,
+                      controller: otherSponsorController,
+                      focusNode: otherSponsorFocusNode,
+                      errorText: fieldClientErrors['additional_sponsor'] != null
+                          ? fieldClientErrors['additional_sponsor']
+                          : otherSponsorErrorText,
+                      onChanged: (value) {
+                        enableSubmitButton();
+                      },
+                      keyboardType: TextInputType.text,
+                      hintText: 'Enter Company',
+                      textInputAction: TextInputAction.done,
+                    ),
+                    Visibility(
+                      visible: false,
                       child: Column(
                         children: [
-                          DropdownButton<Category>(
-                            value: selectedSponsorId,
-                            isExpanded: true,
-                            underline: const SizedBox(),
-                            focusNode: selectedSponsorIdFocusNode,
-                            hint: Text(
-                              'Select Sponsor',
-                              style: TextStyle(
-                                color: textColor,
-                                fontSize: 15,
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w400,
-                              ),
+                          labelContainer(
+                            label: 'Company Sponsor',
+                            labelTextBoxSpace: 8,
+                            width: MediaQuery.of(context).size.width * 1,
+                            height: isOtherSelected
+                                ? MediaQuery.of(context).size.height * 0.15
+                                : MediaQuery.of(context).size.height * 0.06,
+                            isError: selectSponsorError != null,
+                            errorText: selectSponsorError,
+                            child: Column(
+                              children: [
+                                DropdownButton<Category>(
+                                  value: selectedSponsorId,
+                                  isExpanded: true,
+                                  underline: const SizedBox(),
+                                  focusNode: selectedSponsorIdFocusNode,
+                                  hint: Text(
+                                    'Select Sponsor',
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontSize: 15,
+                                      fontFamily: 'Roboto',
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  style: TextStyle(
+                                    color: textColor,
+                                    fontSize: 15,
+                                    fontFamily: 'Roboto',
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                  items: [
+                                    ...sponsors.map((Category value) =>
+                                        DropdownMenuItem<Category>(
+                                          value: value,
+                                          child: Text(value.name ?? ''),
+                                        )),
+                                    DropdownMenuItem<Category>(
+                                      value:
+                                          Category(id: 0, name: 'No Sponsor'),
+                                      child: const Text('No Sponsor'),
+                                    ),
+                                  ],
+                                  onChanged: (Category? value) async {
+                                    setState(() {
+                                      selectedSponsorId = value;
+                                      isOtherSelected = (value?.id == 0);
+                                      selectSponsorError = null;
+                                    });
+                                    // Backend sponsor selected
+                                    categoriesBySponsorIds.clear();
+                                    selectedCategoryBySponsorId.clear();
+                                    if (!isOtherSelected &&
+                                        selectedSponsorId != null) {
+                                      try {
+                                        await getCategoryBySponsorDropdown(
+                                            selectedSponsorId!.id!.toString());
+                                      } catch (e) {
+                                        debugPrint(
+                                            'Error fetching categories for sponsor: $e');
+                                      }
+                                    } else {
+                                      await getCategoriesDropdown();
+                                    }
+                                  },
+                                ),
+                                if (isOtherSelected)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: textFormField(
+                                        isLabel: false,
+                                        label: '',
+                                        controller: otherSponsorController,
+                                        focusNode: otherSponsorFocusNode,
+                                        errorText: otherSponsorErrorText,
+                                        hintText: 'Enter company sponsor',
+                                        onChanged: (v) {
+                                          if (v.isNotEmpty) {
+                                            setState(() {
+                                              otherSponsorErrorText = null;
+                                            });
+                                          }
+                                        },
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'This field is required.';
+                                          }
+                                          return null;
+                                        },
+                                        color: white),
+                                  ),
+                              ],
                             ),
-                            style: TextStyle(
-                              color: textColor,
-                              fontSize: 15,
-                              fontFamily: 'Roboto',
-                              fontWeight: FontWeight.w400,
-                            ),
-                            items: [
-                              ...sponsors.map((Category value) =>
-                                  DropdownMenuItem<Category>(
-                                    value: value,
-                                    child: Text(value.name ?? ''),
-                                  )),
-                              DropdownMenuItem<Category>(
-                                value: Category(id: 0, name: 'No Sponsor'),
-                                child: const Text('No Sponsor'),
-                              ),
-                            ],
-                            onChanged: (Category? value) async {
-                              setState(() {
-                                selectedSponsorId = value;
-                                isOtherSelected = (value?.id == 0);
-                                selectSponsorError = null;
-                              });
-                              // Backend sponsor selected
-                              categoriesBySponsorIds.clear();
-                              selectedCategoryBySponsorId.clear();
-                              if (!isOtherSelected &&
-                                  selectedSponsorId != null) {
-                                try {
-                                  await getCategoryBySponsorDropdown(
-                                      selectedSponsorId!.id!.toString());
-                                } catch (e) {
-                                  debugPrint(
-                                      'Error fetching categories for sponsor: $e');
-                                }
-                              } else {
-                                await getCategoriesDropdown();
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          labelContainer(
+                            label: 'Categories',
+                            labelTextBoxSpace: 8,
+                            isDisable: selectedSponsorId == null,
+                            width: MediaQuery.of(context).size.width * 1,
+                            height: MediaQuery.of(context).size.height * 0.06,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            isError: selectCategoriesBySponsorError,
+                            borderRadius: selectedCategoryBySponsorId.isEmpty
+                                ? BorderRadius.circular(20)
+                                : const BorderRadius.only(
+                                    topLeft: Radius.circular(20),
+                                    topRight: Radius.circular(20),
+                                  ),
+                            onTap: () {
+                              if (selectedSponsorId != null) {
+                                hideKeyboard(context);
+                                showCategoryDialog(
+                                    context, categoriesBySponsorIds,
+                                    (categoriesFromDialogue) {
+                                  setState(() {
+                                    selectedCategoryBySponsorId =
+                                        categoriesFromDialogue;
+                                    selectCategoriesBySponsorError = false;
+                                    if (categoriesFromDialogue.isEmpty) {
+                                      selectCategoriesBySponsorError = true;
+                                    }
+                                  });
+                                  for (var category
+                                      in selectedCategoryBySponsorId) {
+                                    debugPrint(
+                                        'Selected Category By Sponsor: ${category.name} (ID: ${category.id})');
+                                  }
+                                });
                               }
                             },
-                          ),
-                          if (isOtherSelected)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: textFormField(
-                                  isLabel: false,
-                                  label: '',
-                                  controller: otherSponsorController,
-                                  focusNode: otherSponsorFocusNode,
-                                  errorText: otherSponsorErrorText,
-                                  hintText: 'Enter company sponsor',
-                                  onChanged: (v) {
-                                    if (v.isNotEmpty) {
-                                      setState(() {
-                                        otherSponsorErrorText = null;
-                                      });
-                                    }
-                                  },
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'This field is required.';
-                                    }
-                                    return null;
-                                  },
-                                  color: white),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Tap to select categories',
+                                  style: TextStyle(
+                                      color: selectCategoriesBySponsorError
+                                          ? Colors.red
+                                          : Colors.black),
+                                ),
+                                Icon(
+                                  Icons.arrow_drop_down,
+                                  color: selectCategoriesBySponsorError
+                                      ? Colors.red
+                                      : Colors.black,
+                                ),
+                              ],
                             ),
+                          ),
+                          if (selectedCategoryBySponsorId.isNotEmpty)
+                            selectionContainerForAll(
+                              context,
+                              spaceBelowTitle:
+                                  MediaQuery.of(context).size.height * 0.02,
+                              borderRadius:
+                                  selectedCategoryBySponsorId.isNotEmpty
+                                      ? const BorderRadius.only(
+                                          bottomLeft: Radius.circular(20),
+                                          bottomRight: Radius.circular(20),
+                                        )
+                                      : BorderRadius.circular(20),
+                              children: [
+                                for (var item in selectedCategoryBySponsorId)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 2),
+                                    decoration: BoxDecoration(
+                                        color: const Color(0xFF43A146),
+                                        border: Border.all(width: 0.05),
+                                        borderRadius:
+                                            BorderRadius.circular(12)),
+                                    child: Text(
+                                      item.name ?? '',
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          textFormField(
+                            label: 'My Company Role',
+                            labelTextBoxSpace: 8,
+                            controller: positionControllerClient,
+                            focusNode: positionClientFocusNode,
+                            errorText: fieldClientErrors['position'],
+                            onChanged: (value) {
+                              enableSubmitButton();
+                            },
+                            keyboardType: TextInputType.name,
+                            hintText: 'Enter company role',
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          textFormField(
+                            label: 'About Me',
+                            labelTextBoxSpace: 8,
+                            controller: aboutControllerClient,
+                            focusNode: aboutMeClientFocusNode,
+                            errorText: fieldClientErrors['about_me'],
+                            onChanged: (value) {
+                              enableSubmitButton();
+                            },
+                            maxLines: 3,
+                            hintText: 'Enter your bio',
+                          )
                         ],
                       ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    labelContainer(
-                      label: 'Categories',
-                      labelTextBoxSpace: 8,
-                      isDisable: selectedSponsorId == null,
-                      width: MediaQuery.of(context).size.width * 1,
-                      height: MediaQuery.of(context).size.height * 0.06,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      isError: selectCategoriesBySponsorError,
-                      borderRadius: selectedCategoryBySponsorId.isEmpty
-                          ? BorderRadius.circular(20)
-                          : const BorderRadius.only(
-                              topLeft: Radius.circular(20),
-                              topRight: Radius.circular(20),
-                            ),
-                      onTap: () {
-                        if (selectedSponsorId != null) {
-                          hideKeyboard(context);
-                          showCategoryDialog(context, categoriesBySponsorIds,
-                              (categoriesFromDialogue) {
-                            setState(() {
-                              selectedCategoryBySponsorId =
-                                  categoriesFromDialogue;
-                              selectCategoriesBySponsorError = false;
-                              if (categoriesFromDialogue.isEmpty) {
-                                selectCategoriesBySponsorError = true;
-                              }
-                            });
-                            for (var category in selectedCategoryBySponsorId) {
-                              debugPrint(
-                                  'Selected Category By Sponsor: ${category.name} (ID: ${category.id})');
-                            }
-                          });
-                        }
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Tap to select categories',
-                            style: TextStyle(
-                                color: selectCategoriesBySponsorError
-                                    ? Colors.red
-                                    : Colors.black),
-                          ),
-                          Icon(
-                            Icons.arrow_drop_down,
-                            color: selectCategoriesBySponsorError
-                                ? Colors.red
-                                : Colors.black,
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (selectedCategoryBySponsorId.isNotEmpty)
-                      selectionContainerForAll(
-                        context,
-                        spaceBelowTitle:
-                            MediaQuery.of(context).size.height * 0.02,
-                        borderRadius: selectedCategoryBySponsorId.isNotEmpty
-                            ? const BorderRadius.only(
-                                bottomLeft: Radius.circular(20),
-                                bottomRight: Radius.circular(20),
-                              )
-                            : BorderRadius.circular(20),
-                        children: [
-                          for (var item in selectedCategoryBySponsorId)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 2),
-                              decoration: BoxDecoration(
-                                  color: const Color(0xFF43A146),
-                                  border: Border.all(width: 0.05),
-                                  borderRadius: BorderRadius.circular(12)),
-                              child: Text(
-                                item.name ?? '',
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ),
-                        ],
-                      ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    textFormField(
-                      label: 'My Company Role',
-                      labelTextBoxSpace: 8,
-                      controller: positionControllerClient,
-                      focusNode: positionClientFocusNode,
-                      errorText: fieldClientErrors['position'],
-                      onChanged: (value) {
-                        enableSubmitButton();
-                      },
-                      keyboardType: TextInputType.name,
-                      hintText: 'Enter company role',
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    textFormField(
-                      label: 'About Me',
-                      labelTextBoxSpace: 8,
-                      controller: aboutControllerClient,
-                      focusNode: aboutMeClientFocusNode,
-                      errorText: fieldClientErrors['about_me'],
-                      onChanged: (value) {
-                        enableSubmitButton();
-                      },
-                      maxLines: 3,
-                      hintText: 'Enter your bio',
                     ),
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.1,
@@ -977,33 +1006,48 @@ class _SignupScreenState extends State<SignupScreen>
                 ),
                 button(context, onPressed: () async {
                   hideKeyboard(context);
+                  // if (loader) {
+                  // } else {
+                  //   if (selectedSponsorId?.id == 0 &&
+                  //       otherSponsorController.text.isEmpty) {
+                  //     setState(() {
+                  //       selectSponsorError = null;
+                  //       FocusScope.of(context)
+                  //           .requestFocus(otherSponsorFocusNode);
+                  //       otherSponsorErrorText = 'This field is required';
+                  //     });
+                  //   } else {
+                  //     setState(() {
+                  //       otherSponsorErrorText = null;
+                  //       selectSponsorError = null;
+                  //     });
+                  //     await signup(isCoach: false);
+
+                  //     if (selectedSponsorId?.id == null) {
+                  //       setState(() {
+                  //         selectSponsorError = 'Sponsor selection is required.';
+                  //       });
+                  //     } else {
+                  //       setState(() {
+                  //         selectSponsorError = null;
+                  //       });
+                  //     }
+                  //   }
+                  // }
                   if (loader) {
                   } else {
-                    if (selectedSponsorId?.id == 0 &&
-                        otherSponsorController.text.isEmpty) {
-                      setState(() {
-                        selectSponsorError = null;
-                        FocusScope.of(context)
-                            .requestFocus(otherSponsorFocusNode);
-                        otherSponsorErrorText = 'This field is required';
-                      });
-                    } else {
+                    // if (otherSponsorController.text.isEmpty) {
+                    //   setState(() {
+                    //     FocusScope.of(context)
+                    //         .requestFocus(otherSponsorFocusNode);
+                    //     otherSponsorErrorText = 'This field is required';
+                    //   });
+                    // } else {
                       setState(() {
                         otherSponsorErrorText = null;
-                        selectSponsorError = null;
                       });
                       await signup(isCoach: false);
-
-                      if (selectedSponsorId?.id == null) {
-                        setState(() {
-                          selectSponsorError = 'Sponsor selection is required.';
-                        });
-                      } else {
-                        setState(() {
-                          selectSponsorError = null;
-                        });
-                      }
-                    }
+                    // }
                   }
                 },
                     isLoading: loader,
