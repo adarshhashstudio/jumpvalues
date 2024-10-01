@@ -12,7 +12,6 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
-  @override
   Widget build(BuildContext context) => Scaffold(
         body: SafeArea(
           child: Center(

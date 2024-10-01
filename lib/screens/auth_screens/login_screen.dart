@@ -104,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
           await globalUserDetails().then((v) async {
             await appStore.setUserData(_globalUserResponseModel);
           });
-          final socketAndNotifications = SocketAndNotifications();
+          var socketAndNotifications = SocketAndNotifications();
           socketAndNotifications.connectAndListen();
           // Navigate to Dashboard
           await Navigator.of(context).pushReplacement(

@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:jumpvalues/screens/splash_screen.dart';
-import 'package:jumpvalues/services/socket_service.dart';
 import 'package:jumpvalues/store/app_store.dart';
 import 'package:jumpvalues/store/goals_data_hive.dart';
 import 'package:jumpvalues/utils/configs.dart';
@@ -90,11 +89,6 @@ Future<void> main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(GoalsDataAdapter());
   goalsBox = await Hive.openBox<GoalsData>('goalsBox');
-
-  if (appStore.isLoggedIn) {
-    final socketAndNotifications = SocketAndNotifications();
-    socketAndNotifications.connectAndListen();
-  }
 
   await SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((v) {

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
+import 'package:jumpvalues/services/socket_service.dart';
 import 'package:jumpvalues/store/goals_store.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
@@ -93,11 +94,16 @@ class SnackBarHelper {
 
 void isTokenAvailable(BuildContext context) async {
   if (!appStore.isLoggedIn) {
+    // Reset the socket instance and clear state
+    SocketAndNotifications.resetInstance();
+
     await Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-        (Route<dynamic> route) => false);
+      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+      (Route<dynamic> route) => false,
+    );
   }
 }
+
 
 void tokenExpired(BuildContext context) async {
   await appStore.clearData();

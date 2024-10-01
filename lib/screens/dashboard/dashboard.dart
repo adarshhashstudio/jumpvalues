@@ -9,11 +9,14 @@ import 'package:jumpvalues/screens/dashboard/coach_fragments/coach_sessions.dart
 import 'package:jumpvalues/screens/dashboard/common_profile.dart';
 import 'package:jumpvalues/screens/notification_page.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
+import 'package:jumpvalues/services/socket_service.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/images.dart';
 import 'package:jumpvalues/utils/string_extensions.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
+
+
 
 class Dashboard extends StatefulWidget {
   Dashboard({this.index, this.isRedirect = false});
@@ -38,10 +41,15 @@ class DashboardState extends State<Dashboard> {
   }
 
   late List<Widget> fragmentList = [];
+  var socketAndNotifications = SocketAndNotifications();
 
   @override
   void initState() {
     super.initState();
+    // Ensure socket is connected only after login
+    if (appStore.isLoggedIn) {
+      socketAndNotifications.connectAndListen();
+    }
     fragmentList = [
       appStore.userTypeCoach ? const CoachDashboard() : const ClientDashboard(),
       if (appStore.additionalSponsor.isEmpty)
@@ -167,26 +175,27 @@ class DashboardState extends State<Dashboard> {
                   fontSize: 20),
             ),
             actions: [
-              Stack(
-                children: [
-                  const Icon(Icons.notifications),
-                  // Positioned(
-                  //   top: 0,
-                  //   right: 0,
-                  //   child: Container(
-                  //     width: 6,
-                  //     height: 6,
-                  //     decoration: boxDecorationDefault(color: redColor),
-                  //   ),
-                  // ),
-                ],
-              ).onTap(() async {
-                var res = await Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const NotificationPage()));
-                if (res) {
-                  switchToFragment(1);
-                }
-              }),
+              if (appStore.additionalSponsor.isEmpty)
+                Stack(
+                  children: [
+                    const Icon(Icons.notifications),
+                    // Positioned(
+                    //   top: 0,
+                    //   right: 0,
+                    //   child: Container(
+                    //     width: 6,
+                    //     height: 6,
+                    //     decoration: boxDecorationDefault(color: redColor),
+                    //   ),
+                    // ),
+                  ],
+                ).onTap(() async {
+                  var res = await Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const NotificationPage()));
+                  if (res != null && res) {
+                    switchToFragment(1);
+                  }
+                }),
               if (currentIndex == 3 ||
                   (appStore.additionalSponsor.isNotEmpty && currentIndex == 1))
                 Text(
