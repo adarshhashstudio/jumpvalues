@@ -110,14 +110,29 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
     }
   }
 
-  void _submitForm() {
+  void _submitForm() async {
+    int companysizez;
+    if (selectedCompanySize == 'Under 100 Employees') {
+      companysizez = 0;
+    } else if (selectedCompanySize == '101-250 Employees') {
+      companysizez = 1;
+    } else if (selectedCompanySize == '251-750 Employees') {
+      companysizez = 2;
+    } else if (selectedCompanySize == '751-999 Employees') {
+      companysizez = 3;
+    } else if (selectedCompanySize == '1,000+ Employees') {
+      companysizez = 4;
+    } else {
+      companysizez = 0;
+    }
+
     final submissionData = {
       'email': emailController?.text,
       'country_code': sCountryCode,
       'phone': sPhoneNumber,
       'contact_name': contactNameController?.text,
       'company_name': companyNameController?.text,
-      'company_size': selectedCompanySize,
+      'company_size': companysizez,
       'contact_job_title': jobTitleController?.text,
       'questions': answers.entries
           .map((entry) => {
@@ -131,6 +146,62 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
 
     debugPrint(submissionData.toString());
     // Send submissionData to API
+
+    setState(() {
+      loading = true;
+    });
+    try {
+      var response = await consentRaise(submissionData);
+      debugPrint('consentQuestionsApi: Data fetched successfully');
+
+      if (response?.status == true) {
+        SnackBarHelper.showStatusSnackBar(
+            context, StatusIndicator.success, response?.message ?? 'Success');
+      } else {
+        // debugPrint('consentQuestionsApi: Error response from API');
+        // SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+        //     response?.message ?? 'Something went wrong');
+        if (response?.errors?.isNotEmpty ?? false) {
+          // Set field errors and focus on the first error field
+          response?.errors?.forEach((e) {
+            fieldErrors[e.field ?? '0'] = e.message ?? '0';
+          });
+          // Focus on the first error
+          if (fieldErrors.containsKey('email')) {
+            FocusScope.of(context).requestFocus(emailFocusNode);
+          } else if (fieldErrors.containsKey('country_code')) {
+            FocusScope.of(context).requestFocus(phoneNumberFocusNode);
+          } else if (fieldErrors.containsKey('phone')) {
+            FocusScope.of(context).requestFocus(phoneNumberFocusNode);
+          } else if (fieldErrors.containsKey('contact_name')) {
+            FocusScope.of(context).requestFocus(contactNameFocusNode);
+          } else if (fieldErrors.containsKey('company_name')) {
+            FocusScope.of(context).requestFocus(companyNameFocusNode);
+          } else if (fieldErrors.containsKey('company_size')) {
+            SnackBarHelper.showStatusSnackBar(
+              context,
+              StatusIndicator.error,
+              fieldErrors['company_size'] ?? 'Something went wrong',
+            );
+          } else if (fieldErrors.containsKey('contact_job_title')) {
+            FocusScope.of(context).requestFocus(jobTitleFocusNode);
+          }
+        } else {
+          // Handle other errors
+          SnackBarHelper.showStatusSnackBar(
+            context,
+            StatusIndicator.error,
+            response?.message ?? 'Something went wrong',
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('consentRaise error: $e');
+    } finally {
+      setState(() {
+        loading = false;
+      });
+    }
   }
 
   @override

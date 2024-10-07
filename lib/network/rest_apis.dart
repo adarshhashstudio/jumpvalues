@@ -532,12 +532,12 @@ Future<BaseResponseModel?> notificationTest() async {
   return response;
 }
 
-Future<BaseResponseModel?> consentRaise() async {
+Future<BaseResponseModel?> consentRaise(Map<String, dynamic> request) async {
   BaseResponseModel? response;
   try {
     response = BaseResponseModel.fromJson(await handleResponse(
         await buildHttpResponse('consent/raise',
-            isAuth: true, method: HttpMethodType.post)));
+            request: request, isAuth: true, method: HttpMethodType.post)));
   } catch (e) {
     rethrow;
   }
