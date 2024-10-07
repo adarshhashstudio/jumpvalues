@@ -1,7 +1,656 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/models/question_model.dart';
+import 'package:jumpvalues/network/rest_apis.dart';
+import 'package:jumpvalues/utils/configs.dart';
+import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
+import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
+import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
+import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:nb_utils/nb_utils.dart';
+
+class ConsentRaiseScreen extends StatefulWidget {
+  const ConsentRaiseScreen({super.key});
+
+  @override
+  State<ConsentRaiseScreen> createState() => _ConsentRaiseScreenState();
+}
+
+class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  ConsentQuestionResponse? consentQuestionResponse;
+
+  bool loading = false;
+  // TextEditing Controllers
+  TextEditingController? companyNameController;
+  TextEditingController? contactNameController;
+  TextEditingController? jobTitleController;
+  TextEditingController? emailController;
+  TextEditingController? phoneNumberController;
+
+  // FocusNodes for each field
+  final FocusNode companyNameFocusNode = FocusNode();
+  final FocusNode contactNameFocusNode = FocusNode();
+  final FocusNode jobTitleFocusNode = FocusNode();
+  final FocusNode emailFocusNode = FocusNode();
+  final FocusNode phoneNumberFocusNode = FocusNode();
+
+  // Dropdown values for Company Size
+  String? selectedCompanySize;
+  List<String> companySizeList = [
+    'Under 100 Employees',
+    '101-250 Employees',
+    '251-750 Employees',
+    '751-999 Employees',
+    '1,000+ Employees'
+  ];
+
+  String sPhoneNumber = '';
+  String sCountryCode = '';
+
+//   // Map to store error messages for each field
+  Map<String, dynamic> fieldErrors = {};
+
+  // Store selected boolean values for each question by question ID
+  Map<int, bool?> selectedBooleanValues = {};
+
+  @override
+  void initState() {
+    super.initState();
+    debugPrint('ConsentRaiseScreen: initState called');
+    consentQuestionsApi();
+  }
+
+  Future<void> consentQuestionsApi() async {
+    debugPrint('consentQuestionsApi: Fetching data...');
+    setState(() {
+      loading = true;
+    });
+    try {
+      var response = await consentQuestions();
+      debugPrint('consentQuestionsApi: Data fetched successfully');
+
+      if (response?.status == true) {
+        setState(() {
+          consentQuestionResponse = response;
+          debugPrint('consentQuestionsApi: Data set in state');
+        });
+      } else {
+        debugPrint('consentQuestionsApi: Error response from API');
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+            response?.message ?? 'Something went wrong');
+      }
+    } catch (e) {
+      debugPrint('consentQuestionsApi error: $e');
+    } finally {
+      setState(() {
+        loading = false;
+        debugPrint('consentQuestionsApi: Loading set to false');
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(4.0),
+            child: Container(
+              color: Colors.grey,
+              height: 0.5,
+            ),
+          ),
+          leading: GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: const Padding(
+              padding: EdgeInsets.only(left: 14.0),
+              child: Icon(Icons.arrow_back_ios_new),
+            ),
+          ),
+          centerTitle: true,
+          title: Text(
+            'Raise Consent',
+            style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.black.withOpacity(0.8),
+                fontSize: 20),
+          ),
+        ),
+        body: loading
+            ? const Center(
+                child:
+                    CircularProgressIndicator()) // Center the loading indicator
+            : Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.01,
+                          ),
+                          const Text(
+                            'Thank you for choosing Jump for your organization\'s coaching and consulting needs. Please complete this form, and we\'ll reach out to discuss your goals and how we can help.',
+                            style: TextStyle(fontSize: 12),
+                            textAlign: TextAlign.center,
+                          ).paddingSymmetric(horizontal: 16),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.01,
+                          ),
+                          divider(),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.02,
+                          ),
+                          // Company Name
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              children: [
+                                textFormField(
+                                  label: 'Company Name *',
+                                  labelTextBoxSpace: 8,
+                                  autofocus: true,
+                                  controller: companyNameController,
+                                  focusNode: companyNameFocusNode,
+                                  errorText: fieldErrors['company_name'],
+                                  onChanged: (value) {},
+                                  keyboardType: TextInputType.name,
+                                  hintText: 'Enter Company Name',
+                                  textInputAction: TextInputAction.next,
+                                ),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.02,
+                                ),
+                                // Contact Name
+                                textFormField(
+                                  label: 'Contact Name *',
+                                  labelTextBoxSpace: 8,
+                                  autofocus: false,
+                                  controller: contactNameController,
+                                  focusNode: contactNameFocusNode,
+                                  errorText: fieldErrors['contact_name'],
+                                  onChanged: (value) {},
+                                  keyboardType: TextInputType.name,
+                                  hintText: 'Enter Contact Name',
+                                  textInputAction: TextInputAction.next,
+                                ),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.02,
+                                ),
+                                // Primary Contact Job Title
+                                textFormField(
+                                  label: 'Primary Contact Job Title *',
+                                  labelTextBoxSpace: 8,
+                                  autofocus: false,
+                                  controller: jobTitleController,
+                                  focusNode: jobTitleFocusNode,
+                                  errorText: fieldErrors['job_title'],
+                                  onChanged: (value) {},
+                                  keyboardType: TextInputType.text,
+                                  hintText: 'Enter Job Title',
+                                  textInputAction: TextInputAction.next,
+                                ),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.02,
+                                ),
+                                // Email Address
+                                textFormField(
+                                  label: 'Email Address *',
+                                  labelTextBoxSpace: 8,
+                                  autofocus: false,
+                                  controller: emailController,
+                                  focusNode: emailFocusNode,
+                                  errorText: fieldErrors['email'],
+                                  onChanged: (value) {},
+                                  keyboardType: TextInputType.emailAddress,
+                                  hintText: 'Enter Email Address',
+                                  textInputAction: TextInputAction.next,
+                                ),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.02,
+                                ),
+                                textFormField(
+                                  label: 'Phone Number *',
+                                  labelTextBoxSpace: 8,
+                                  controller: phoneNumberController,
+                                  focusNode: phoneNumberFocusNode,
+                                  errorText: fieldErrors['phone'],
+                                  prefixIcon: IconButton(
+                                    onPressed: () {},
+                                    icon: Text(
+                                      '+1',
+                                      style: TextStyle(
+                                        color: textColor,
+                                        fontSize: 15,
+                                        fontFamily: 'Roboto',
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                  inputFormatters: [maskFormatter],
+                                  onChanged: (phoneNumber) {
+                                    setState(() {
+                                      sPhoneNumber =
+                                          maskedTextToNumber(phoneNumber);
+                                      // sCountryCodeClient = phoneNumber.countryCode;
+                                      sCountryCode = '+1';
+                                    });
+                                  },
+                                  validator: (phoneNumber) {
+                                    if (phoneNumber == null ||
+                                        phoneNumber.isEmpty) {
+                                      return 'Phone number is required';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.02,
+                                ),
+                                // Company Size Dropdown
+                                labelContainer(
+                                  label: 'Company Size *',
+                                  labelTextBoxSpace: 8,
+                                  width: MediaQuery.of(context).size.width * 1,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.06,
+                                  child: DropdownButton<String>(
+                                    value: selectedCompanySize,
+                                    isExpanded: true,
+                                    underline: const SizedBox(),
+                                    hint: const Text(
+                                      'Select Company Size',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 15,
+                                        fontFamily: 'Roboto',
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15,
+                                      fontFamily: 'Roboto',
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    items: companySizeList
+                                        .map((String value) =>
+                                            DropdownMenuItem<String>(
+                                              value: value,
+                                              child: Text(value),
+                                            ))
+                                        .toList(),
+                                    onChanged: (String? value) {
+                                      setState(() {
+                                        selectedCompanySize = value;
+                                      });
+                                    },
+                                  ),
+                                ),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.02,
+                                ),
+                                ListView.builder(
+                                  itemCount:
+                                      consentQuestionResponse?.data?.length,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
+                                  itemBuilder: (context, index) {
+                                    final question =
+                                        consentQuestionResponse?.data?[index];
+                                    switch (question?.type) {
+                                      case 1: // Single select dropdown
+                                        return _buildSingleSelectDropdown(
+                                                question)
+                                            .paddingBottom(20);
+                                      case 2: // Multi select dropdown
+                                        return _buildMultiSelectDropdown(
+                                                question)
+                                            .paddingBottom(20);
+                                      case 3: // Boolean (Yes/No) radio buttons
+                                        return _buildBooleanRadio(question)
+                                            .paddingBottom(20);
+                                      case 4: // Empty Text Form Field
+                                        return _buildTextFormField(question)
+                                            .paddingBottom(20);
+                                      case 5: // Goal (Extendable dropdown)
+                                        return _buildGoalDropdown(question)
+                                            .paddingBottom(20);
+                                      default:
+                                        return const SizedBox(); // Return empty container for unsupported types
+                                    }
+                                  },
+                                ),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.1,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 16,
+                    child: Container(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                        child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.92,
+                            child: button(context,
+                                onPressed: () async {}, text: 'Submit')),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+      );
+
+  // Text Form Field for description (when type is 4)
+  Widget _buildTextFormField(Question? question) {
+    // Create a TextEditingController to capture the input
+    var _textEditingController = TextEditingController();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        textFormField(
+          label: question?.question ?? '',
+          controller: _textEditingController,
+          hintText: 'Enter Description',
+          maxLines: 3,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter a response';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  // Single select dropdown
+  Widget _buildSingleSelectDropdown(Question? question) => labelContainer(
+      label: question?.question ?? '',
+      width: MediaQuery.of(context).size.width * 1,
+      child: DropdownButtonFormField<String>(
+        items: question?.options
+            ?.map((option) => DropdownMenuItem<String>(
+                  value: option.value,
+                  child: Text(option.value ?? ''),
+                ))
+            .toList(),
+        hint: Text(
+          'Select',
+          style: TextStyle(
+            color: textColor,
+            fontSize: 15,
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        style: TextStyle(
+          color: textColor,
+          fontSize: 15,
+          fontFamily: 'Roboto',
+          fontWeight: FontWeight.w400,
+        ),
+        decoration:
+            const InputDecoration(border: InputBorder.none, iconColor: black),
+        onChanged: (value) {
+          setState(() {});
+        },
+      ));
+
+// Multi select dropdown using MultiSelectDialogField
+  Widget _buildMultiSelectDropdown(Question? question) {
+    // Create a list of selected values
+    var selectedValues = <String>[];
+
+    // Extract the options from the question (assuming options contain 'value' for labels)
+    var categories =
+        question?.options?.map((opt) => opt.value ?? '').toList() ?? [];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        labelContainer(
+          label: question?.question ?? '',
+          width: MediaQuery.of(context).size.width * 1,
+          child: MultiSelectDialogField(
+            items: categories
+                .map((category) => MultiSelectItem(category, category))
+                .toList(),
+            title: const Text('Select'),
+            buttonIcon: Icon(Icons.arrow_drop_down),
+            decoration: BoxDecoration(),
+            buttonText: Text(
+              'Select',
+              style: TextStyle(
+                color: textColor,
+                fontSize: 15,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            onConfirm: (values) {
+              setState(() {
+                // Update the selected values based on user input
+                selectedValues = List<String>.from(values);
+              });
+            },
+            chipDisplay: MultiSelectChipDisplay(
+              chipColor: Theme.of(context).cardColor,
+              textStyle: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold),
+              onTap: (value) {
+                setState(() {
+                  // Remove tapped value from the selected values
+                  selectedValues.remove(value);
+                });
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Boolean (Yes/No) radio buttons
+  Widget _buildBooleanRadio(Question? question) {
+    // Ensure each question has its own stored value in the map
+    final questionId =
+        question?.id ?? 0; // Assuming each question has a unique 'id'
+    var selectedValue = selectedBooleanValues[questionId];
+
+    return labelContainer(
+        label: question?.question ?? '',
+        width: MediaQuery.of(context).size.width * 1,
+        child: Row(
+          children: question?.options
+                  ?.map((option) => Expanded(
+                        child: RadioListTile<bool>(
+                          title: Text(option.value ?? ''),
+                          value: option.value ==
+                              'Yes', // 'Yes' corresponds to true
+                          groupValue: selectedValue,
+                          onChanged: (value) {
+                            setState(() {
+                              // Store the selected value for this specific question
+                              selectedBooleanValues[questionId] = value;
+                            });
+                          },
+                        ),
+                      ))
+                  .toList() ??
+              [],
+        ));
+  }
+
+  Widget _buildGoalDropdown(Question? question) =>
+      DropdownWithMultiSelectAndAddNewItem(question: question);
+}
+
+class DropdownWithMultiSelectAndAddNewItem extends StatefulWidget {
+  final Question? question;
+
+  DropdownWithMultiSelectAndAddNewItem({this.question});
+
+  @override
+  _DropdownWithMultiSelectAndAddNewItemState createState() =>
+      _DropdownWithMultiSelectAndAddNewItemState();
+}
+
+class _DropdownWithMultiSelectAndAddNewItemState
+    extends State<DropdownWithMultiSelectAndAddNewItem> {
+  late List<String> items;
+  List<String> selectedItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize items with the goals from the question options
+    items =
+        widget.question?.options?.map((opt) => opt.value ?? '').toList() ?? [];
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          labelContainer(
+            label: widget.question?.question ?? '',
+            width: MediaQuery.of(context).size.width * 1,
+            child: Column(
+              children: [
+                MultiSelectDialogField(
+                  items:
+                      items.map((item) => MultiSelectItem(item, item)).toList(),
+                  buttonIcon: const Icon(Icons.arrow_drop_down),
+                  title: Text(
+                    'Select',
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 15,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  decoration: const BoxDecoration(),
+                  buttonText: Text(
+                    'Select',
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 15,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  onConfirm: (values) {
+                    setState(() {
+                      selectedItems = List<String>.from(values);
+                    });
+                  },
+                  chipDisplay: MultiSelectChipDisplay(
+                    items: selectedItems
+                        .map((item) => MultiSelectItem(item, item))
+                        .toList(),
+                    chipColor: Theme.of(context).cardColor,
+                    textStyle: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold),
+                    onTap: (value) {
+                      setState(() {
+                        selectedItems.remove(value);
+                      });
+                    },
+                  ),
+                ),
+                // Multi-select dropdown
+                ElevatedButton(
+                  onPressed: () {
+                    _showAddNewItemDialog(context);
+                  },
+                  child: const Row(
+                    children: [
+                      Icon(
+                        Icons.add,
+                        color: grey,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Add Your',
+                        style: TextStyle(
+                          color: grey,
+                          fontSize: 15,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                12.height,
+              ],
+            ),
+          ),
+        ],
+      );
+
+  // Show dialog to add new goal
+  void _showAddNewItemDialog(BuildContext context) {
+    var _textController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Add New Goal'),
+        content: TextField(
+          controller: _textController,
+          decoration: const InputDecoration(hintText: 'Enter new goal'),
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('Add'),
+            onPressed: () {
+              setState(() {
+                if (_textController.text.isNotEmpty &&
+                    !items.contains(_textController.text)) {
+                  items.add(_textController.text);
+                  selectedItems
+                      .add(_textController.text); // Auto-select new item
+                }
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 // class ConsentRaiseScreen extends StatefulWidget {
 //   const ConsentRaiseScreen({super.key});
@@ -368,7 +1017,7 @@ import 'package:nb_utils/nb_utils.dart';
 //             SizedBox(
 //               height: MediaQuery.of(context).size.height * 0.03,
 //             ),
-           
+
 //             divider(),
 //              SizedBox(
 //               height: MediaQuery.of(context).size.height * 0.01,
@@ -434,260 +1083,3 @@ import 'package:nb_utils/nb_utils.dart';
 //         ),
 //       );
 // }
-
-class ConsentRaiseScreen extends StatefulWidget {
-  @override
-  _ConsentRaiseScreenState createState() => _ConsentRaiseScreenState();
-}
-
-class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
-  // Simulate fetching JSON data
-  List<Map<String, dynamic>> sampleJsonData = [
-    {
-      "id": "1",
-      "question": "Select your favorite colors",
-      "type": "multi-select",
-      "options": [
-        {"id": 1, "value": "Red"},
-        {"id": 2, "value": "Blue"},
-        {"id": 3, "value": "Green"},
-      ]
-    },
-    {
-      "id": "2",
-      "question": "Describe your request",
-      "type": "description",
-      "options": []
-    },
-    {
-      "id": "3",
-      "question": "Select a goal",
-      "type": "goals",
-      "options": [
-        {"id": 1, "value": "Goal 1"},
-        {"id": 2, "value": "Goal 2"},
-      ]
-    },
-    {
-      "id": "4",
-      "question": "Pick your preference",
-      "type": "single",
-      "options": [
-        {"id": 1, "value": "Option 1"},
-        {"id": 2, "value": "Option 2"},
-      ]
-    }
-  ];
-
-  late List<QuestionModel> questions;
-
-  @override
-  void initState() {
-    super.initState();
-    // Convert JSON data to list of QuestionModel objects
-    questions = sampleJsonData.map((json) => QuestionModel.fromJson(json)).toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Consent Raise Form'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              // Pass the questions to the DynamicForm
-              child: DynamicForm(questions: questions),
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // Handle form submission or action
-                _submitForm();
-              },
-              child: Text('Submit'),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _submitForm() {
-    // Logic to collect and submit the form data
-    // You can access the form data via the formData map from DynamicForm
-    print("Form submitted!");
-  }
-}
-
-class DynamicForm extends StatefulWidget {
-  final List<QuestionModel> questions;
-
-  DynamicForm({required this.questions});
-
-  @override
-  _DynamicFormState createState() => _DynamicFormState();
-}
-
-class _DynamicFormState extends State<DynamicForm> {
-  Map<String, dynamic> formData = {};
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: widget.questions.length,
-      itemBuilder: (context, index) {
-        final question = widget.questions[index];
-        return buildDynamicWidget(question);
-      },
-    );
-  }
-
-  Widget buildDynamicWidget(QuestionModel question) {
-    switch (question.type) {
-      case 'multi-select':
-        return buildMultiSelectDropdown(question);
-      case 'description':
-        return buildDescriptionField(question);
-      case 'goals':
-        return buildGoalsDropdown(question);
-      case 'single':
-        return buildSingleSelectDropdown(question);
-      default:
-        return SizedBox.shrink();
-    }
-  }
-
-  // Multi-select dropdown for 'multi-select' type
-  Widget buildMultiSelectDropdown(QuestionModel question) {
-    List<String> selectedValues = [];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(question.question ?? ""),
-        DropdownButtonFormField<String>(
-          value: null,
-          hint: Text("Select values"),
-          onChanged: (value) {
-            if (!selectedValues.contains(value)) {
-              setState(() {
-                selectedValues.add(value!);
-              });
-            }
-          },
-          items: question.options?.map((option) {
-                return DropdownMenuItem<String>(
-                  value: option.value,
-                  child: Text(option.value!),
-                );
-              }).toList() ??
-              [],
-          isExpanded: true,
-        ),
-        Wrap(
-          children: selectedValues.map((value) {
-            return Chip(
-              label: Text(value),
-              onDeleted: () {
-                setState(() {
-                  selectedValues.remove(value);
-                });
-              },
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  // Single select dropdown for 'single' type
-  Widget buildSingleSelectDropdown(QuestionModel question) {
-    String? selectedValue;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(question.question ?? ""),
-        DropdownButtonFormField<String>(
-          value: selectedValue,
-          hint: Text("Select one"),
-          onChanged: (value) {
-            setState(() {
-              selectedValue = value;
-            });
-          },
-          items: question.options?.map((option) {
-                return DropdownMenuItem<String>(
-                  value: option.value,
-                  child: Text(option.value!),
-                );
-              }).toList() ??
-              [],
-          isExpanded: true,
-        ),
-      ],
-    );
-  }
-
-  // Text form field for 'description' type
-  Widget buildDescriptionField(QuestionModel question) {
-    TextEditingController controller = TextEditingController();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(question.question ?? ""),
-        TextFormField(
-          controller: controller,
-          decoration: InputDecoration(hintText: "Enter details"),
-          maxLines: 3,
-          onChanged: (value) {
-            formData[question.id!] = value;
-          },
-        ),
-      ],
-    );
-  }
-
-  // Goals dropdown with text input for adding new options
-  Widget buildGoalsDropdown(QuestionModel question) {
-    TextEditingController newGoalController = TextEditingController();
-    List<String> goals = [];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(question.question ?? ""),
-        DropdownButtonFormField<String>(
-          value: null,
-          hint: Text("Select or add a goal"),
-          onChanged: (value) {
-            if (value != null) {
-              setState(() {
-                goals.add(value);
-              });
-            }
-          },
-          items: goals.map((goal) {
-            return DropdownMenuItem<String>(
-              value: goal,
-              child: Text(goal),
-            );
-          }).toList(),
-          isExpanded: true,
-        ),
-        TextFormField(
-          controller: newGoalController,
-          decoration: InputDecoration(hintText: "Add new goal"),
-          onFieldSubmitted: (newGoal) {
-            setState(() {
-              goals.add(newGoal);
-              newGoalController.clear();
-            });
-          },
-        ),
-      ],
-    );
-  }
-}

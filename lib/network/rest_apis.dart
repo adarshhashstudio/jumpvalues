@@ -12,6 +12,7 @@ import 'package:jumpvalues/models/coach_profile_response_model.dart';
 import 'package:jumpvalues/models/global_user_response_model.dart';
 import 'package:jumpvalues/models/login_response.dart';
 import 'package:jumpvalues/models/notification_response_model.dart';
+import 'package:jumpvalues/models/question_model.dart';
 import 'package:jumpvalues/models/requested_sessions_response_model.dart';
 import 'package:jumpvalues/models/signup_response_model.dart';
 import 'package:jumpvalues/models/time_slots_list_response_model.dart';
@@ -537,6 +538,18 @@ Future<BaseResponseModel?> consentRaise() async {
     response = BaseResponseModel.fromJson(await handleResponse(
         await buildHttpResponse('consent/raise',
             isAuth: true, method: HttpMethodType.post)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
+
+Future<ConsentQuestionResponse?> consentQuestions() async {
+  ConsentQuestionResponse? response;
+  try {
+    response = ConsentQuestionResponse.fromJson(await handleResponse(
+        await buildHttpResponse('consent/questions',
+            isAuth: true, method: HttpMethodType.get)));
   } catch (e) {
     rethrow;
   }

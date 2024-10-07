@@ -661,8 +661,12 @@ void showUpgradeSponsorshipDialog(BuildContext context,
                           //   }
                           // }
                           Navigator.of(context).pop();
-                          await Navigator.of(context).push(MaterialPageRoute(
-                              builder: (contextt) => ConsentRaiseScreen()));
+                          try {
+                            await Navigator.of(context).push(MaterialPageRoute(
+                                builder: (contextt) => ConsentRaiseScreen()));
+                          } catch (e) {
+                            debugPrint('Navigation error: $e');
+                          }
                         },
                         text: 'Send Request',
                         child: loading

@@ -10,7 +10,6 @@ class LearnScreen extends StatefulWidget {
 
 class _LearnScreenState extends State<LearnScreen> {
   @override
-  @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           bottom: PreferredSize(

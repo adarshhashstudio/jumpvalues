@@ -6,6 +6,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/client_dashboard_response_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
+import 'package:jumpvalues/screens/client_screens/consent_raise_screen.dart';
 import 'package:jumpvalues/screens/client_screens/select_screen.dart';
 import 'package:jumpvalues/screens/dashboard/dashboard.dart';
 import 'package:jumpvalues/screens/dashboard/video_player_screen.dart';
