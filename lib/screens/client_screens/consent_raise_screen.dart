@@ -19,6 +19,7 @@ class ConsentRaiseScreen extends StatefulWidget {
 class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   ConsentQuestionResponse? consentQuestionResponse;
+  Map<int, dynamic> answers = {};
 
   bool loading = false;
   // TextEditing Controllers
@@ -57,8 +58,27 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
   @override
   void initState() {
     super.initState();
-    debugPrint('ConsentRaiseScreen: initState called');
+
+    // Initialize controllers
+    companyNameController = TextEditingController();
+    contactNameController = TextEditingController();
+    jobTitleController = TextEditingController();
+    emailController = TextEditingController();
+    phoneNumberController = TextEditingController();
+
+    // Fetch questions API
     consentQuestionsApi();
+  }
+
+  @override
+  void dispose() {
+    companyNameController?.dispose();
+    contactNameController?.dispose();
+    jobTitleController?.dispose();
+    emailController?.dispose();
+    phoneNumberController?.dispose();
+
+    super.dispose();
   }
 
   Future<void> consentQuestionsApi() async {
@@ -88,6 +108,29 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
         debugPrint('consentQuestionsApi: Loading set to false');
       });
     }
+  }
+
+  void _submitForm() {
+    final submissionData = {
+      'email': emailController?.text,
+      'country_code': sCountryCode,
+      'phone': sPhoneNumber,
+      'contact_name': contactNameController?.text,
+      'company_name': companyNameController?.text,
+      'company_size': selectedCompanySize,
+      'contact_job_title': jobTitleController?.text,
+      'questions': answers.entries
+          .map((entry) => {
+                'question_id': entry.key,
+                'answers': entry.value,
+                'is_goal': entry.value
+                    is List<String>, // Check if this is a goal question
+              })
+          .toList(),
+    };
+
+    debugPrint(submissionData.toString());
+    // Send submissionData to API
   }
 
   @override
@@ -349,8 +392,9 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
                             horizontal: 16.0, vertical: 8.0),
                         child: SizedBox(
                             width: MediaQuery.of(context).size.width * 0.92,
-                            child: button(context,
-                                onPressed: () async {}, text: 'Submit')),
+                            child: button(context, onPressed: () async {
+                              _submitForm();
+                            }, text: 'Submit')),
                       ),
                     ),
                   ),
@@ -360,8 +404,12 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
 
   // Text Form Field for description (when type is 4)
   Widget _buildTextFormField(Question? question) {
-    // Create a TextEditingController to capture the input
     var _textEditingController = TextEditingController();
+
+    // If there's already an answer for this question, prefill the text field
+    if (answers[question?.id] != null) {
+      _textEditingController.text = answers[question!.id] as String;
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -377,43 +425,44 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
             }
             return null;
           },
+          onChanged: (value) {
+            // Update the global map with the text input
+            answers[question!.id!] = value;
+          },
         ),
       ],
     );
   }
 
-  // Single select dropdown
   Widget _buildSingleSelectDropdown(Question? question) => labelContainer(
-      label: question?.question ?? '',
-      width: MediaQuery.of(context).size.width * 1,
-      child: DropdownButtonFormField<String>(
-        items: question?.options
-            ?.map((option) => DropdownMenuItem<String>(
-                  value: option.value,
-                  child: Text(option.value ?? ''),
-                ))
-            .toList(),
-        hint: Text(
-          'Select',
-          style: TextStyle(
-            color: textColor,
-            fontSize: 15,
-            fontFamily: 'Roboto',
-            fontWeight: FontWeight.w400,
+        label: question?.question ?? '',
+        width: MediaQuery.of(context).size.width * 1,
+        child: DropdownButtonFormField<String>(
+          value: answers[question?.id] as String?,
+          items: question?.options
+              ?.map((option) => DropdownMenuItem<String>(
+                    value: option.value,
+                    child: Text(option.value ?? ''),
+                  ))
+              .toList(),
+          hint: Text(
+            'Select',
+            style: TextStyle(
+                color: textColor,
+                fontSize: 15,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.w400),
           ),
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+          ),
+          onChanged: (value) {
+            setState(() {
+              answers[question!.id!] = value;
+            });
+          },
         ),
-        style: TextStyle(
-          color: textColor,
-          fontSize: 15,
-          fontFamily: 'Roboto',
-          fontWeight: FontWeight.w400,
-        ),
-        decoration:
-            const InputDecoration(border: InputBorder.none, iconColor: black),
-        onChanged: (value) {
-          setState(() {});
-        },
-      ));
+      );
 
 // Multi select dropdown using MultiSelectDialogField
   Widget _buildMultiSelectDropdown(Question? question) {
@@ -473,43 +522,57 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
 
   // Boolean (Yes/No) radio buttons
   Widget _buildBooleanRadio(Question? question) {
-    // Ensure each question has its own stored value in the map
-    final questionId =
-        question?.id ?? 0; // Assuming each question has a unique 'id'
-    var selectedValue = selectedBooleanValues[questionId];
+    final questionId = question?.id ?? 0;
+    var selectedValue = answers[questionId];
 
     return labelContainer(
-        label: question?.question ?? '',
-        width: MediaQuery.of(context).size.width * 1,
-        child: Row(
-          children: question?.options
-                  ?.map((option) => Expanded(
-                        child: RadioListTile<bool>(
-                          title: Text(option.value ?? ''),
-                          value: option.value ==
-                              'Yes', // 'Yes' corresponds to true
-                          groupValue: selectedValue,
-                          onChanged: (value) {
-                            setState(() {
-                              // Store the selected value for this specific question
-                              selectedBooleanValues[questionId] = value;
-                            });
-                          },
-                        ),
-                      ))
-                  .toList() ??
-              [],
-        ));
+      label: question?.question ?? '',
+      width: MediaQuery.of(context).size.width * 1,
+      child: Row(
+        children: question?.options
+                ?.map((option) => Expanded(
+                      child: RadioListTile<bool>(
+                        title: Text(option.value ?? ''),
+                        value:
+                            option.value == 'Yes', // 'Yes' corresponds to true
+                        groupValue: selectedValue,
+                        onChanged: (value) {
+                          setState(() {
+                            // Store the selected value in the answers map
+                            answers[questionId] = value;
+                          });
+                        },
+                      ),
+                    ))
+                .toList() ??
+            [],
+      ),
+    );
+  }
+
+  void _onGoalSelectionChanged(int questionId, List<String> selectedItems) {
+    setState(() {
+      answers[questionId] = selectedItems;
+    });
   }
 
   Widget _buildGoalDropdown(Question? question) =>
-      DropdownWithMultiSelectAndAddNewItem(question: question);
+      DropdownWithMultiSelectAndAddNewItem(
+        question: question,
+        onSelectedItemsChanged: (selectedItems) {
+          _onGoalSelectionChanged(
+              question!.id!, selectedItems); // Pass selected values to parent
+        },
+      );
 }
 
 class DropdownWithMultiSelectAndAddNewItem extends StatefulWidget {
   final Question? question;
+  final Function(List<String>)
+      onSelectedItemsChanged; // Add callback for selected items
 
-  DropdownWithMultiSelectAndAddNewItem({this.question});
+  DropdownWithMultiSelectAndAddNewItem(
+      {this.question, required this.onSelectedItemsChanged});
 
   @override
   _DropdownWithMultiSelectAndAddNewItemState createState() =>
@@ -524,7 +587,6 @@ class _DropdownWithMultiSelectAndAddNewItemState
   @override
   void initState() {
     super.initState();
-    // Initialize items with the goals from the question options
     items =
         widget.question?.options?.map((opt) => opt.value ?? '').toList() ?? [];
   }
@@ -564,6 +626,8 @@ class _DropdownWithMultiSelectAndAddNewItemState
                   onConfirm: (values) {
                     setState(() {
                       selectedItems = List<String>.from(values);
+                      widget.onSelectedItemsChanged(
+                          selectedItems); // Notify parent about selected items
                     });
                   },
                   chipDisplay: MultiSelectChipDisplay(
@@ -578,11 +642,12 @@ class _DropdownWithMultiSelectAndAddNewItemState
                     onTap: (value) {
                       setState(() {
                         selectedItems.remove(value);
+                        widget.onSelectedItemsChanged(
+                            selectedItems); // Notify parent about updated selected items
                       });
                     },
                   ),
                 ),
-                // Multi-select dropdown
                 ElevatedButton(
                   onPressed: () {
                     _showAddNewItemDialog(context);
@@ -606,14 +671,13 @@ class _DropdownWithMultiSelectAndAddNewItemState
                     ],
                   ),
                 ),
-                12.height,
+                SizedBox(height: 12),
               ],
             ),
           ),
         ],
       );
 
-  // Show dialog to add new goal
   void _showAddNewItemDialog(BuildContext context) {
     var _textController = TextEditingController();
 
@@ -641,6 +705,8 @@ class _DropdownWithMultiSelectAndAddNewItemState
                   items.add(_textController.text);
                   selectedItems
                       .add(_textController.text); // Auto-select new item
+                  widget.onSelectedItemsChanged(
+                      selectedItems); // Notify parent about new selected items
                 }
               });
               Navigator.of(context).pop();
@@ -651,6 +717,7 @@ class _DropdownWithMultiSelectAndAddNewItemState
     );
   }
 }
+
 
 // class ConsentRaiseScreen extends StatefulWidget {
 //   const ConsentRaiseScreen({super.key});
