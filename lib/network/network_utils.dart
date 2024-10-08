@@ -133,17 +133,30 @@ void apidebugPrint({
 }) {
   debugPrint(
       '┌───────────────────────────────────────────────────────────────────────────────────────────────────────');
-  debugPrint('\u001b[93m Url: \u001B[39m $url');
-  debugPrint('\u001b[93m endPoint: \u001B[39m \u001B[1m$endPoint\u001B[22m');
-  debugPrint('\u001b[93m header: \u001B[39m \u001b[96m$headers\u001B[39m');
+  debugPrint('\u001b[ Url: \u001B[ $url');
+  debugPrint('\u001b[ endPoint: \u001B[ \u001B[$endPoint\u001B[');
+  debugPrint('\u001b[ header: \u001B[ \u001b[$headers\u001B[');
   debugPrint(
-      '\u001b[93m QueryParams: \u001B[39m \u001b[96m$queryParams\u001B[39m');
-  debugPrint('\u001b[93m Request: \u001B[39m \u001b[96m$request\u001B[39m');
-  debugPrint(statusCode == 200 ? '\u001b[32m' : '\u001b[31m');
+      '\u001b[ QueryParams: \u001B[ \u001b[$queryParams\u001B[');
+  debugPrint('\u001b[ Request: \u001B[ \u001b[$request\u001B[');
+  debugPrint(statusCode == 200 ? '\u001b[' : '\u001b[');
   debugPrint('Response ($methodtype) $statusCode: $responseBody');
-  debugPrint('\u001B[0m');
+  debugPrint('\u001B[');
   debugPrint(
       '└───────────────────────────────────────────────────────────────────────────────────────────────────────');
+  // debugPrint(
+  //     '┌───────────────────────────────────────────────────────────────────────────────────────────────────────');
+  // debugPrint('\u001b[93m Url: \u001B[39m $url');
+  // debugPrint('\u001b[93m endPoint: \u001B[39m \u001B[1m$endPoint\u001B[22m');
+  // debugPrint('\u001b[93m header: \u001B[39m \u001b[96m$headers\u001B[39m');
+  // debugPrint(
+  //     '\u001b[93m QueryParams: \u001B[39m \u001b[96m$queryParams\u001B[39m');
+  // debugPrint('\u001b[93m Request: \u001B[39m \u001b[96m$request\u001B[39m');
+  // debugPrint(statusCode == 200 ? '\u001b[32m' : '\u001b[31m');
+  // debugPrint('Response ($methodtype) $statusCode: $responseBody');
+  // debugPrint('\u001B[0m');
+  // debugPrint(
+  //     '└───────────────────────────────────────────────────────────────────────────────────────────────────────');
 }
 
 Map<String, String> buildHeaderTokens({

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/models/category_dropdown_response.dart';
 import 'package:jumpvalues/models/question_model.dart';
@@ -21,6 +23,7 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   ConsentQuestionResponse? consentQuestionResponse;
   Map<int, dynamic> answers = {};
+  Map<int, dynamic> goalAnswer = {};
 
   bool loading = false;
   // TextEditing Controllers
@@ -29,6 +32,7 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
   TextEditingController? jobTitleController;
   TextEditingController? emailController;
   TextEditingController? phoneNumberController;
+  TextEditingController? descriptionController;
 
   // FocusNodes for each field
   final FocusNode companyNameFocusNode = FocusNode();
@@ -53,10 +57,24 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
 //   // Map to store error messages for each field
   Map<String, dynamic> fieldErrors = {};
 
-  // Store selected boolean values for each question by question ID
-  Map<int, bool?> selectedBooleanValues = {};
+// Store selected boolean values for each question by question ID
+  // Map<int, bool?> selectedBooleanValues = {};
+  Map<int, List<int>> selectedMultiSelectValues = {};
+  // For multi-select dropdowns
 
   List<Category> sponsors = [];
+
+  bool buttonLoad = false;
+
+  Category? selectedSponsorId;
+  bool isOtherSelected = false;
+  String? otherSponsorErrorText;
+  String? selectSponsorError;
+  String? otherGoalString;
+  final FocusNode selectedSponsorIdFocusNode = FocusNode();
+
+  TextEditingController otherSponsorController = TextEditingController();
+  final FocusNode otherSponsorFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -68,6 +86,7 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
     jobTitleController = TextEditingController();
     emailController = TextEditingController();
     phoneNumberController = TextEditingController();
+    descriptionController = TextEditingController();
     getGoalsDropdown();
     // Fetch questions API
     consentQuestionsApi();
@@ -80,6 +99,7 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
     jobTitleController?.dispose();
     emailController?.dispose();
     phoneNumberController?.dispose();
+    descriptionController?.dispose();
 
     super.dispose();
   }
@@ -140,95 +160,276 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
     }
   }
 
-  void _submitForm() async {
-    int companysizez;
+// String generateJson() {
+//         int companysizez;
+//     if (selectedCompanySize == 'Under 100 Employees') {
+//       companysizez = 0;
+//     } else if (selectedCompanySize == '101-250 Employees') {
+//       companysizez = 1;
+//     } else if (selectedCompanySize == '251-750 Employees') {
+//       companysizez = 2;
+//     } else if (selectedCompanySize == '751-999 Employees') {
+//       companysizez = 3;
+//     } else if (selectedCompanySize == '1,000+ Employees') {
+//       companysizez = 4;
+//     } else {
+//       companysizez = 0; // Default case
+//     }
+
+//   List<Map<String, dynamic>> questions = [];
+//   answers.forEach((questionId, answer) {
+//     bool isGoal = (answer is List && answer.contains(0)); // Check for "other" goal
+
+//     Map<String, dynamic> questionData = {
+//       "question_id": questionId.toString(),
+//       "answers": answer is List ? answer.map((e) => e is bool ? (e ? 1 : 0) : e).toList() : [answer],
+//       "is_goal": isGoal,
+//     };
+
+//     if (isGoal) {
+//       questionData["other_goals"] = goalAnswer[questionId] ?? "";
+//     }
+
+//     questions.add(questionData);
+//   });
+
+//   Map<String, dynamic> jsonData = {
+//     "email": emailController?.text ?? "",
+//     "country_code": sCountryCode,
+//     "phone": sPhoneNumber ?? "",
+//     "contact_name": contactNameController?.text ?? "",
+//     "company_name": companyNameController?.text ?? "",
+//     "company_size": companysizez,
+//     "contact_job_title": jobTitleController?.text ?? "",
+//     "questions": questions,
+//   };
+
+//   return jsonEncode(jsonData);
+// }
+// String generateJson() {
+//   int companySize;
+
+//   // Determine company size based on selected value
+//   if (selectedCompanySize == 'Under 100 Employees') {
+//     companySize = 0;
+//   } else if (selectedCompanySize == '101-250 Employees') {
+//     companySize = 1;
+//   } else if (selectedCompanySize == '251-750 Employees') {
+//     companySize = 2;
+//   } else if (selectedCompanySize == '751-999 Employees') {
+//     companySize = 3;
+//   } else if (selectedCompanySize == '1,000+ Employees') {
+//     companySize = 4;
+//   } else {
+//     companySize = 0; // Default case
+//   }
+
+//   // Create a list to hold question data
+//   List<Map<String, dynamic>> questions = [];
+
+//   // Iterate over answers
+//   answers.forEach((questionId, answer) {
+//     bool isGoal = (answer is List && answer.contains(0)); // Check if it's a goal with "Other"
+
+//     Map<String, dynamic> questionData = {
+//       "question_id": questionId.toString(),
+//       "is_goal": isGoal,
+//     };
+
+//     // Handle different answer cases
+//     if (answer is List) {
+//       if (answer.length == 1) {
+//         var singleAnswer = answer[0];
+
+//         // Handle Boolean type
+//         if (singleAnswer is bool) {
+//           questionData["answers"] = singleAnswer ? '0' : '1'; // Convert to 1/0 for true/false
+//         }
+//         // Handle String type
+//         else if (singleAnswer is String) {
+//           questionData["answers"] = singleAnswer; // Single text answer
+//         }
+//         // Handle other types (e.g., int)
+//         else {
+//           questionData["answers"] = singleAnswer; // Single number answer
+//         }
+//       } else {
+//         // More than one answer, keep it as a list
+//         questionData["answers"] = answer.map((e) => e is bool ? (e ? 1 : 0) : e).toList();
+//       }
+//     } else {
+//       // If the answer is a single boolean, number, or string, handle it accordingly
+//       if (answer is bool) {
+//         questionData["answers"] = answer ? '0' : '1'; // Convert to 1/0 for true/false
+//       } else {
+//         questionData["answers"] = answer; // For text or number, assign directly
+//       }
+//     }
+
+//     // Add "other_goals" if it's a goal with "Other" selected
+//     if (isGoal) {
+//       questionData["other_goals"] = goalAnswer[questionId] ?? "";
+//     }
+
+//     // Add this question data to the questions list
+//     questions.add(questionData);
+//   });
+  String generateJson() {
+    int companySize;
+
+    // Determine company size based on selected value
     if (selectedCompanySize == 'Under 100 Employees') {
-      companysizez = 0;
+      companySize = 0;
     } else if (selectedCompanySize == '101-250 Employees') {
-      companysizez = 1;
+      companySize = 1;
     } else if (selectedCompanySize == '251-750 Employees') {
-      companysizez = 2;
+      companySize = 2;
     } else if (selectedCompanySize == '751-999 Employees') {
-      companysizez = 3;
+      companySize = 3;
     } else if (selectedCompanySize == '1,000+ Employees') {
-      companysizez = 4;
+      companySize = 4;
     } else {
-      companysizez = 0;
+      companySize = 0; // Default case
     }
 
-    final submissionData = {
-      'email': emailController?.text,
-      'country_code': sCountryCode,
-      'phone': sPhoneNumber,
-      'contact_name': contactNameController?.text ?? '',
-      'company_name': companyNameController?.text ?? '',
-      'company_size': companysizez,
-      'contact_job_title': jobTitleController?.text ?? '',
-      'questions': answers.entries.map((entry) {
-        // Check if the entry value is a list and determine if it's a goal question
-        bool isGoal = entry.value is List<String> &&
-            (entry.value as List<String>).isNotEmpty;
+    // Create a list to hold question data
+    List<Map<String, dynamic>> questions = [];
 
-        return {
-          'question_id': entry.key,
-          'answers': isGoal
-              ? entry.value // keep it as is if it's a list
-              : (entry.value is List<int>
-                  ? entry.value
-                  : entry.value
-                      .toString()), // handle different types of answers
-          if (isGoal && otherGoalString != null && otherGoalString!.isNotEmpty)
-            'other_goals':
-                otherGoalString, // Include only if it's a goal and otherGoalString is not empty
-          'is_goal': isGoal, // Boolean indicating if it’s a goal question
-        };
-      }).toList(),
+    // Iterate over answers
+    answers.forEach((questionId, answer) {
+      bool isGoal = (answer is List &&
+          answer.contains(0)); // Check if it's a goal with "Other"
+
+      Map<String, dynamic> questionData = {
+        "question_id": questionId.toString(),
+        "is_goal": isGoal,
+      };
+
+      // Handle different answer cases
+      if (answer is List) {
+        if (answer.length == 1) {
+          var singleAnswer = answer[0];
+
+          // Handle Boolean type
+          if (singleAnswer is bool) {
+            questionData["answers"] =
+                singleAnswer ? '0' : '1'; // Convert to 1/0 for true/false
+          }
+          // Handle String type
+          else if (singleAnswer is String) {
+            questionData["answers"] = singleAnswer; // Single text answer
+          }
+          // Handle other types (e.g., int)
+          else {
+            questionData["answers"] = singleAnswer; // Single number answer
+          }
+        } else {
+          // More than one answer, process the list
+          List answersList =
+              answer.map((e) => e is bool ? (e ? 1 : 0) : e).toList();
+
+          // If it's a goal and contains 0, remove 0 from the list
+          if (isGoal && answersList.contains(0)) {
+            answersList.removeWhere((element) => element == 0);
+          }
+
+          questionData["answers"] = answersList;
+        }
+      } else {
+        // If the answer is a single boolean, number, or string, handle it accordingly
+        if (answer is bool) {
+          questionData["answers"] =
+              answer ? '0' : '1'; // Convert to 1/0 for true/false
+        } else {
+          questionData["answers"] =
+              answer; // For text or number, assign directly
+        }
+      }
+
+      // Add "other_goals" if it's a goal with "Other" selected
+      if (isGoal) {
+        questionData["other_goals"] = goalAnswer[questionId] ?? "";
+      }
+
+      // Add this question data to the questions list
+      questions.add(questionData);
+    });
+
+    // Create the final JSON data
+    Map<String, dynamic> jsonData = {
+      "email": emailController?.text ?? "",
+      "country_code": sCountryCode,
+      "phone": sPhoneNumber ?? "",
+      "contact_name": contactNameController?.text ?? "",
+      "company_name": companyNameController?.text ?? "",
+      "company_size": companySize,
+      "contact_job_title": jobTitleController?.text ?? "",
+      "questions": questions,
     };
 
-    debugPrint(submissionData.toString());
-    // Send submissionData to API
+    return jsonEncode(jsonData); // Return the encoded JSON string
+  }
 
+  void _submitForm() async {
+    // final submissionData = {
+    //   'email': emailController?.text,
+    //   'country_code': sCountryCode,
+    //   'phone': sPhoneNumber,
+    //   'contact_name': contactNameController?.text ?? '',
+    //   'company_name': companyNameController?.text ?? '',
+    //   'company_size': companysizez,
+    //   'contact_job_title': jobTitleController?.text ?? '',
+    //   'questions': answers.entries.map((entry) {
+    //     bool isGoal = false;
+    //     String otherGoals = '';
+
+    //     // Check if the entry is a goal question
+    //     if (entry.value is List<String> && entry.value.isNotEmpty) {
+    //       isGoal = true;
+    //       otherGoals = otherGoalString ?? ''; // Capture the other goal text
+    //     }
+
+    //     // Create a JSON object for each question
+    //     return {
+    //       'question_id': entry.key,
+    //       'answers': isGoal
+    //           ? entry.value // Keep it as is if it's a list
+    //           : (entry.value is List<int>
+    //               ? entry.value
+    //               : entry.value
+    //                   .toString()), // Handle different types of answers
+    //       if (isGoal && otherGoals.isNotEmpty)
+    //         'other_goals':
+    //             otherGoals, // Include only if it's a goal and otherGoalString is not empty
+    //       'is_goal': isGoal, // Boolean indicating if it’s a goal question
+    //     };
+    //   }).toList(),
+    // };
+
+    debugPrint(generateJson().toString());
+
+    // Send submissionData to API
     setState(() {
-      loading = true;
+      buttonLoad = true;
     });
     try {
-      var response = await consentRaise(submissionData);
+      var response = await consentRaise(jsonDecode(generateJson()));
       debugPrint('consentQuestionsApi: Data fetched successfully');
 
       if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(
             context, StatusIndicator.success, response?.message ?? 'Success');
+        Navigator.of(context).pop();
       } else {
-        // debugPrint('consentQuestionsApi: Error response from API');
-        // SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-        //     response?.message ?? 'Something went wrong');
+        // Handle errors from the API response
         if (response?.errors?.isNotEmpty ?? false) {
-          // Set field errors and focus on the first error field
           response?.errors?.forEach((e) {
             fieldErrors[e.field ?? '0'] = e.message ?? '0';
           });
-          // Focus on the first error
-          if (fieldErrors.containsKey('email')) {
-            FocusScope.of(context).requestFocus(emailFocusNode);
-          } else if (fieldErrors.containsKey('country_code')) {
-            FocusScope.of(context).requestFocus(phoneNumberFocusNode);
-          } else if (fieldErrors.containsKey('phone')) {
-            FocusScope.of(context).requestFocus(phoneNumberFocusNode);
-          } else if (fieldErrors.containsKey('contact_name')) {
-            FocusScope.of(context).requestFocus(contactNameFocusNode);
-          } else if (fieldErrors.containsKey('company_name')) {
-            FocusScope.of(context).requestFocus(companyNameFocusNode);
-          } else if (fieldErrors.containsKey('company_size')) {
-            SnackBarHelper.showStatusSnackBar(
-              context,
-              StatusIndicator.error,
-              fieldErrors['company_size'] ?? 'Something went wrong',
-            );
-          } else if (fieldErrors.containsKey('contact_job_title')) {
-            FocusScope.of(context).requestFocus(jobTitleFocusNode);
-          }
+
+          // Focus on the first error field
+          _focusOnFirstError();
         } else {
-          // Handle other errors
           SnackBarHelper.showStatusSnackBar(
             context,
             StatusIndicator.error,
@@ -240,8 +441,29 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
       debugPrint('consentRaise error: $e');
     } finally {
       setState(() {
-        loading = false;
+        buttonLoad = false;
       });
+    }
+  }
+
+  void _focusOnFirstError() {
+    if (fieldErrors.containsKey('email')) {
+      FocusScope.of(context).requestFocus(emailFocusNode);
+    } else if (fieldErrors.containsKey('country_code') ||
+        fieldErrors.containsKey('phone')) {
+      FocusScope.of(context).requestFocus(phoneNumberFocusNode);
+    } else if (fieldErrors.containsKey('contact_name')) {
+      FocusScope.of(context).requestFocus(contactNameFocusNode);
+    } else if (fieldErrors.containsKey('company_name')) {
+      FocusScope.of(context).requestFocus(companyNameFocusNode);
+    } else if (fieldErrors.containsKey('company_size')) {
+      SnackBarHelper.showStatusSnackBar(
+        context,
+        StatusIndicator.error,
+        fieldErrors['company_size'] ?? 'Something went wrong',
+      );
+    } else if (fieldErrors.containsKey('contact_job_title')) {
+      FocusScope.of(context).requestFocus(jobTitleFocusNode);
     }
   }
 
@@ -473,6 +695,7 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
                                   height:
                                       MediaQuery.of(context).size.height * 0.02,
                                 ),
+                                // In your ListView.builder:
                                 ListView.builder(
                                   itemCount:
                                       consentQuestionResponse?.data?.length,
@@ -530,7 +753,7 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
                               } else {
                                 return;
                               }
-                            }, text: 'Submit')),
+                            }, isLoading: buttonLoad, text: 'Submit')),
                       ),
                     ),
                   ),
@@ -540,11 +763,9 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
 
   // Text Form Field for description (when type is 4)
   Widget _buildTextFormField(Question? question) {
-    var _textEditingController = TextEditingController();
-
     // If there's already an answer for this question, prefill the text field
     if (answers[question?.id] != null) {
-      _textEditingController.text = answers[question!.id] as String;
+      descriptionController?.text = answers[question!.id] as String;
     }
 
     return Column(
@@ -552,14 +773,11 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
       children: [
         textFormField(
           label: question?.question ?? '',
-          controller: _textEditingController,
+          controller: descriptionController,
           hintText: 'Enter Description',
           maxLines: 3,
           validator: (value) {
-            // if (value == null || value.isEmpty) {
-            //   return 'Please enter a response';
-            // }
-            // return null;
+            // Add validation if necessary
           },
           onChanged: (value) {
             // Update the global map with the text input
@@ -600,28 +818,23 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
         ),
       );
 
-// Multi select dropdown using MultiSelectDialogField
   Widget _buildMultiSelectDropdown(Question? question) {
-    // Create a list of selected values
-    var selectedValues = <String>[];
-
-    // Extract the options from the question (assuming options contain 'value' for labels)
-    var categories =
-        question?.options?.map((opt) => opt.value ?? '').toList() ?? [];
+    // Map options to categories, assuming category.id is an int
+    var categories = question?.options?.map((opt) => opt).toList() ?? [];
+    var selectedValues = selectedMultiSelectValues[question!.id] ?? [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         labelContainer(
-          label: question?.question ?? '',
+          label: question.question ?? '',
           width: MediaQuery.of(context).size.width * 1,
           child: MultiSelectDialogField(
-            items: categories
-                .map((category) => MultiSelectItem(category, category))
-                .toList(),
+            items: categories.map((category) {
+              return MultiSelectItem(category.id, category.value ?? '');
+            }).toList(),
             title: const Text('Select'),
             buttonIcon: const Icon(Icons.arrow_drop_down),
-            decoration: const BoxDecoration(),
             buttonText: Text(
               'Select',
               style: TextStyle(
@@ -631,10 +844,14 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
                 fontWeight: FontWeight.w400,
               ),
             ),
+            initialValue: selectedValues, // Ensure this is List<int>
             onConfirm: (values) {
               setState(() {
-                // Update the selected values based on user input
-                selectedValues = List<String>.from(values);
+                // Use List<int> instead of List<String> to handle IDs correctly
+                selectedMultiSelectValues[question.id!] =
+                    List<int>.from(values);
+                answers[question.id!] = selectedMultiSelectValues[
+                    question.id!]; // Store IDs in the answers map
               });
             },
             chipDisplay: MultiSelectChipDisplay(
@@ -645,8 +862,7 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
                   fontWeight: FontWeight.bold),
               onTap: (value) {
                 setState(() {
-                  // Remove tapped value from the selected values
-                  selectedValues.remove(value);
+                  selectedMultiSelectValues[question.id!]!.remove(value);
                 });
               },
             ),
@@ -656,31 +872,34 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
     );
   }
 
-  // Boolean (Yes/No) radio buttons
+// Change selectedBooleanValues to store int
+  Map<int, int?> selectedBooleanValues = {};
+
   Widget _buildBooleanRadio(Question? question) {
     final questionId = question?.id ?? 0;
-    var selectedValue = answers[questionId];
+    var selectedValue = selectedBooleanValues[questionId];
 
     return labelContainer(
       label: question?.question ?? '',
       width: MediaQuery.of(context).size.width * 1,
       child: Row(
-        children: question?.options
-                ?.map((option) => Expanded(
-                      child: RadioListTile<bool>(
-                        title: Text(option.value ?? ''),
-                        value:
-                            option.value == 'Yes', // 'Yes' corresponds to true
-                        groupValue: selectedValue,
-                        onChanged: (value) {
-                          setState(() {
-                            // Store the selected value in the answers map
-                            answers[questionId] = value;
-                          });
-                        },
-                      ),
-                    ))
-                .toList() ??
+        children: question?.options?.map((option) {
+              bool isYes = option.value == 'Yes';
+              return Expanded(
+                child: RadioListTile<int>(
+                  title: Text(option.value ?? ''),
+                  value: isYes ? 1 : 0, // Use 1 for Yes and 0 for No
+                  groupValue: selectedValue, // Ensure this is int?
+                  onChanged: (value) {
+                    setState(() {
+                      selectedBooleanValues[questionId] = value; // Store as int
+                      answers[questionId] =
+                          value == 1; // Convert to bool for answers
+                    });
+                  },
+                ),
+              );
+            }).toList() ??
             [],
       ),
     );
@@ -689,23 +908,14 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
   void _onGoalSelectionChanged(
       int questionId, List<Category> selectedItems, String other) {
     setState(() {
-      // Convert selected items to the desired format (IDs or names)
       if (selectedItems.isNotEmpty) {
         answers[questionId] = selectedItems.map((item) => item.id).toList();
+      } else {
+        answers[questionId] = []; // Handle empty selection case
       }
-      otherGoalString = other;
+      goalAnswer[questionId] = other; // Handle "other" goal text
     });
   }
-
-  Category? selectedSponsorId;
-  bool isOtherSelected = false;
-  String? otherSponsorErrorText;
-  String? selectSponsorError;
-  String? otherGoalString;
-  final FocusNode selectedSponsorIdFocusNode = FocusNode();
-
-  TextEditingController otherSponsorController = TextEditingController();
-  final FocusNode otherSponsorFocusNode = FocusNode();
 
   Widget _buildGoalDropdown(Question? question) =>
       DropdownWithMultiSelectAndAddNewItem(
