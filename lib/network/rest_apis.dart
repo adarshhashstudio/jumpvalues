@@ -555,3 +555,15 @@ Future<ConsentQuestionResponse?> consentQuestions() async {
   }
   return response;
 }
+
+Future<CategoryDropdownResponse?> goalsDropdown() async {
+  CategoryDropdownResponse? response;
+  try {
+    response = CategoryDropdownResponse.fromJson(await handleResponse(
+        await buildHttpResponse('goals/dropdown',
+            isAuth: true, method: HttpMethodType.get)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}
