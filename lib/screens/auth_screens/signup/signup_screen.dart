@@ -446,7 +446,7 @@ class _SignupScreenState extends State<SignupScreen>
       // if (selectedSponsorId?.id != null && selectedSponsorId?.id == 0) {
       //   addIfNotEmpty('additional_sponsor', otherSponsorController.text);
       // }
-      addIfNotEmpty('additional_sponsor', otherSponsorController.text);
+      addIfNotEmpty('additional_sponsor', otherSponsorController.text.isEmpty?'other':otherSponsorController.text);
     }
 
     var endPoint = isCoach ? 'auth/coach/register' : 'auth/client/register';

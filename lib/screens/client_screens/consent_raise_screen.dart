@@ -32,7 +32,9 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
   TextEditingController? jobTitleController;
   TextEditingController? emailController;
   TextEditingController? phoneNumberController;
-  TextEditingController? descriptionController;
+
+  // Map to store TextEditingControllers for each question of type 4
+  Map<int, TextEditingController> descriptionControllers = {};
 
   // FocusNodes for each field
   final FocusNode companyNameFocusNode = FocusNode();
@@ -86,10 +88,16 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
     jobTitleController = TextEditingController();
     emailController = TextEditingController();
     phoneNumberController = TextEditingController();
-    descriptionController = TextEditingController();
+    
     getGoalsDropdown();
     // Fetch questions API
     consentQuestionsApi();
+    // Initialize the descriptionControllers based on the questions
+    consentQuestionResponse?.data?.forEach((question) {
+      if (question.type == 4) {
+        descriptionControllers[question.id!] = TextEditingController();
+      }
+    });
   }
 
   @override
@@ -99,7 +107,11 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
     jobTitleController?.dispose();
     emailController?.dispose();
     phoneNumberController?.dispose();
-    descriptionController?.dispose();
+
+    // Dispose all the TextEditingControllers to prevent memory leaks
+    descriptionControllers.forEach((key, controller) {
+      controller.dispose();
+    });
 
     super.dispose();
   }
@@ -160,120 +172,6 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
     }
   }
 
-// String generateJson() {
-//         int companysizez;
-//     if (selectedCompanySize == 'Under 100 Employees') {
-//       companysizez = 0;
-//     } else if (selectedCompanySize == '101-250 Employees') {
-//       companysizez = 1;
-//     } else if (selectedCompanySize == '251-750 Employees') {
-//       companysizez = 2;
-//     } else if (selectedCompanySize == '751-999 Employees') {
-//       companysizez = 3;
-//     } else if (selectedCompanySize == '1,000+ Employees') {
-//       companysizez = 4;
-//     } else {
-//       companysizez = 0; // Default case
-//     }
-
-//   List<Map<String, dynamic>> questions = [];
-//   answers.forEach((questionId, answer) {
-//     bool isGoal = (answer is List && answer.contains(0)); // Check for "other" goal
-
-//     Map<String, dynamic> questionData = {
-//       "question_id": questionId.toString(),
-//       "answers": answer is List ? answer.map((e) => e is bool ? (e ? 1 : 0) : e).toList() : [answer],
-//       "is_goal": isGoal,
-//     };
-
-//     if (isGoal) {
-//       questionData["other_goals"] = goalAnswer[questionId] ?? "";
-//     }
-
-//     questions.add(questionData);
-//   });
-
-//   Map<String, dynamic> jsonData = {
-//     "email": emailController?.text ?? "",
-//     "country_code": sCountryCode,
-//     "phone": sPhoneNumber ?? "",
-//     "contact_name": contactNameController?.text ?? "",
-//     "company_name": companyNameController?.text ?? "",
-//     "company_size": companysizez,
-//     "contact_job_title": jobTitleController?.text ?? "",
-//     "questions": questions,
-//   };
-
-//   return jsonEncode(jsonData);
-// }
-// String generateJson() {
-//   int companySize;
-
-//   // Determine company size based on selected value
-//   if (selectedCompanySize == 'Under 100 Employees') {
-//     companySize = 0;
-//   } else if (selectedCompanySize == '101-250 Employees') {
-//     companySize = 1;
-//   } else if (selectedCompanySize == '251-750 Employees') {
-//     companySize = 2;
-//   } else if (selectedCompanySize == '751-999 Employees') {
-//     companySize = 3;
-//   } else if (selectedCompanySize == '1,000+ Employees') {
-//     companySize = 4;
-//   } else {
-//     companySize = 0; // Default case
-//   }
-
-//   // Create a list to hold question data
-//   List<Map<String, dynamic>> questions = [];
-
-//   // Iterate over answers
-//   answers.forEach((questionId, answer) {
-//     bool isGoal = (answer is List && answer.contains(0)); // Check if it's a goal with "Other"
-
-//     Map<String, dynamic> questionData = {
-//       "question_id": questionId.toString(),
-//       "is_goal": isGoal,
-//     };
-
-//     // Handle different answer cases
-//     if (answer is List) {
-//       if (answer.length == 1) {
-//         var singleAnswer = answer[0];
-
-//         // Handle Boolean type
-//         if (singleAnswer is bool) {
-//           questionData["answers"] = singleAnswer ? '0' : '1'; // Convert to 1/0 for true/false
-//         }
-//         // Handle String type
-//         else if (singleAnswer is String) {
-//           questionData["answers"] = singleAnswer; // Single text answer
-//         }
-//         // Handle other types (e.g., int)
-//         else {
-//           questionData["answers"] = singleAnswer; // Single number answer
-//         }
-//       } else {
-//         // More than one answer, keep it as a list
-//         questionData["answers"] = answer.map((e) => e is bool ? (e ? 1 : 0) : e).toList();
-//       }
-//     } else {
-//       // If the answer is a single boolean, number, or string, handle it accordingly
-//       if (answer is bool) {
-//         questionData["answers"] = answer ? '0' : '1'; // Convert to 1/0 for true/false
-//       } else {
-//         questionData["answers"] = answer; // For text or number, assign directly
-//       }
-//     }
-
-//     // Add "other_goals" if it's a goal with "Other" selected
-//     if (isGoal) {
-//       questionData["other_goals"] = goalAnswer[questionId] ?? "";
-//     }
-
-//     // Add this question data to the questions list
-//     questions.add(questionData);
-//   });
   String generateJson() {
     int companySize;
 
@@ -761,27 +659,23 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
               ),
       );
 
-  // Text Form Field for description (when type is 4)
   Widget _buildTextFormField(Question? question) {
-    // If there's already an answer for this question, prefill the text field
-    if (answers[question?.id] != null) {
-      descriptionController?.text = answers[question!.id] as String;
-    }
-
+    final controller = descriptionControllers[question!.id!];
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         textFormField(
-          label: question?.question ?? '',
-          controller: descriptionController,
+          label: question.question ?? '',
+          controller: controller,
           hintText: 'Enter Description',
           maxLines: 3,
           validator: (value) {
-            // Add validation if necessary
+            // Add validation logic if necessary
           },
           onChanged: (value) {
-            // Update the global map with the text input
-            answers[question!.id!] = value;
+            // Update the global answers map with the text input
+            answers[question.id!] = value;
           },
         ),
       ],
