@@ -421,35 +421,79 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
   }
 
   /// Question Type 3 - Followed Up Question
-  /// If the question is followed up then on the bases of question values Yes/No
-  /// In this method more UI will made
-  Widget _buildFollowedUpQuestionTypeThree(Question? question) {
-    final questionId = question?.id ?? 0;
-    var selectedValue = selectedBooleanValues[questionId];
+  /// If the question is followed up then based on question values Yes/No
+  /// In this method more UI will be made
+  Widget _buildFollowedUpQuestionTypeThree(Question? mainQuestion) {
+    final questionId = mainQuestion?.id ?? 0;
+    var selectedValue = selectedBooleanValues[
+        questionId]; // Get the selected value for this question
 
-    return labelContainer(
-      label: question?.question ?? '',
-      width: MediaQuery.of(context).size.width * 1,
-      child: Row(
-        children: question?.options?.map((option) {
-              var isYes = option.value == 'Yes';
-              return Expanded(
-                child: RadioListTile<int>(
-                  title: Text(option.value ?? ''),
-                  value: isYes ? 1 : 0, // Use 1 for Yes and 0 for No
-                  groupValue: selectedValue, // Ensure this is int?
-                  onChanged: (value) {
-                    setState(() {
-                      selectedBooleanValues[questionId] = value; // Store as int
-                      answers[questionId] =
-                          value == 1; // Convert to bool for answers
-                    });
-                  },
-                ),
+    return Column(
+      children: [
+        labelContainer(
+          label: mainQuestion?.question ?? '',
+          width: MediaQuery.of(context).size.width,
+          child: Row(
+            children: mainQuestion?.options
+                    ?.map((option) => Expanded(
+                          child: RadioListTile<int>(
+                            title: Text(option.value ??
+                                ''), // Display the option label (Yes/No)
+                            value: option.id ??
+                                0, // Use the option's id as the value
+                            groupValue:
+                                selectedValue, // Ensure this holds the selected option's id
+                            onChanged: (value) {
+                              setState(() {
+                                if (value != null) {
+                                  selectedBooleanValues[questionId] = value;
+
+                                  // Store true for 'Yes' and false for 'No' in answers
+                                  answers[questionId] = value ==
+                                      0; // Assuming 0 is Yes, and 1 is No
+                                } else {
+                                  // Handle the null case
+                                  selectedBooleanValues[questionId] =
+                                      0; // Default or fallback value
+                                  answers[questionId] =
+                                      false; // Default to false when no value is selected
+                                }
+
+                                // Check for follow-up question visibility
+                                _updateFollowUpVisibility(mainQuestion);
+                              });
+                            },
+                          ),
+                        ))
+                    .toList() ??
+                [],
+          ),
+        ),
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.02,
+        ),
+        // Only show follow-up questions if they exist and are visible
+        if (mainQuestion?.followUpQuestions != null &&
+            mainQuestion!.followUpQuestions!.isNotEmpty)
+          ListView.builder(
+            itemCount: mainQuestion.followUpQuestions!.length,
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              final innQuestion = mainQuestion.followUpQuestions![index];
+              // Determine if this follow-up question should be shown
+              final shouldShowFollowUp = _shouldShowFollowUp(
+                innQuestion,
+                selectedValue,
+                innQuestion.dependentQId!,
               );
-            }).toList() ??
-            [],
-      ),
+
+              return shouldShowFollowUp
+                  ? _buildFollowUpQuestion(innQuestion)
+                  : const SizedBox(); // Return an empty container if the question shouldn't be shown
+            },
+          ),
+      ],
     );
   }
 
@@ -462,51 +506,170 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
         [];
     var selectedValues = selectedMultiSelectValues[question!.id] ?? [];
 
-    return DropdownWithMultipleSelection(
-      label: question.question ?? 'Select options',
-      options: categories, // Pass the converted categories
-      initialSelectedValues: selectedValues,
-      onSelectionChanged: (selectedValues) {
-        setState(() {
-          // Save the selected values in the answers and selectedMultiSelectValues maps
-          selectedMultiSelectValues[question.id!] = selectedValues;
-          answers[question.id!] = selectedValues;
-        });
-      },
+    return Column(
+      children: [
+        DropdownWithMultipleSelection(
+          label: question.question ?? 'Select options',
+          options: categories, // Pass the converted categories
+          initialSelectedValues: selectedValues,
+          onSelectionChanged: (selectedValues) {
+            setState(() {
+              // Save the selected values in the answers and selectedMultiSelectValues maps
+              selectedMultiSelectValues[question.id!] = selectedValues;
+              answers[question.id!] = selectedValues;
+            });
+          },
+        ),
+
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.02,
+        ),
+        // Only show follow-up questions if they exist and are visible
+        if (question.followUpQuestions != null &&
+            question.followUpQuestions!.isNotEmpty)
+          ListView.builder(
+            itemCount: question.followUpQuestions!.length,
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              final innQuestion = question.followUpQuestions![index];
+              // Determine if this follow-up question should be shown
+              final shouldShowFollowUp =
+                  _shouldShowFollowUpForMultipleSelection(
+                innQuestion,
+                selectedValues,
+                innQuestion.dependentQId!,
+              );
+
+              return shouldShowFollowUp
+                  ? _buildFollowUpQuestion(innQuestion)
+                  : const SizedBox(); // Return an empty container if the question shouldn't be shown
+            },
+          ),
+      ],
     );
   }
 
   /// Question Type 1 - Single Selection Dropdown
-  Widget _buildSingleSelectDropdownTypeOne(Question? question) =>
-      labelContainer(
-        label: question?.question ?? '',
-        width: MediaQuery.of(context).size.width * 1,
-        child: DropdownButtonFormField<String>(
-          value: answers[question?.id] as String?,
-          items: question?.options
-              ?.map((option) => DropdownMenuItem<String>(
-                    value: option.value,
-                    child: Text(option.value ?? ''),
-                  ))
-              .toList(),
-          hint: Text(
-            'Select',
-            style: TextStyle(
-                color: textColor,
-                fontSize: 15,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.w400),
+  Widget _buildSingleSelectDropdownTypeOne(Question? question) => Column(
+        children: [
+          labelContainer(
+            label: question?.question ?? '',
+            width: MediaQuery.of(context).size.width * 1,
+            child: DropdownButtonFormField<int>(
+              value: answers[question?.id] as int?,
+              items: question?.options
+                  ?.map((option) => DropdownMenuItem<int>(
+                        value: option.id,
+                        child: Text(option.value ?? ''),
+                      ))
+                  .toList(),
+              hint: Text(
+                'Select',
+                style: TextStyle(
+                    color: textColor,
+                    fontSize: 15,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w400),
+              ),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  answers[question!.id!] = value;
+                  debugPrint(
+                      'Question Type 1 - Single Selection Dropdown: answers[question.id] : ${answers[question.id!]}');
+                });
+              },
+            ),
           ),
-          decoration: const InputDecoration(
-            border: InputBorder.none,
+
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.02,
           ),
-          onChanged: (value) {
-            setState(() {
-              answers[question!.id!] = value;
-            });
-          },
-        ),
+          // Only show follow-up questions if they exist and are visible
+          if (question?.followUpQuestions != null &&
+              question!.followUpQuestions!.isNotEmpty)
+            ListView.builder(
+              itemCount: question.followUpQuestions!.length,
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                final innQuestion = question.followUpQuestions![index];
+                // Determine if this follow-up question should be shown
+                final shouldShowFollowUp = _shouldShowFollowUp(
+                  innQuestion,
+                  answers[question.id!],
+                  innQuestion.dependentQId!,
+                );
+
+                return shouldShowFollowUp
+                    ? _buildFollowUpQuestion(innQuestion)
+                    : const SizedBox(); // Return an empty container if the question shouldn't be shown
+              },
+            ),
+        ],
       );
+
+  /// Check if the follow-up question should be shown based on selected values
+  bool _shouldShowFollowUpForMultipleSelection(
+      Question followUpQuestion, List<int> selectedValueList, int questionId) {
+    if (followUpQuestion.dependentQId == questionId &&
+        followUpQuestion.dependencyValue != null) {
+      // Assuming dependency_value is a String representation of the selected value
+      // Convert dependencyValue to an int for comparison
+      int dependencyValueInt =
+          int.tryParse(followUpQuestion.dependencyValue!) ?? -1;
+
+      // Check if the selectedValueList contains the dependencyValue
+      return selectedValueList.contains(dependencyValueInt);
+    }
+    return false; // Default to not showing if conditions are not met
+  }
+
+  /// Check if the follow-up question should be shown based on selected values
+  bool _shouldShowFollowUp(
+      Question followUpQuestion, int? selectedValue, int questionId) {
+    if (followUpQuestion.dependentQId == questionId &&
+        followUpQuestion.dependencyValue != null) {
+      // Assuming dependency_value is a String representation of the selected value
+      return selectedValue.toString() == followUpQuestion.dependencyValue;
+    }
+    return false; // Default to not showing if conditions are not met
+  }
+
+  /// Method to update any visibility conditions for follow-up questions
+  void _updateFollowUpVisibility(Question? mainQuestion) {
+    // This can be used for additional logic in the future if needed
+    // For now, it can remain empty or contain any necessary updates you want
+    setState(() {
+      // This forces a rebuild; currently, the logic for showing follow-ups is handled directly in the builder
+    });
+  }
+
+  /// Method to build follow-up questions based on their type
+  Widget _buildFollowUpQuestion(Question followUpQuestion) {
+    switch (followUpQuestion.type) {
+      case 1: // Question Type 1 - Single Selection Dropdown
+        return _buildSingleSelectDropdownTypeOne(followUpQuestion)
+            .paddingBottom(20);
+      case 2: // Question Type 2 - Multiple Selection Dropdown
+        return _buildMultiSelectDropdownTypeTwo(followUpQuestion)
+            .paddingBottom(20);
+      case 3: // Question Type 3 - Followed Up (Yes/No) radio buttons
+        return _buildFollowedUpQuestionTypeThree(followUpQuestion)
+            .paddingBottom(20);
+      case 4: // Question Type 4 - Make Number of textFormFields
+        return _buildNumberOfTextFormFieldTypeFour(followUpQuestion)
+            .paddingBottom(20);
+      case 5: // Question Type 5 - Extendable Multiple Selection Dropdown
+        return _buildMultipleSelectionDropdownTypeFive(followUpQuestion)
+            .paddingBottom(20);
+      default:
+        return const SizedBox(); // Return empty container for unsupported types
+    }
+  }
 
   @override
   void dispose() {
