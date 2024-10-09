@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:jumpvalues/models/category_dropdown_response.dart';
 import 'package:jumpvalues/models/question_model.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
+import 'package:jumpvalues/screens/client_screens/widgets.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
-import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
-import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
-import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class ConsentRaiseScreen extends StatefulWidget {
@@ -22,27 +20,21 @@ class ConsentRaiseScreen extends StatefulWidget {
 class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   ConsentQuestionResponse? consentQuestionResponse;
+  bool loading = false;
+  bool buttonLoad = false;
+
   Map<int, dynamic> answers = {};
   Map<int, dynamic> goalAnswer = {};
 
-  bool loading = false;
-  // TextEditing Controllers
-  TextEditingController? companyNameController;
-  TextEditingController? contactNameController;
-  TextEditingController? jobTitleController;
-  TextEditingController? emailController;
+  // Controllers and focus nodes
+  final _controllers = <String, TextEditingController>{};
+  final _focusNodes = <String, FocusNode>{};
   TextEditingController? phoneNumberController;
-
+  String sPhoneNumber = '';
+  String sCountryCode = '';
+  FocusNode phoneNumberFocusNode = FocusNode();
   // Map to store TextEditingControllers for each question of type 4
   Map<int, TextEditingController> descriptionControllers = {};
-
-  // FocusNodes for each field
-  final FocusNode companyNameFocusNode = FocusNode();
-  final FocusNode contactNameFocusNode = FocusNode();
-  final FocusNode jobTitleFocusNode = FocusNode();
-  final FocusNode emailFocusNode = FocusNode();
-  final FocusNode phoneNumberFocusNode = FocusNode();
-
   // Dropdown values for Company Size
   String? selectedCompanySize;
   List<String> companySizeList = [
@@ -52,21 +44,11 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
     '751-999 Employees',
     '1,000+ Employees'
   ];
-
-  String sPhoneNumber = '';
-  String sCountryCode = '';
-
-//   // Map to store error messages for each field
+  // Map to store error messages for each field
   Map<String, dynamic> fieldErrors = {};
-
-// Store selected boolean values for each question by question ID
-  // Map<int, bool?> selectedBooleanValues = {};
+  // Store selected boolean values for each question by question ID
   Map<int, List<int>> selectedMultiSelectValues = {};
-  // For multi-select dropdowns
-
   List<Category> sponsors = [];
-
-  bool buttonLoad = false;
 
   Category? selectedSponsorId;
   bool isOtherSelected = false;
@@ -78,21 +60,14 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
   TextEditingController otherSponsorController = TextEditingController();
   final FocusNode otherSponsorFocusNode = FocusNode();
 
+  // Change selectedBooleanValues to store int
+  Map<int, int?> selectedBooleanValues = {};
+
   @override
   void initState() {
     super.initState();
-
-    // Initialize controllers
-    companyNameController = TextEditingController();
-    contactNameController = TextEditingController();
-    jobTitleController = TextEditingController();
-    emailController = TextEditingController();
-    phoneNumberController = TextEditingController();
-    
-    getGoalsDropdown();
-    // Fetch questions API
-    consentQuestionsApi();
-    // Initialize the descriptionControllers based on the questions
+    _initializeControllers();
+    _fetchConsentData();
     consentQuestionResponse?.data?.forEach((question) {
       if (question.type == 4) {
         descriptionControllers[question.id!] = TextEditingController();
@@ -100,270 +75,127 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
     });
   }
 
-  @override
-  void dispose() {
-    companyNameController?.dispose();
-    contactNameController?.dispose();
-    jobTitleController?.dispose();
-    emailController?.dispose();
-    phoneNumberController?.dispose();
-
-    // Dispose all the TextEditingControllers to prevent memory leaks
-    descriptionControllers.forEach((key, controller) {
-      controller.dispose();
-    });
-
-    super.dispose();
+  void _initializeControllers() {
+    const fields = [
+      'companyName',
+      'contactName',
+      'jobTitle',
+      'email',
+    ];
+    for (var field in fields) {
+      _controllers[field] = TextEditingController();
+      _focusNodes[field] = FocusNode();
+    }
   }
 
-  Future<void> getGoalsDropdown() async {
-    setState(() {
-      loading = true;
-    });
+  Future<void> _fetchConsentData() async {
+    setState(() => loading = true);
+    await _getGoalsDropdown();
+    await _consentQuestionsApi();
+    setState(() => loading = false);
+  }
 
+  Future<void> _getGoalsDropdown() async {
     try {
       var response = await goalsDropdown();
       if (response?.status == true) {
-        setState(() {
-          sponsors.clear();
-          sponsors = response?.data ?? [];
-        });
+        sponsors = response?.data ?? [];
       } else {
-        if (response?.message != null) {
-          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-              response?.message ?? errorSomethingWentWrong);
-        }
+        _showError(response?.message ?? 'Something went wrong');
       }
     } catch (e) {
-      debugPrint('sponsorsDropdown Error: $e');
-    } finally {
-      setState(() {
-        loading = false;
-      });
+      debugPrint('Error fetching goals: $e');
     }
   }
 
-  Future<void> consentQuestionsApi() async {
-    debugPrint('consentQuestionsApi: Fetching data...');
-    setState(() {
-      loading = true;
-    });
+  Future<void> _consentQuestionsApi() async {
     try {
       var response = await consentQuestions();
-      debugPrint('consentQuestionsApi: Data fetched successfully');
-
       if (response?.status == true) {
-        setState(() {
-          consentQuestionResponse = response;
-          debugPrint('consentQuestionsApi: Data set in state');
-        });
+        setState(() => consentQuestionResponse = response);
       } else {
-        debugPrint('consentQuestionsApi: Error response from API');
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong');
+        _showError(response?.message ?? 'Failed to fetch data');
       }
     } catch (e) {
-      debugPrint('consentQuestionsApi error: $e');
-    } finally {
-      setState(() {
-        loading = false;
-        debugPrint('consentQuestionsApi: Loading set to false');
-      });
+      debugPrint('Error fetching consent questions: $e');
     }
   }
 
-  String generateJson() {
-    int companySize;
-
-    // Determine company size based on selected value
-    if (selectedCompanySize == 'Under 100 Employees') {
-      companySize = 0;
-    } else if (selectedCompanySize == '101-250 Employees') {
-      companySize = 1;
-    } else if (selectedCompanySize == '251-750 Employees') {
-      companySize = 2;
-    } else if (selectedCompanySize == '751-999 Employees') {
-      companySize = 3;
-    } else if (selectedCompanySize == '1,000+ Employees') {
-      companySize = 4;
-    } else {
-      companySize = 0; // Default case
-    }
-
-    // Create a list to hold question data
-    List<Map<String, dynamic>> questions = [];
-
-    // Iterate over answers
-    answers.forEach((questionId, answer) {
-      bool isGoal = (answer is List &&
-          answer.contains(0)); // Check if it's a goal with "Other"
-
-      Map<String, dynamic> questionData = {
-        "question_id": questionId.toString(),
+  String _generateJson() {
+    final companySize = _getCompanySizeIndex(selectedCompanySize);
+    final questions = answers.entries.map((entry) {
+      final isGoal = entry.value is List && entry.value.contains(0);
+      final answerData = _formatAnswer(entry.value, isGoal);
+      return {
+        "question_id": entry.key.toString(),
         "is_goal": isGoal,
+        "answers": answerData,
+        if (isGoal) "other_goals": goalAnswer[entry.key] ?? ""
       };
+    }).toList();
 
-      // Handle different answer cases
-      if (answer is List) {
-        if (answer.length == 1) {
-          var singleAnswer = answer[0];
-
-          // Handle Boolean type
-          if (singleAnswer is bool) {
-            questionData["answers"] =
-                singleAnswer ? '0' : '1'; // Convert to 1/0 for true/false
-          }
-          // Handle String type
-          else if (singleAnswer is String) {
-            questionData["answers"] = singleAnswer; // Single text answer
-          }
-          // Handle other types (e.g., int)
-          else {
-            questionData["answers"] = singleAnswer; // Single number answer
-          }
-        } else {
-          // More than one answer, process the list
-          List answersList =
-              answer.map((e) => e is bool ? (e ? 1 : 0) : e).toList();
-
-          // If it's a goal and contains 0, remove 0 from the list
-          if (isGoal && answersList.contains(0)) {
-            answersList.removeWhere((element) => element == 0);
-          }
-
-          questionData["answers"] = answersList;
-        }
-      } else {
-        // If the answer is a single boolean, number, or string, handle it accordingly
-        if (answer is bool) {
-          questionData["answers"] =
-              answer ? '0' : '1'; // Convert to 1/0 for true/false
-        } else {
-          questionData["answers"] =
-              answer; // For text or number, assign directly
-        }
-      }
-
-      // Add "other_goals" if it's a goal with "Other" selected
-      if (isGoal) {
-        questionData["other_goals"] = goalAnswer[questionId] ?? "";
-      }
-
-      // Add this question data to the questions list
-      questions.add(questionData);
-    });
-
-    // Create the final JSON data
-    Map<String, dynamic> jsonData = {
-      "email": emailController?.text ?? "",
-      "country_code": sCountryCode,
-      "phone": sPhoneNumber ?? "",
-      "contact_name": contactNameController?.text ?? "",
-      "company_name": companyNameController?.text ?? "",
+    return jsonEncode({
+      "email": _controllers['email']?.text ?? "",
+      "contact_name": _controllers['contactName']?.text ?? "",
+      "company_name": _controllers['companyName']?.text ?? "",
       "company_size": companySize,
-      "contact_job_title": jobTitleController?.text ?? "",
-      "questions": questions,
-    };
-
-    return jsonEncode(jsonData); // Return the encoded JSON string
+      "contact_job_title": _controllers['jobTitle']?.text ?? "",
+      "questions": questions
+    });
   }
 
-  void _submitForm() async {
-    // final submissionData = {
-    //   'email': emailController?.text,
-    //   'country_code': sCountryCode,
-    //   'phone': sPhoneNumber,
-    //   'contact_name': contactNameController?.text ?? '',
-    //   'company_name': companyNameController?.text ?? '',
-    //   'company_size': companysizez,
-    //   'contact_job_title': jobTitleController?.text ?? '',
-    //   'questions': answers.entries.map((entry) {
-    //     bool isGoal = false;
-    //     String otherGoals = '';
+  int _getCompanySizeIndex(String? companySize) {
+    const companySizes = {
+      'Under 100 Employees': 0,
+      '101-250 Employees': 1,
+      '251-750 Employees': 2,
+      '751-999 Employees': 3,
+      '1,000+ Employees': 4
+    };
+    return companySizes[companySize] ?? 0;
+  }
 
-    //     // Check if the entry is a goal question
-    //     if (entry.value is List<String> && entry.value.isNotEmpty) {
-    //       isGoal = true;
-    //       otherGoals = otherGoalString ?? ''; // Capture the other goal text
-    //     }
+  dynamic _formatAnswer(dynamic answer, bool isGoal) {
+    if (answer is List) {
+      return answer.map((e) => e is bool ? (e ? 1 : 0) : e).toList();
+    } else if (answer is bool) {
+      return answer ? '1' : '0';
+    }
+    return answer;
+  }
 
-    //     // Create a JSON object for each question
-    //     return {
-    //       'question_id': entry.key,
-    //       'answers': isGoal
-    //           ? entry.value // Keep it as is if it's a list
-    //           : (entry.value is List<int>
-    //               ? entry.value
-    //               : entry.value
-    //                   .toString()), // Handle different types of answers
-    //       if (isGoal && otherGoals.isNotEmpty)
-    //         'other_goals':
-    //             otherGoals, // Include only if it's a goal and otherGoalString is not empty
-    //       'is_goal': isGoal, // Boolean indicating if it’s a goal question
-    //     };
-    //   }).toList(),
-    // };
+  void _showError(String message) {
+    SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error, message);
+  }
 
-    debugPrint(generateJson().toString());
-
-    // Send submissionData to API
-    setState(() {
-      buttonLoad = true;
-    });
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => buttonLoad = true);
     try {
-      var response = await consentRaise(jsonDecode(generateJson()));
-      debugPrint('consentQuestionsApi: Data fetched successfully');
-
+      var response = await consentRaise(jsonDecode(_generateJson()));
       if (response?.status == true) {
         SnackBarHelper.showStatusSnackBar(
             context, StatusIndicator.success, response?.message ?? 'Success');
         Navigator.of(context).pop();
       } else {
-        // Handle errors from the API response
-        if (response?.errors?.isNotEmpty ?? false) {
-          response?.errors?.forEach((e) {
-            fieldErrors[e.field ?? '0'] = e.message ?? '0';
-          });
-
-          // Focus on the first error field
-          _focusOnFirstError();
-        } else {
-          SnackBarHelper.showStatusSnackBar(
-            context,
-            StatusIndicator.error,
-            response?.message ?? 'Something went wrong',
-          );
-        }
+        _showError(response?.message ?? 'Failed to submit');
       }
     } catch (e) {
-      debugPrint('consentRaise error: $e');
+      debugPrint('Error submitting consent: $e');
     } finally {
-      setState(() {
-        buttonLoad = false;
-      });
+      setState(() => buttonLoad = false);
     }
   }
 
-  void _focusOnFirstError() {
-    if (fieldErrors.containsKey('email')) {
-      FocusScope.of(context).requestFocus(emailFocusNode);
-    } else if (fieldErrors.containsKey('country_code') ||
-        fieldErrors.containsKey('phone')) {
-      FocusScope.of(context).requestFocus(phoneNumberFocusNode);
-    } else if (fieldErrors.containsKey('contact_name')) {
-      FocusScope.of(context).requestFocus(contactNameFocusNode);
-    } else if (fieldErrors.containsKey('company_name')) {
-      FocusScope.of(context).requestFocus(companyNameFocusNode);
-    } else if (fieldErrors.containsKey('company_size')) {
-      SnackBarHelper.showStatusSnackBar(
-        context,
-        StatusIndicator.error,
-        fieldErrors['company_size'] ?? 'Something went wrong',
-      );
-    } else if (fieldErrors.containsKey('contact_job_title')) {
-      FocusScope.of(context).requestFocus(jobTitleFocusNode);
-    }
-  }
+  Widget _buildTextFormField(String label, String field, String hint) =>
+      textFormField(
+        label: label,
+        hintText: hint,
+        controller: _controllers[field],
+        focusNode: _focusNodes[field],
+        validator: (value) =>
+            value == null || value.isEmpty ? '$label cannot be empty' : null,
+      ).paddingBottom(16);
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -394,9 +226,7 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
           ),
         ),
         body: loading
-            ? const Center(
-                child:
-                    CircularProgressIndicator()) // Center the loading indicator
+            ? const Center(child: CircularProgressIndicator())
             : Stack(
                 children: [
                   SingleChildScrollView(
@@ -404,112 +234,19 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
                       key: _formKey,
                       child: Column(
                         children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.01,
-                          ),
-                          const Text(
-                            'Thank you for choosing Jump for your organization\'s coaching and consulting needs. Please complete this form, and we\'ll reach out to discuss your goals and how we can help.',
-                            style: TextStyle(fontSize: 12),
-                            textAlign: TextAlign.center,
-                          ).paddingSymmetric(horizontal: 16),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.01,
-                          ),
-                          divider(),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.02,
-                          ),
-                          // Company Name
+                          header(context),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Column(
                               children: [
-                                textFormField(
-                                  label: 'Company Name *',
-                                  labelTextBoxSpace: 8,
-                                  controller: companyNameController,
-                                  focusNode: companyNameFocusNode,
-                                  errorText: fieldErrors['company_name'],
-                                  onChanged: (value) {},
-                                  keyboardType: TextInputType.name,
-                                  hintText: 'Enter Company Name',
-                                  textInputAction: TextInputAction.next,
-                                  validator: (v) {
-                                    if (v == null || v.isEmpty) {
-                                      return 'Company name should not be empty.';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.02,
-                                ),
-                                // Contact Name
-                                textFormField(
-                                  label: 'Contact Name *',
-                                  labelTextBoxSpace: 8,
-                                  autofocus: false,
-                                  controller: contactNameController,
-                                  focusNode: contactNameFocusNode,
-                                  errorText: fieldErrors['contact_name'],
-                                  onChanged: (value) {},
-                                  keyboardType: TextInputType.name,
-                                  hintText: 'Enter Contact Name',
-                                  textInputAction: TextInputAction.next,
-                                  validator: (v) {
-                                    if (v == null || v.isEmpty) {
-                                      return 'Contact name should not be empty.';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.02,
-                                ),
-                                // Primary Contact Job Title
-                                textFormField(
-                                  label: 'Primary Contact Job Title *',
-                                  labelTextBoxSpace: 8,
-                                  autofocus: false,
-                                  controller: jobTitleController,
-                                  focusNode: jobTitleFocusNode,
-                                  errorText: fieldErrors['job_title'],
-                                  onChanged: (value) {},
-                                  keyboardType: TextInputType.text,
-                                  hintText: 'Enter Job Title',
-                                  textInputAction: TextInputAction.next,
-                                  validator: (v) {
-                                    if (v == null || v.isEmpty) {
-                                      return 'Job title should not be empty.';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.02,
-                                ),
-                                // Email Address
-                                textFormField(
-                                  label: 'Email Address *',
-                                  labelTextBoxSpace: 8,
-                                  autofocus: false,
-                                  controller: emailController,
-                                  focusNode: emailFocusNode,
-                                  errorText: fieldErrors['email'],
-                                  onChanged: (value) {},
-                                  keyboardType: TextInputType.emailAddress,
-                                  hintText: 'Enter Email Address',
-                                  textInputAction: TextInputAction.next,
-                                  validator: (email) =>
-                                      validateEmail(email ?? ''),
-                                ),
-                                SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.02,
-                                ),
+                                _buildTextFormField('Company Name*',
+                                    'companyName', 'Enter Company Name'),
+                                _buildTextFormField('Contact Name*',
+                                    'contactName', 'Enter Contact Name'),
+                                _buildTextFormField('Job Title*', 'jobTitle',
+                                    'Enter Job Title'),
+                                _buildTextFormField(
+                                    'Email Address*', 'email', 'Enter Email'),
                                 textFormField(
                                   label: 'Phone Number *',
                                   labelTextBoxSpace: 8,
@@ -533,7 +270,6 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
                                     setState(() {
                                       sPhoneNumber =
                                           maskedTextToNumber(phoneNumber);
-                                      // sCountryCodeClient = phoneNumber.countryCode;
                                       sCountryCode = '+1';
                                     });
                                   },
@@ -549,7 +285,6 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
                                   height:
                                       MediaQuery.of(context).size.height * 0.02,
                                 ),
-                                // Company Size Dropdown
                                 labelContainer(
                                   label: 'Company Size',
                                   labelTextBoxSpace: 8,
@@ -593,7 +328,6 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
                                   height:
                                       MediaQuery.of(context).size.height * 0.02,
                                 ),
-                                // In your ListView.builder:
                                 ListView.builder(
                                   itemCount:
                                       consentQuestionResponse?.data?.length,
@@ -603,22 +337,25 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
                                     final question =
                                         consentQuestionResponse?.data?[index];
                                     switch (question?.type) {
-                                      case 1: // Single select dropdown
-                                        return _buildSingleSelectDropdown(
+                                      case 1: // Question Type 1 - Single Selection Dropdown
+                                        return _buildSingleSelectDropdownTypeOne(
                                                 question)
                                             .paddingBottom(20);
-                                      case 2: // Multi select dropdown
-                                        return _buildMultiSelectDropdown(
+                                      case 2: // Question Type 2 - Multiple Selection Dropdown
+                                        return _buildMultiSelectDropdownTypeTwo(
                                                 question)
                                             .paddingBottom(20);
-                                      case 3: // Boolean (Yes/No) radio buttons
-                                        return _buildBooleanRadio(question)
+                                      case 3: // Question Type 3 - Followed Up (Yes/No) radio buttons
+                                        return _buildFollowedUpQuestionTypeThree(
+                                                question)
                                             .paddingBottom(20);
-                                      case 4: // Empty Text Form Field
-                                        return _buildTextFormField(question)
+                                      case 4: // Question Type 4 - Make Number of textFormFields
+                                        return _buildNumberOfTextFormFieldTypeFour(
+                                                question)
                                             .paddingBottom(20);
-                                      case 5: // Goal (Extendable dropdown)
-                                        return _buildGoalDropdown(question)
+                                      case 5: // Question Type 5 - Extendable Multiple Selection Dropdown
+                                        return _buildMultipleSelectionDropdownTypeFive(
+                                                question)
                                             .paddingBottom(20);
                                       default:
                                         return const SizedBox(); // Return empty container for unsupported types
@@ -636,53 +373,112 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
                       ),
                     ),
                   ),
-                  Positioned(
-                    bottom: 16,
-                    child: Container(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 8.0),
-                        child: SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.92,
-                            child: button(context, onPressed: () async {
-                              hideKeyboard(context);
-                              if (_formKey.currentState!.validate()) {
-                                _submitForm();
-                              } else {
-                                return;
-                              }
-                            }, isLoading: buttonLoad, text: 'Submit')),
-                      ),
-                    ),
-                  ),
+                  submitConsentButton(context, buttonLoading: buttonLoad,
+                      onPressed: () async {
+                    hideKeyboard(context);
+                    if (_formKey.currentState!.validate()) {
+                      await _submitForm();
+                    } else {
+                      return;
+                    }
+                  }),
                 ],
               ),
       );
 
-  Widget _buildTextFormField(Question? question) {
+  /// Question Type 5 - Extendable Multiple Selection Dropdown
+  Widget _buildMultipleSelectionDropdownTypeFive(Question? question) =>
+      DropdownWithMultiSelectAndAddNewItem(
+        question: question,
+        goalslistfromapi: sponsors, // List fetched from API
+        onSelectedItemsChanged: (selectedItems, otherSponsorText) {
+          setState(() {
+            if (selectedItems.isNotEmpty) {
+              answers[question!.id!] =
+                  selectedItems.map((item) => item.id).toList();
+            } else {
+              answers[question!.id!] = []; // Handle empty selection case
+            }
+            goalAnswer[question.id!] =
+                otherSponsorText; // Handle "other" goal text
+          });
+        },
+      );
+
+  /// Question Type 4 - Make Number of textFormFields
+  Widget _buildNumberOfTextFormFieldTypeFour(Question? question) {
     final controller = descriptionControllers[question!.id!];
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        textFormField(
-          label: question.question ?? '',
-          controller: controller,
-          hintText: 'Enter Description',
-          maxLines: 3,
-          validator: (value) {
-            // Add validation logic if necessary
-          },
-          onChanged: (value) {
-            // Update the global answers map with the text input
-            answers[question.id!] = value;
-          },
-        ),
-      ],
+    return textFormField(
+      label: question.question ?? '',
+      controller: controller,
+      hintText: 'Enter Description',
+      maxLines: 3,
+      onChanged: (value) {
+        // Update the global answers map with the text input
+        answers[question.id!] = value;
+      },
     );
   }
 
-  Widget _buildSingleSelectDropdown(Question? question) => labelContainer(
+  /// Question Type 3 - Followed Up Question
+  /// If the question is followed up then on the bases of question values Yes/No
+  /// In this method more UI will made
+  Widget _buildFollowedUpQuestionTypeThree(Question? question) {
+    final questionId = question?.id ?? 0;
+    var selectedValue = selectedBooleanValues[questionId];
+
+    return labelContainer(
+      label: question?.question ?? '',
+      width: MediaQuery.of(context).size.width * 1,
+      child: Row(
+        children: question?.options?.map((option) {
+              var isYes = option.value == 'Yes';
+              return Expanded(
+                child: RadioListTile<int>(
+                  title: Text(option.value ?? ''),
+                  value: isYes ? 1 : 0, // Use 1 for Yes and 0 for No
+                  groupValue: selectedValue, // Ensure this is int?
+                  onChanged: (value) {
+                    setState(() {
+                      selectedBooleanValues[questionId] = value; // Store as int
+                      answers[questionId] =
+                          value == 1; // Convert to bool for answers
+                    });
+                  },
+                ),
+              );
+            }).toList() ??
+            [],
+      ),
+    );
+  }
+
+  /// Question Type 2 - Multiple Selection Dropdown
+  Widget _buildMultiSelectDropdownTypeTwo(Question? question) {
+    // Convert List<Option> to List<Category>
+    var categories = question?.options
+            ?.map((option) => Category(id: option.id, name: option.value))
+            .toList() ??
+        [];
+    var selectedValues = selectedMultiSelectValues[question!.id] ?? [];
+
+    return DropdownWithMultipleSelection(
+      label: question.question ?? 'Select options',
+      options: categories, // Pass the converted categories
+      initialSelectedValues: selectedValues,
+      onSelectionChanged: (selectedValues) {
+        setState(() {
+          // Save the selected values in the answers and selectedMultiSelectValues maps
+          selectedMultiSelectValues[question.id!] = selectedValues;
+          answers[question.id!] = selectedValues;
+        });
+      },
+    );
+  }
+
+  /// Question Type 1 - Single Selection Dropdown
+  Widget _buildSingleSelectDropdownTypeOne(Question? question) =>
+      labelContainer(
         label: question?.question ?? '',
         width: MediaQuery.of(context).size.width * 1,
         child: DropdownButtonFormField<String>(
@@ -712,241 +508,11 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
         ),
       );
 
-  Widget _buildMultiSelectDropdown(Question? question) {
-    // Map options to categories, assuming category.id is an int
-    var categories = question?.options?.map((opt) => opt).toList() ?? [];
-    var selectedValues = selectedMultiSelectValues[question!.id] ?? [];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        labelContainer(
-          label: question.question ?? '',
-          width: MediaQuery.of(context).size.width * 1,
-          child: MultiSelectDialogField(
-            items: categories.map((category) {
-              return MultiSelectItem(category.id, category.value ?? '');
-            }).toList(),
-            title: const Text('Select'),
-            buttonIcon: const Icon(Icons.arrow_drop_down),
-            buttonText: Text(
-              'Select',
-              style: TextStyle(
-                color: textColor,
-                fontSize: 15,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            initialValue: selectedValues, // Ensure this is List<int>
-            onConfirm: (values) {
-              setState(() {
-                // Use List<int> instead of List<String> to handle IDs correctly
-                selectedMultiSelectValues[question.id!] =
-                    List<int>.from(values);
-                answers[question.id!] = selectedMultiSelectValues[
-                    question.id!]; // Store IDs in the answers map
-              });
-            },
-            chipDisplay: MultiSelectChipDisplay(
-              chipColor: Theme.of(context).cardColor,
-              textStyle: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold),
-              onTap: (value) {
-                setState(() {
-                  selectedMultiSelectValues[question.id!]!.remove(value);
-                });
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-// Change selectedBooleanValues to store int
-  Map<int, int?> selectedBooleanValues = {};
-
-  Widget _buildBooleanRadio(Question? question) {
-    final questionId = question?.id ?? 0;
-    var selectedValue = selectedBooleanValues[questionId];
-
-    return labelContainer(
-      label: question?.question ?? '',
-      width: MediaQuery.of(context).size.width * 1,
-      child: Row(
-        children: question?.options?.map((option) {
-              bool isYes = option.value == 'Yes';
-              return Expanded(
-                child: RadioListTile<int>(
-                  title: Text(option.value ?? ''),
-                  value: isYes ? 1 : 0, // Use 1 for Yes and 0 for No
-                  groupValue: selectedValue, // Ensure this is int?
-                  onChanged: (value) {
-                    setState(() {
-                      selectedBooleanValues[questionId] = value; // Store as int
-                      answers[questionId] =
-                          value == 1; // Convert to bool for answers
-                    });
-                  },
-                ),
-              );
-            }).toList() ??
-            [],
-      ),
-    );
-  }
-
-  void _onGoalSelectionChanged(
-      int questionId, List<Category> selectedItems, String other) {
-    setState(() {
-      if (selectedItems.isNotEmpty) {
-        answers[questionId] = selectedItems.map((item) => item.id).toList();
-      } else {
-        answers[questionId] = []; // Handle empty selection case
-      }
-      goalAnswer[questionId] = other; // Handle "other" goal text
+  @override
+  void dispose() {
+    descriptionControllers.forEach((key, controller) {
+      controller.dispose();
     });
+    super.dispose();
   }
-
-  Widget _buildGoalDropdown(Question? question) =>
-      DropdownWithMultiSelectAndAddNewItem(
-        question: question,
-        goalslistfromapi: sponsors, // List fetched from API
-        onSelectedItemsChanged: (selectedItems, otherSponsorText) {
-          _onGoalSelectionChanged(
-              question!.id!, selectedItems, otherSponsorText);
-        },
-      );
-}
-
-class DropdownWithMultiSelectAndAddNewItem extends StatefulWidget {
-  // Callback for selected items
-
-  DropdownWithMultiSelectAndAddNewItem({
-    this.question,
-    required this.onSelectedItemsChanged,
-    required this.goalslistfromapi,
-  });
-  final Question? question;
-  final List<Category> goalslistfromapi; // Goals fetched from API
-  final Function(List<Category>, String) onSelectedItemsChanged;
-
-  @override
-  _DropdownWithMultiSelectAndAddNewItemState createState() =>
-      _DropdownWithMultiSelectAndAddNewItemState();
-}
-
-class _DropdownWithMultiSelectAndAddNewItemState
-    extends State<DropdownWithMultiSelectAndAddNewItem> {
-  List<Category> selectedItems = [];
-  bool isOtherSelected = false;
-  TextEditingController otherGoalController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    // Ensure "Other" is always part of the dropdown options
-    if (!widget.goalslistfromapi.contains(Category(id: 0, name: 'Other'))) {
-      widget.goalslistfromapi.add(Category(id: 0, name: 'Other'));
-    }
-    selectedItems = [];
-  }
-
-  @override
-  Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          labelContainer(
-            label: widget.question?.question ?? '',
-            width: MediaQuery.of(context).size.width * 1,
-            child: Column(
-              children: [
-                MultiSelectDialogField(
-                  items: widget.goalslistfromapi
-                      .map((item) => MultiSelectItem(item, item.name ?? ''))
-                      .toList(),
-                  title: const Text(
-                    'Select Goal(s)',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  buttonIcon: const Icon(Icons.arrow_drop_down),
-                  decoration: const BoxDecoration(),
-                  buttonText: const Text(
-                    'Select Goal(s)',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  onConfirm: (values) {
-                    setState(() {
-                      selectedItems = List<Category>.from(values);
-                      widget.onSelectedItemsChanged(
-                          selectedItems, otherGoalController.text);
-                      // Check if "Other" is selected
-                      isOtherSelected =
-                          selectedItems.any((element) => element.id == 0);
-                    });
-                  },
-                  chipDisplay: MultiSelectChipDisplay(
-                    items: selectedItems
-                        .map((item) => MultiSelectItem(item, item.name ?? ''))
-                        .toList(),
-                    chipColor: Theme.of(context).cardColor,
-                    textStyle: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold),
-                    onTap: (item) {
-                      setState(() {
-                        selectedItems.remove(item);
-                        widget.onSelectedItemsChanged(
-                            selectedItems, otherGoalController.text);
-                        // Update "Other" selection state
-                        isOtherSelected =
-                            selectedItems.any((element) => element.id == 0);
-                      });
-                    },
-                  ),
-                ),
-                if (isOtherSelected)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: textFormField(
-                      label: '',
-                      isLabel: false,
-                      controller: otherGoalController,
-                      hintText: 'Enter custom goal',
-                      errorText: otherGoalController.text.isEmpty
-                          ? 'This field is required.'
-                          : null,
-                      onChanged: (value) {
-                        if (value.isNotEmpty) {
-                          // Add custom goal dynamically
-                          setState(() {
-                            // Update the selected items with the custom goal
-                            var customGoal = Category(id: 0, name: value);
-                            if (!selectedItems.contains(customGoal)) {
-                              selectedItems.add(customGoal);
-                            }
-                            widget.onSelectedItemsChanged(
-                                selectedItems, otherGoalController.text);
-                          });
-                        }
-                      },
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      );
 }
