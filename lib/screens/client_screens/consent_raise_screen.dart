@@ -29,12 +29,14 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
   // Controllers and focus nodes
   final _controllers = <String, TextEditingController>{};
   final _focusNodes = <String, FocusNode>{};
-  TextEditingController? phoneNumberController;
-  String sPhoneNumber = '';
-  String sCountryCode = '';
-  FocusNode phoneNumberFocusNode = FocusNode();
   // Map to store TextEditingControllers for each question of type 4
   Map<int, TextEditingController> descriptionControllers = {};
+  TextEditingController otherSponsorController = TextEditingController();
+  final FocusNode otherSponsorFocusNode = FocusNode();
+  TextEditingController? phoneNumberController;
+  FocusNode phoneNumberFocusNode = FocusNode();
+  String sPhoneNumber = '';
+  String sCountryCode = '';
   // Dropdown values for Company Size
   String? selectedCompanySize;
   List<String> companySizeList = [
@@ -49,17 +51,12 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
   // Store selected boolean values for each question by question ID
   Map<int, List<int>> selectedMultiSelectValues = {};
   List<Category> sponsors = [];
-
   Category? selectedSponsorId;
   bool isOtherSelected = false;
   String? otherSponsorErrorText;
   String? selectSponsorError;
   String? otherGoalString;
   final FocusNode selectedSponsorIdFocusNode = FocusNode();
-
-  TextEditingController otherSponsorController = TextEditingController();
-  final FocusNode otherSponsorFocusNode = FocusNode();
-
   // Change selectedBooleanValues to store int
   Map<int, int?> selectedBooleanValues = {};
 
@@ -89,13 +86,13 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
   }
 
   Future<void> _fetchConsentData() async {
-    setState(() => loading = true);
     await _getGoalsDropdown();
-    await _consentQuestionsApi();
-    setState(() => loading = false);
   }
 
   Future<void> _getGoalsDropdown() async {
+    setState(() {
+      loading = true;
+    });
     try {
       var response = await goalsDropdown();
       if (response?.status == true) {
@@ -105,6 +102,8 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
       }
     } catch (e) {
       debugPrint('Error fetching goals: $e');
+    } finally {
+      await _consentQuestionsApi();
     }
   }
 
@@ -118,6 +117,10 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
       }
     } catch (e) {
       debugPrint('Error fetching consent questions: $e');
+    } finally {
+      setState(() {
+        loading = false;
+      });
     }
   }
 
@@ -706,6 +709,16 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
 
   @override
   void dispose() {
+    phoneNumberController?.dispose();
+    phoneNumberFocusNode.dispose();
+    otherSponsorController.dispose();
+    otherSponsorFocusNode.dispose();
+    _controllers.forEach((key, controller) {
+      controller.dispose();
+    });
+    _focusNodes.forEach((key, focusNode) {
+      focusNode.dispose();
+    });
     descriptionControllers.forEach((key, controller) {
       controller.dispose();
     });
