@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:jumpvalues/models/tutorial_video_module.dart';
+import 'package:jumpvalues/models/tutorial_video_modle.dart';
 import 'package:jumpvalues/screens/dashboard/video_player_screen.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/utils.dart';

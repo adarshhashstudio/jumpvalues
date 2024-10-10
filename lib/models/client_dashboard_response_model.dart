@@ -1,5 +1,5 @@
 import 'package:jumpvalues/models/corevalues_response_model.dart';
-import 'package:jumpvalues/models/tutorial_video_module.dart';
+import 'package:jumpvalues/models/tutorial_video_modle.dart';
 
 class ClientDashboardResponseModel {
   ClientDashboardResponseModel(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/models/coach_dashboard_response_model.dart';
-import 'package:jumpvalues/models/tutorial_video_module.dart';
+import 'package:jumpvalues/models/tutorial_video_modle.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/dashboard/tutorial_video_module.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';

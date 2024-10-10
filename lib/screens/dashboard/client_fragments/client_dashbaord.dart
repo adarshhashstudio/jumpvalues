@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/client_dashboard_response_model.dart';
-import 'package:jumpvalues/models/tutorial_video_module.dart';
+import 'package:jumpvalues/models/tutorial_video_modle.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/screens/client_screens/select_screen.dart';
 import 'package:jumpvalues/screens/dashboard/dashboard.dart';
