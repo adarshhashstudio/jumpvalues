@@ -19,8 +19,8 @@ class SocketAndNotifications {
       SocketAndNotifications._internal();
 
   IO.Socket? _socket;
-  final StreamController<String> _socketResponseController =
-      StreamController<String>.broadcast(); // Use broadcast for multiple listeners
+  final StreamController<String> _socketResponseController = StreamController<
+      String>.broadcast(); // Use broadcast for multiple listeners
 
   bool _isConnecting = false; // Flag to prevent multiple connection attempts
   bool _isConnected = false; // Flag to track connection status
@@ -42,7 +42,8 @@ class SocketAndNotifications {
 
     _isConnecting = true;
 
-    debugPrint('SOCKET IO ==> Attempting to connect with Token: ${appStore.token}');
+    debugPrint(
+        'SOCKET IO ==> Attempting to connect with Token: ${appStore.token}');
 
     // Create and configure the socket instance with new token
     _socket = IO.io(
@@ -50,7 +51,8 @@ class SocketAndNotifications {
       IO.OptionBuilder()
           .setTransports(['websocket']) // Use WebSocket for Flutter
           .disableAutoConnect() // Disable auto-connection to manage it manually
-          .setAuth({'token': appStore.token}).enableReconnection()  // Disable automatic reconnection
+          .setAuth({'token': appStore.token})
+          .enableReconnection() // Disable automatic reconnection
           .build(),
     );
 
@@ -68,13 +70,15 @@ class SocketAndNotifications {
     });
 
     _socket?.on('notification', (data) {
-      debugPrint('SOCKET IO ==> Data received from socket (notification): $data');
+      debugPrint(
+          'SOCKET IO ==> Data received from socket (notification): $data');
       _socketResponseController.add(data.toString());
       NotificationManager().showNotification(data['title'], data['message']);
     });
 
     _socket?.on('account_upgraded', (data) {
-      debugPrint('SOCKET IO ==> Data received from socket (account_upgraded): $data');
+      debugPrint(
+          'SOCKET IO ==> Data received from socket (account_upgraded): $data');
       tokenExpired(NavigationService.navigatorKey.currentState!.context);
     });
 

@@ -305,7 +305,10 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
               )));
       if (completed) {
         if (!appStore.userTypeCoach) {
-          showRatingDialog(context, sessionId: sessionId, coachId: coachId, onActionPerformed: widget.onActionPerformed);
+          showRatingDialog(context,
+              sessionId: sessionId,
+              coachId: coachId,
+              onActionPerformed: widget.onActionPerformed);
         }
         widget.onActionPerformed();
       }

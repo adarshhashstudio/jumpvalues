@@ -43,7 +43,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   @override
   void dispose() {
-    _youtubePlayerController.removeListener(_youtubePlayerListener); // Remove listener
+    _youtubePlayerController
+        .removeListener(_youtubePlayerListener); // Remove listener
     _youtubePlayerController.dispose();
     super.dispose();
   }

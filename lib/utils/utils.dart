@@ -104,7 +104,6 @@ void isTokenAvailable(BuildContext context) async {
   }
 }
 
-
 void tokenExpired(BuildContext context) async {
   await appStore.clearData();
   GoalsStore(goalsBox, ''); // Clear the userId on logout

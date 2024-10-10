@@ -176,7 +176,7 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
     // Handle formatting of answers based on type
     if (answer is List) {
       // Convert boolean to 1/0 for lists
-      List formattedList =
+      var formattedList =
           answer.map((e) => e is bool ? (e ? 1 : 0) : e).toList();
 
       // If it's a goal and other_goals is not empty, remove 0 from the list
@@ -657,7 +657,7 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
         followUpQuestion.dependencyValue != null) {
       // Assuming dependency_value is a String representation of the selected value
       // Convert dependencyValue to an int for comparison
-      int dependencyValueInt =
+      var dependencyValueInt =
           int.tryParse(followUpQuestion.dependencyValue!) ?? -1;
 
       // Check if the selectedValueList contains the dependencyValue

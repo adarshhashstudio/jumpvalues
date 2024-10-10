@@ -16,8 +16,6 @@ import 'package:jumpvalues/utils/string_extensions.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
 
-
-
 class Dashboard extends StatefulWidget {
   Dashboard({this.index, this.isRedirect = false});
   final int? index;
