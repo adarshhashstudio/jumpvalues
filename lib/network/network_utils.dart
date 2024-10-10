@@ -131,19 +131,30 @@ void apidebugPrint({
   String methodtype = '',
   bool hasRequest = false,
 }) {
+  void printFullText(String text) {
+    final pattern =
+        RegExp('.{1,800}'); // Split the content into chunks of 800 characters
+    pattern.allMatches(text).forEach((match) => debugPrint(match.group(0)));
+  }
+
   debugPrint(
       '┌───────────────────────────────────────────────────────────────────────────────────────────────────────');
-  debugPrint('\u001b[ Url: \u001B[ $url');
-  debugPrint('\u001b[ endPoint: \u001B[ \u001B[$endPoint\u001B[');
-  debugPrint('\u001b[ header: \u001B[ \u001b[$headers\u001B[');
-  debugPrint(
-      '\u001b[ QueryParams: \u001B[ \u001b[$queryParams\u001B[');
-  debugPrint('\u001b[ Request: \u001B[ \u001b[$request\u001B[');
-  debugPrint(statusCode == 200 ? '\u001b[' : '\u001b[');
-  debugPrint('Response ($methodtype) $statusCode: $responseBody');
-  debugPrint('\u001B[');
+  debugPrint('Url         ==> : $url\n');
+  debugPrint('──────────────────────────────────────\n');
+  debugPrint('EndPoint    ==> : $endPoint\n');
+  debugPrint('──────────────────────────────────────\n');
+  debugPrint('Headers     ==> : $headers\n');
+  debugPrint('──────────────────────────────────────\n');
+  debugPrint('QueryParams ==> : $queryParams\n');
+  debugPrint('──────────────────────────────────────\n');
+  printFullText('Request     ==> : $request\n');
+  debugPrint('──────────────────────────────────────\n');
+  printFullText(statusCode == 200
+      ? 'Response     ==> : ($methodtype) $statusCode: $responseBody'
+      : 'Error ($methodtype) $statusCode: $responseBody');
   debugPrint(
       '└───────────────────────────────────────────────────────────────────────────────────────────────────────');
+
   // debugPrint(
   //     '┌───────────────────────────────────────────────────────────────────────────────────────────────────────');
   // debugPrint('\u001b[93m Url: \u001B[39m $url');

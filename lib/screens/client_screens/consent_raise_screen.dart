@@ -123,28 +123,47 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
 
   String _generateJson() {
     final companySize = _getCompanySizeIndex(selectedCompanySize);
+
+    // Construct the questions list by iterating over all answer entries
     final questions = answers.entries.map((entry) {
-      final isGoal = entry.value is List && entry.value.contains(0);
-      final answerData = _formatAnswer(entry.value, isGoal);
+      final questionId = entry.key.toString(); // Question ID as a string
+      final answerValue = entry.value; // Current answer value
+      final isGoal =
+          _isGoalQuestion(answerValue); // Check if it's a goal-type question
+      final otherGoals =
+          goalAnswer[entry.key]; // Get other goals for this question
+      final formattedAnswer =
+          _formatAnswer(answerValue, isGoal, otherGoals); // Format the answer
+
+      // Build the question object
       return {
-        "question_id": entry.key.toString(),
+        "question_id": questionId,
         "is_goal": isGoal,
-        "answers": answerData,
-        if (isGoal) "other_goals": goalAnswer[entry.key] ?? ""
+        "answers": formattedAnswer,
+        if (isGoal) "other_goals": otherGoals ?? ""
       };
     }).toList();
 
+    // Construct the final JSON object for API submission
     return jsonEncode({
       "email": _controllers['email']?.text ?? "",
       "contact_name": _controllers['contactName']?.text ?? "",
       "company_name": _controllers['companyName']?.text ?? "",
       "company_size": companySize,
       "contact_job_title": _controllers['jobTitle']?.text ?? "",
+      "country_code": sCountryCode,
+      "phone": sPhoneNumber,
       "questions": questions
     });
   }
 
+  bool _isGoalQuestion(dynamic answer) {
+    // Check if the answer is a goal-type question
+    return answer is List && answer.contains(0);
+  }
+
   int _getCompanySizeIndex(String? companySize) {
+    // Mapping for company size options
     const companySizes = {
       'Under 100 Employees': 0,
       '101-250 Employees': 1,
@@ -152,16 +171,28 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
       '751-999 Employees': 3,
       '1,000+ Employees': 4
     };
-    return companySizes[companySize] ?? 0;
+    return companySizes[companySize] ?? 0; // Default to 0 if not found
   }
 
-  dynamic _formatAnswer(dynamic answer, bool isGoal) {
+  dynamic _formatAnswer(dynamic answer, bool isGoal, String? otherGoals) {
+    // Handle formatting of answers based on type
     if (answer is List) {
-      return answer.map((e) => e is bool ? (e ? 1 : 0) : e).toList();
+      // Convert boolean to 1/0 for lists
+      List formattedList =
+          answer.map((e) => e is bool ? (e ? 1 : 0) : e).toList();
+
+      // If it's a goal and other_goals is not empty, remove 0 from the list
+      if (isGoal && otherGoals != null && otherGoals.isNotEmpty) {
+        formattedList.remove(0);
+      }
+
+      return formattedList; // Return the formatted list
     } else if (answer is bool) {
-      return answer ? '1' : '0';
+      return answer ? '1' : '0'; // Convert boolean to string for single answers
+    } else if (answer is int) {
+      return answer.toString(); // Convert integers to string
     }
-    return answer;
+    return answer; // Return as is for strings or other types
   }
 
   void _showError(String message) {
