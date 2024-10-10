@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/models/coach_dashboard_response_model.dart';
+import 'package:jumpvalues/models/tutorial_video_module.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
-import 'package:jumpvalues/screens/dashboard/video_player_screen.dart';
+import 'package:jumpvalues/screens/dashboard/tutorial_video_module.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/utils/images.dart';
 import 'package:jumpvalues/utils/utils.dart';
@@ -147,41 +148,42 @@ class _CoachDashboardState extends State<CoachDashboard> {
                 ),
               ],
             ),
-            (videos == null || videos!.isEmpty)
-                ? dataNotFoundWidget(context, showImage: false).onTap(() {})
-                : ListView.builder(
-                    itemCount: videos?.length,
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemBuilder: (context, index) {
-                      final video = videos?[index];
-                      return ListTile(
-                        leading: IconButton(
-                          icon: const Icon(Icons.video_file, size: 35),
-                          onPressed: () {},
-                        ),
-                        trailing: const Icon(
-                          Icons.arrow_right,
-                          size: 30,
-                        ),
-                        contentPadding: EdgeInsets.zero,
-                        dense: true,
-                        title: Text(video?.title ?? ''),
-                        subtitle: Text(video?.slug ?? ''),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => VideoPlayerScreen(
-                                videoUrl: video?.url ?? '',
-                                title: video?.title ?? '',
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+            // (videos == null || videos!.isEmpty)
+            //     ? dataNotFoundWidget(context, showImage: false).onTap(() {})
+            //     : ListView.builder(
+            //         itemCount: videos?.length,
+            //         physics: const NeverScrollableScrollPhysics(),
+            //         shrinkWrap: true,
+            //         itemBuilder: (context, index) {
+            //           final video = videos?[index];
+            //           return ListTile(
+            //             leading: IconButton(
+            //               icon: const Icon(Icons.video_file, size: 35),
+            //               onPressed: () {},
+            //             ),
+            //             trailing: const Icon(
+            //               Icons.arrow_right,
+            //               size: 30,
+            //             ),
+            //             contentPadding: EdgeInsets.zero,
+            //             dense: true,
+            //             title: Text(video?.title ?? ''),
+            //             subtitle: Text(video?.slug ?? ''),
+            //             onTap: () {
+            //               Navigator.push(
+            //                 context,
+            //                 MaterialPageRoute(
+            //                   builder: (context) => VideoPlayerScreen(
+            //                     videoUrl: video?.url ?? '',
+            //                     title: video?.title ?? '',
+            //                   ),
+            //                 ),
+            //               );
+            //             },
+            //           );
+            //         },
+            //       ),
+            TutorialVideoModule(videos: videos),
           ],
         ).paddingSymmetric(horizontal: 16, vertical: 16),
       );

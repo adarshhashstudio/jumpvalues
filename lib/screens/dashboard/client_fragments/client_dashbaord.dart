@@ -1,15 +1,14 @@
 import 'dart:math';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/client_dashboard_response_model.dart';
+import 'package:jumpvalues/models/tutorial_video_module.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
-import 'package:jumpvalues/screens/client_screens/consent_raise_screen.dart';
 import 'package:jumpvalues/screens/client_screens/select_screen.dart';
 import 'package:jumpvalues/screens/dashboard/dashboard.dart';
-import 'package:jumpvalues/screens/dashboard/video_player_screen.dart';
+import 'package:jumpvalues/screens/dashboard/tutorial_video_module.dart';
 import 'package:jumpvalues/screens/web_view_screen.dart';
 import 'package:jumpvalues/screens/widgets/widgets.dart';
 import 'package:jumpvalues/store/goals_data_hive.dart';
@@ -210,60 +209,61 @@ class _ClientDashboardState extends State<ClientDashboard> {
                 ),
               ],
             ),
-            (videos == null || videos!.isEmpty)
-                ? dataNotFoundWidget(context, showImage: false).onTap(() {})
-                : ListView.builder(
-                    itemCount: videos?.length,
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemBuilder: (context, index) {
-                      final video = videos?[index];
-                      var videoId = convertUrlToId(video?.url ?? '');
-                      var thumbnailUrl = getThumbnail(videoId: videoId ?? '');
-                      return ListTile(
-                        leading: Stack(
-                          children: [
-                            CachedNetworkImage(
-                              width: MediaQuery.of(context).size.width * 0.2,
-                              height: MediaQuery.of(context).size.height * 0.13,
-                              imageUrl: '$thumbnailUrl',
-                              placeholder: (context, v) => Container(
-                                color: grey,
-                              ),
-                              errorWidget: (context, url, error) => Container(
-                                color: grey,
-                              ),
-                            ),
-                            Positioned.fill(
-                                child: Center(
-                                    child: Icon(
-                              Icons.play_circle_fill,
-                              color: white.withOpacity(0.8),
-                            )))
-                          ],
-                        ),
-                        trailing: const Icon(
-                          Icons.arrow_right,
-                          size: 30,
-                        ),
-                        contentPadding: EdgeInsets.zero,
-                        dense: true,
-                        title: Text(video?.title ?? '', style: boldTextStyle()),
-                        subtitle: Text(video?.slug ?? ''),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => VideoPlayerScreen(
-                                videoUrl: video?.url ?? '',
-                                title: video?.title ?? '',
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+            // (videos == null || videos!.isEmpty)
+            //     ? dataNotFoundWidget(context, showImage: false).onTap(() {})
+            //     : ListView.builder(
+            //         itemCount: videos?.length,
+            //         physics: const NeverScrollableScrollPhysics(),
+            //         shrinkWrap: true,
+            //         itemBuilder: (context, index) {
+            //           final video = videos?[index];
+            //           var videoId = convertUrlToId(video?.url ?? '');
+            //           var thumbnailUrl = getThumbnail(videoId: videoId ?? '');
+            //           return ListTile(
+            //             leading: Stack(
+            //               children: [
+            //                 CachedNetworkImage(
+            //                   width: MediaQuery.of(context).size.width * 0.2,
+            //                   height: MediaQuery.of(context).size.height * 0.13,
+            //                   imageUrl: '$thumbnailUrl',
+            //                   placeholder: (context, v) => Container(
+            //                     color: grey,
+            //                   ),
+            //                   errorWidget: (context, url, error) => Container(
+            //                     color: grey,
+            //                   ),
+            //                 ),
+            //                 Positioned.fill(
+            //                     child: Center(
+            //                         child: Icon(
+            //                   Icons.play_circle_fill,
+            //                   color: white.withOpacity(0.8),
+            //                 )))
+            //               ],
+            //             ),
+            //             trailing: const Icon(
+            //               Icons.arrow_right,
+            //               size: 30,
+            //             ),
+            //             contentPadding: EdgeInsets.zero,
+            //             dense: true,
+            //             title: Text(video?.title ?? '', style: boldTextStyle()),
+            //             subtitle: Text(video?.slug ?? ''),
+            //             onTap: () {
+            //               Navigator.push(
+            //                 context,
+            //                 MaterialPageRoute(
+            //                   builder: (context) => VideoPlayerScreen(
+            //                     videoUrl: video?.url ?? '',
+            //                     title: video?.title ?? '',
+            //                   ),
+            //                 ),
+            //               );
+            //             },
+            //           );
+            //         },
+            //       ),
+            TutorialVideoModule(videos: videos),
           ],
         ).paddingSymmetric(horizontal: 16, vertical: 16),
       );

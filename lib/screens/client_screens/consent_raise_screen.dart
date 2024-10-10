@@ -137,30 +137,28 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
 
       // Build the question object
       return {
-        "question_id": questionId,
-        "is_goal": isGoal,
-        "answers": formattedAnswer,
-        if (isGoal) "other_goals": otherGoals ?? ""
+        'question_id': questionId,
+        'is_goal': isGoal,
+        'answers': formattedAnswer,
+        if (isGoal) 'other_goals': otherGoals ?? ''
       };
     }).toList();
 
     // Construct the final JSON object for API submission
     return jsonEncode({
-      "email": _controllers['email']?.text ?? "",
-      "contact_name": _controllers['contactName']?.text ?? "",
-      "company_name": _controllers['companyName']?.text ?? "",
-      "company_size": companySize,
-      "contact_job_title": _controllers['jobTitle']?.text ?? "",
-      "country_code": sCountryCode,
-      "phone": sPhoneNumber,
-      "questions": questions
+      'email': _controllers['email']?.text ?? '',
+      'contact_name': _controllers['contactName']?.text ?? '',
+      'company_name': _controllers['companyName']?.text ?? '',
+      'company_size': companySize,
+      'contact_job_title': _controllers['jobTitle']?.text ?? '',
+      'country_code': sCountryCode,
+      'phone': sPhoneNumber,
+      'questions': questions
     });
   }
 
-  bool _isGoalQuestion(dynamic answer) {
-    // Check if the answer is a goal-type question
-    return answer is List && answer.contains(0);
-  }
+  /// Check if the answer is a goal-type question
+  bool _isGoalQuestion(dynamic answer) => answer is List && answer.contains(0);
 
   int _getCompanySizeIndex(String? companySize) {
     // Mapping for company size options
