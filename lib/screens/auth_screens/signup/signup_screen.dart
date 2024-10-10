@@ -74,7 +74,6 @@ class _SignupScreenState extends State<SignupScreen>
   Map<String, dynamic> fieldClientErrors = {};
 
   bool submitButtonEnabled = false;
-  bool coachSubmitButtonEnabled = false;
   bool selectCategoriesError = false;
   bool selectCoreValuesError = false;
 
@@ -193,12 +192,6 @@ class _SignupScreenState extends State<SignupScreen>
 
   void _handleTabChange() {
     hideKeyboard(context);
-    setState(() {
-      submitButtonEnabled = false;
-      coachSubmitButtonEnabled = false;
-    });
-    enableSubmitButton();
-    enableCoachSubmitButton();
   }
 
   void showCategoryDialog(BuildContext context, List<Category> categories,
@@ -213,56 +206,6 @@ class _SignupScreenState extends State<SignupScreen>
         selectAllButton: selectAllButton,
       ),
     );
-  }
-
-  enableSubmitButton() {
-    // Client
-    // if (firstNameController!.text.isNotEmpty &&
-    //     lastNameController!.text.isNotEmpty &&
-    //     emailController!.text.isNotEmpty &&
-    //     companyController!.text.isNotEmpty &&
-    //     passwordController!.text.isNotEmpty &&
-    //     positionController!.text.isNotEmpty &&
-    //     aboutController!.text.isNotEmpty &&
-    //     acceptTerms) {
-    // setState(() {
-    //   submitButtonEnabled = true;
-    // });
-    // } else {
-    //   setState(() {
-    //     submitButtonEnabled = false;
-    //   });
-    // }
-  }
-
-  void enableCoachSubmitButton() {
-    // Coach
-    // if (firstNameController!.text.isNotEmpty &&
-    //     lastNameController!.text.isNotEmpty &&
-    //     emailController!.text.isNotEmpty &&
-    //     passwordController!.text.isNotEmpty &&
-    //     phoneNumberController!.text.isNotEmpty &&
-    //     educationController!.text.isNotEmpty &&
-    //     philosophyController!.text.isNotEmpty &&
-    //     certificationsController!.text.isNotEmpty &&
-    //     industriesServedController!.text.isNotEmpty &&
-    //     experianceController!.text.isNotEmpty &&
-    //     nicheController!.text.isNotEmpty &&
-    //     selectedPreferVia != null &&
-    //     selectedCategories.isNotEmpty) {
-    //   setState(() {
-    //     coachSubmitButtonEnabled = true;
-    //   });
-    //   debugPrint('Coach submit button enabled');
-    // } else {
-    //   setState(() {
-    //     coachSubmitButtonEnabled = false;
-    //   });
-    //   debugPrint('Coach submit button disabled');
-    // }
-    setState(() {
-      coachSubmitButtonEnabled = true;
-    });
   }
 
   Future<void> getCategoriesDropdown() async {
@@ -446,7 +389,11 @@ class _SignupScreenState extends State<SignupScreen>
       // if (selectedSponsorId?.id != null && selectedSponsorId?.id == 0) {
       //   addIfNotEmpty('additional_sponsor', otherSponsorController.text);
       // }
-      addIfNotEmpty('additional_sponsor', otherSponsorController.text.isEmpty?'other':otherSponsorController.text);
+      addIfNotEmpty(
+          'additional_sponsor',
+          otherSponsorController.text.isEmpty
+              ? 'other'
+              : otherSponsorController.text);
     }
 
     var endPoint = isCoach ? 'auth/coach/register' : 'auth/client/register';
@@ -586,9 +533,7 @@ class _SignupScreenState extends State<SignupScreen>
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
                       ],
-                      onChanged: (value) {
-                        enableSubmitButton();
-                      },
+                      onChanged: (value) {},
                       keyboardType: TextInputType.name,
                       hintText: 'Enter First Name',
                       textInputAction: TextInputAction.next,
@@ -602,9 +547,7 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: lastNameControllerClient,
                       focusNode: lastNameClientFocusNode,
                       errorText: fieldClientErrors['last_name'],
-                      onChanged: (value) {
-                        enableSubmitButton();
-                      },
+                      onChanged: (value) {},
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
                       ],
@@ -620,9 +563,7 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: emailControllerClient,
                       focusNode: emailClientFocusNode,
                       errorText: fieldClientErrors['email'],
-                      onChanged: (value) {
-                        enableSubmitButton();
-                      },
+                      onChanged: (value) {},
                       keyboardType: TextInputType.emailAddress,
                       hintText: 'Enter Email',
                       textInputAction: TextInputAction.next,
@@ -637,9 +578,7 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: passwordControllerClient,
                       focusNode: passwordClientFocusNode,
                       errorText: fieldClientErrors['password'],
-                      onChanged: (value) {
-                        enableSubmitButton();
-                      },
+                      onChanged: (value) {},
                       inputFormatters: [
                         FilteringTextInputFormatter.deny(RegExp(r'\s'))
                       ],
@@ -682,7 +621,6 @@ class _SignupScreenState extends State<SignupScreen>
                           // sCountryCodeClient = phoneNumber.countryCode;
                           sCountryCodeClient = '+1';
                         });
-                        enableCoachSubmitButton();
                       },
                       validator: (phoneNumber) {
                         if (phoneNumber == null || phoneNumber.isEmpty) {
@@ -702,9 +640,7 @@ class _SignupScreenState extends State<SignupScreen>
                       errorText: fieldClientErrors['additional_sponsor'] != null
                           ? fieldClientErrors['additional_sponsor']
                           : otherSponsorErrorText,
-                      onChanged: (value) {
-                        enableSubmitButton();
-                      },
+                      onChanged: (value) {},
                       keyboardType: TextInputType.text,
                       hintText: 'Enter Company',
                       textInputAction: TextInputAction.done,
@@ -904,9 +840,7 @@ class _SignupScreenState extends State<SignupScreen>
                             controller: positionControllerClient,
                             focusNode: positionClientFocusNode,
                             errorText: fieldClientErrors['position'],
-                            onChanged: (value) {
-                              enableSubmitButton();
-                            },
+                            onChanged: (value) {},
                             keyboardType: TextInputType.name,
                             hintText: 'Enter company role',
                           ),
@@ -919,9 +853,7 @@ class _SignupScreenState extends State<SignupScreen>
                             controller: aboutControllerClient,
                             focusNode: aboutMeClientFocusNode,
                             errorText: fieldClientErrors['about_me'],
-                            onChanged: (value) {
-                              enableSubmitButton();
-                            },
+                            onChanged: (value) {},
                             maxLines: 3,
                             hintText: 'Enter your bio',
                           )
@@ -1043,10 +975,10 @@ class _SignupScreenState extends State<SignupScreen>
                     //     otherSponsorErrorText = 'This field is required';
                     //   });
                     // } else {
-                      setState(() {
-                        otherSponsorErrorText = null;
-                      });
-                      await signup(isCoach: false);
+                    setState(() {
+                      otherSponsorErrorText = null;
+                    });
+                    await signup(isCoach: false);
                     // }
                   }
                 },
@@ -1081,9 +1013,7 @@ class _SignupScreenState extends State<SignupScreen>
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
                       ],
-                      onChanged: (value) {
-                        enableCoachSubmitButton();
-                      },
+                      onChanged: (value) {},
                       keyboardType: TextInputType.name,
                       hintText: 'Enter First Name',
                       textInputAction: TextInputAction.next,
@@ -1097,9 +1027,7 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: lastNameController,
                       focusNode: lastNameFocusNode,
                       errorText: fieldErrors['last_name'],
-                      onChanged: (value) {
-                        enableCoachSubmitButton();
-                      },
+                      onChanged: (value) {},
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
                       ],
@@ -1115,9 +1043,7 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: emailController,
                       focusNode: emailFocusNode,
                       errorText: fieldErrors['email'],
-                      onChanged: (value) {
-                        enableCoachSubmitButton();
-                      },
+                      onChanged: (value) {},
                       keyboardType: TextInputType.emailAddress,
                       hintText: 'Enter Email',
                       textInputAction: TextInputAction.next,
@@ -1132,9 +1058,7 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: passwordController,
                       focusNode: passwordFocusNode,
                       errorText: fieldErrors['password'],
-                      onChanged: (value) {
-                        enableCoachSubmitButton();
-                      },
+                      onChanged: (value) {},
                       inputFormatters: [
                         FilteringTextInputFormatter.deny(RegExp(r'\s'))
                       ],
@@ -1177,7 +1101,6 @@ class _SignupScreenState extends State<SignupScreen>
                           // sCountryCode = phoneNumber.countryCode;
                           sCountryCode = '+1';
                         });
-                        enableCoachSubmitButton();
                       },
                       validator: (phoneNumber) {
                         if (phoneNumber == null || phoneNumber.isEmpty) {
@@ -1195,9 +1118,7 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: educationController,
                       focusNode: educationFocusNode,
                       errorText: fieldErrors['education'],
-                      onChanged: (value) {
-                        enableCoachSubmitButton();
-                      },
+                      onChanged: (value) {},
                       keyboardType: TextInputType.text,
                       hintText: 'Enter Education',
                       textInputAction: TextInputAction.next,
@@ -1236,7 +1157,6 @@ class _SignupScreenState extends State<SignupScreen>
                                 ))
                             .toList(),
                         onChanged: (String? value) {
-                          enableCoachSubmitButton();
                           setState(() {
                             selectedPreferVia = value;
                           });
@@ -1252,9 +1172,7 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: philosophyController,
                       focusNode: philosophyFocusNode,
                       errorText: fieldErrors['philosophy'],
-                      onChanged: (value) {
-                        enableCoachSubmitButton();
-                      },
+                      onChanged: (value) {},
                       keyboardType: TextInputType.text,
                       hintText: 'Enter Philosophy',
                       textInputAction: TextInputAction.next,
@@ -1268,9 +1186,7 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: certificationsController,
                       focusNode: certificationsFocusNode,
                       errorText: fieldErrors['certifications'],
-                      onChanged: (value) {
-                        enableCoachSubmitButton();
-                      },
+                      onChanged: (value) {},
                       keyboardType: TextInputType.text,
                       hintText: 'Enter Certifications',
                       textInputAction: TextInputAction.next,
@@ -1284,9 +1200,7 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: industriesServedController,
                       focusNode: industriesServedFocusNode,
                       errorText: fieldErrors['industries_served'],
-                      onChanged: (value) {
-                        enableCoachSubmitButton();
-                      },
+                      onChanged: (value) {},
                       keyboardType: TextInputType.text,
                       hintText: 'Enter Industries Served',
                       textInputAction: TextInputAction.next,
@@ -1300,9 +1214,7 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: experianceController,
                       focusNode: experianceFocusNode,
                       errorText: fieldErrors['experiance'],
-                      onChanged: (value) {
-                        enableCoachSubmitButton();
-                      },
+                      onChanged: (value) {},
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       keyboardType: TextInputType.number,
                       hintText: 'Enter Experiance',
@@ -1317,9 +1229,7 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: nicheController,
                       focusNode: nicheFocusNode,
                       errorText: fieldErrors['niche'],
-                      onChanged: (value) {
-                        enableCoachSubmitButton();
-                      },
+                      onChanged: (value) {},
                       keyboardType: TextInputType.text,
                       hintText: 'Enter Niche',
                       textInputAction: TextInputAction.done,
@@ -1342,7 +1252,6 @@ class _SignupScreenState extends State<SignupScreen>
                               topRight: Radius.circular(20),
                             ),
                       onTap: () {
-                        enableCoachSubmitButton();
                         hideKeyboard(context);
                         showCategoryDialog(context, categories,
                             (categoriesFromDialogue) {
@@ -1423,7 +1332,6 @@ class _SignupScreenState extends State<SignupScreen>
                               topRight: Radius.circular(20),
                             ),
                       onTap: () {
-                        enableCoachSubmitButton();
                         hideKeyboard(context);
                         showCategoryDialog(context, coreValues,
                             (categoriesFromDialogue) {
@@ -1521,10 +1429,7 @@ class _SignupScreenState extends State<SignupScreen>
                 //       }
                 await signup(isCoach: true);
               }
-            },
-                isLoading: loader,
-                text: 'Sign Up',
-                isEnabled: coachSubmitButtonEnabled),
+            }, isLoading: loader, text: 'Sign Up'),
           ),
         ],
       );
