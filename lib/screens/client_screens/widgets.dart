@@ -112,10 +112,10 @@ class _DropdownWithMultipleSelectionState
               fontWeight: FontWeight.bold,
             ),
             onTap: (value) {
-              setState(() {
-                _selectedValues.remove(value);
-              });
-              widget.onSelectionChanged(_selectedValues);
+              // setState(() {
+              //   _selectedValues.remove(value);
+              // });
+              // widget.onSelectionChanged(_selectedValues);
             },
           ),
         ),
@@ -224,7 +224,7 @@ class _DropdownWithMultiSelectAndAddNewItemState
                       color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.bold,
                     ),
-                    onTap: _onChipTap,
+                    // onTap: _onChipTap,
                   ),
                 ),
                 if (isOtherSelected)

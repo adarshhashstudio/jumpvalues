@@ -359,35 +359,35 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
                                   height:
                                       MediaQuery.of(context).size.height * 0.02,
                                 ),
-                                ListView.builder(
+                                ListView.separated(
                                   itemCount:
-                                      consentQuestionResponse?.data?.length,
+                                      consentQuestionResponse!.data!.length,
                                   physics: const NeverScrollableScrollPhysics(),
                                   shrinkWrap: true,
+                                  separatorBuilder: (context, index) =>
+                                      SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.02,
+                                  ),
                                   itemBuilder: (context, index) {
                                     final question =
                                         consentQuestionResponse?.data?[index];
                                     switch (question?.type) {
                                       case 1: // Question Type 1 - Single Selection Dropdown
                                         return _buildSingleSelectDropdownTypeOne(
-                                                question)
-                                            .paddingBottom(20);
+                                            question);
                                       case 2: // Question Type 2 - Multiple Selection Dropdown
                                         return _buildMultiSelectDropdownTypeTwo(
-                                                question)
-                                            .paddingBottom(20);
+                                            question);
                                       case 3: // Question Type 3 - Followed Up (Yes/No) radio buttons
                                         return _buildFollowedUpQuestionTypeThree(
-                                                question)
-                                            .paddingBottom(20);
+                                            question);
                                       case 4: // Question Type 4 - Make Number of textFormFields
                                         return _buildNumberOfTextFormFieldTypeFour(
-                                                question)
-                                            .paddingBottom(20);
+                                            question);
                                       case 5: // Question Type 5 - Extendable Multiple Selection Dropdown
                                         return _buildMultipleSelectionDropdownTypeFive(
-                                                question)
-                                            .paddingBottom(20);
+                                            question);
                                       default:
                                         return const SizedBox(); // Return empty container for unsupported types
                                     }
@@ -506,10 +506,13 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
         // Only show follow-up questions if they exist and are visible
         if (mainQuestion?.followUpQuestions != null &&
             mainQuestion!.followUpQuestions!.isNotEmpty)
-          ListView.builder(
+          ListView.separated(
             itemCount: mainQuestion.followUpQuestions!.length,
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
+            separatorBuilder: (context, index) => SizedBox(
+              height: MediaQuery.of(context).size.height * 0.01,
+            ),
             itemBuilder: (context, index) {
               final innQuestion = mainQuestion.followUpQuestions![index];
               // Determine if this follow-up question should be shown
@@ -558,10 +561,13 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
         // Only show follow-up questions if they exist and are visible
         if (question.followUpQuestions != null &&
             question.followUpQuestions!.isNotEmpty)
-          ListView.builder(
+          ListView.separated(
             itemCount: question.followUpQuestions!.length,
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
+            separatorBuilder: (context, index) => SizedBox(
+              height: MediaQuery.of(context).size.height * 0.01,
+            ),
             itemBuilder: (context, index) {
               final innQuestion = question.followUpQuestions![index];
               // Determine if this follow-up question should be shown
@@ -622,10 +628,13 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
           // Only show follow-up questions if they exist and are visible
           if (question?.followUpQuestions != null &&
               question!.followUpQuestions!.isNotEmpty)
-            ListView.builder(
+            ListView.separated(
               itemCount: question.followUpQuestions!.length,
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
+              separatorBuilder: (context, index) => SizedBox(
+                height: MediaQuery.of(context).size.height * 0.01,
+              ),
               itemBuilder: (context, index) {
                 final innQuestion = question.followUpQuestions![index];
                 // Determine if this follow-up question should be shown
@@ -683,20 +692,15 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
   Widget _buildFollowUpQuestion(Question followUpQuestion) {
     switch (followUpQuestion.type) {
       case 1: // Question Type 1 - Single Selection Dropdown
-        return _buildSingleSelectDropdownTypeOne(followUpQuestion)
-            .paddingBottom(20);
+        return _buildSingleSelectDropdownTypeOne(followUpQuestion);
       case 2: // Question Type 2 - Multiple Selection Dropdown
-        return _buildMultiSelectDropdownTypeTwo(followUpQuestion)
-            .paddingBottom(20);
+        return _buildMultiSelectDropdownTypeTwo(followUpQuestion);
       case 3: // Question Type 3 - Followed Up (Yes/No) radio buttons
-        return _buildFollowedUpQuestionTypeThree(followUpQuestion)
-            .paddingBottom(20);
+        return _buildFollowedUpQuestionTypeThree(followUpQuestion);
       case 4: // Question Type 4 - Make Number of textFormFields
-        return _buildNumberOfTextFormFieldTypeFour(followUpQuestion)
-            .paddingBottom(20);
+        return _buildNumberOfTextFormFieldTypeFour(followUpQuestion);
       case 5: // Question Type 5 - Extendable Multiple Selection Dropdown
-        return _buildMultipleSelectionDropdownTypeFive(followUpQuestion)
-            .paddingBottom(20);
+        return _buildMultipleSelectionDropdownTypeFive(followUpQuestion);
       default:
         return const SizedBox(); // Return empty container for unsupported types
     }
