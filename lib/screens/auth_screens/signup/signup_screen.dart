@@ -1053,7 +1053,7 @@ class _SignupScreenState extends State<SignupScreen>
                       height: 20,
                     ),
                     textFormField(
-                      label: 'Password',
+                      label: 'Create Password',
                       labelTextBoxSpace: 8,
                       controller: passwordController,
                       focusNode: passwordFocusNode,
@@ -1063,7 +1063,7 @@ class _SignupScreenState extends State<SignupScreen>
                         FilteringTextInputFormatter.deny(RegExp(r'\s'))
                       ],
                       keyboardType: TextInputType.visiblePassword,
-                      hintText: 'Enter Password',
+                      hintText: 'Create Password',
                       validator: (value) => passwordValidate(value ?? ''),
                       obscureText: _obscureText,
                       unHidePassword: (value) {
@@ -1480,7 +1480,7 @@ class _SignupScreenState extends State<SignupScreen>
           ),
           body: PopScope(
             canPop: false,
-            onPopInvoked: (didPop) {
+            onPopInvokedWithResult: (didPop, dynamic) {
               if (didPop) {
               } else {
                 Navigator.pushReplacement(

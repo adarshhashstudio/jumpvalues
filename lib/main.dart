@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -24,40 +25,43 @@ class NavigationService {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: 'AIzaSyDLkgae9qZezwFRfeU8PcDf1s9DLHKi7mk',
-      appId: '1:927941200379:android:8cd86db678ad12b734235e',
-      messagingSenderId: '927941200379',
-      projectId: 'jumpcc-app',
-    ),
-  );
+  if (Platform.isAndroid) {
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: 'AIzaSyDLkgae9qZezwFRfeU8PcDf1s9DLHKi7mk',
+        appId: '1:927941200379:android:8cd86db678ad12b734235e',
+        messagingSenderId: '927941200379',
+        projectId: 'jumpcc-app',
+      ),
+    );
 
-  FlutterError.onError = (FlutterErrorDetails errorDetails) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-    FirebaseCrashlytics.instance
-        .log('Flutter error occurred: ${errorDetails.exceptionAsString()}');
-    FirebaseCrashlytics.instance.setCustomKey('Error Type', 'Flutter');
-    FirebaseCrashlytics.instance
-        .setCustomKey('Error Message', errorDetails.exceptionAsString());
-    FirebaseCrashlytics.instance
-        .setCustomKey('Stack Trace', errorDetails.stack.toString());
-  };
+    FlutterError.onError = (FlutterErrorDetails errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+      FirebaseCrashlytics.instance
+          .log('Flutter error occurred: ${errorDetails.exceptionAsString()}');
+      FirebaseCrashlytics.instance.setCustomKey('Error Type', 'Flutter');
+      FirebaseCrashlytics.instance
+          .setCustomKey('Error Message', errorDetails.exceptionAsString());
+      FirebaseCrashlytics.instance
+          .setCustomKey('Stack Trace', errorDetails.stack.toString());
+    };
 
-  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    FirebaseCrashlytics.instance.log('Platform error occurred: $error');
-    FirebaseCrashlytics.instance.setCustomKey('Error Type', 'Platform');
-    FirebaseCrashlytics.instance
-        .setCustomKey('Error Message', error.toString());
-    FirebaseCrashlytics.instance.setCustomKey('Stack Trace', stack.toString());
-    return true;
-  };
+    PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      FirebaseCrashlytics.instance.log('Platform error occurred: $error');
+      FirebaseCrashlytics.instance.setCustomKey('Error Type', 'Platform');
+      FirebaseCrashlytics.instance
+          .setCustomKey('Error Message', error.toString());
+      FirebaseCrashlytics.instance
+          .setCustomKey('Stack Trace', stack.toString());
+      return true;
+    };
 
-  await FirebaseCrashlytics.instance.setCustomKey('App Version', '1.0.0');
-  await FirebaseCrashlytics.instance.setCustomKey('Build Number', '1');
-  await FirebaseCrashlytics.instance
-      .log('Firebase and Crashlytics initialized');
+    await FirebaseCrashlytics.instance.setCustomKey('App Version', '1.0.0');
+    await FirebaseCrashlytics.instance.setCustomKey('Build Number', '1');
+    await FirebaseCrashlytics.instance
+        .log('Firebase and Crashlytics initialized');
+  }
 
   await initialize();
 

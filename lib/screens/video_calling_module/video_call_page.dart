@@ -198,6 +198,9 @@ class _VideoCallPageState extends State<VideoCallPage> {
         _onDisconnected(event);
       });
     } catch (e) {
+      debugPrint(
+        'Failed to join room: $e',
+      );
       SnackBarHelper.showStatusSnackBar(
         context,
         StatusIndicator.error,

@@ -121,6 +121,10 @@ class TotalWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height * 0.14,
+          maxHeight: MediaQuery.of(context).size.height * 0.17,
+        ),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         decoration: boxDecorationDefault(color: color),
         child: Column(

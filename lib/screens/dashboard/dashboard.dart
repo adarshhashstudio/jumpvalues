@@ -174,9 +174,9 @@ class DashboardState extends State<Dashboard> {
             ),
             actions: [
               if (appStore.additionalSponsor.isEmpty)
-                Stack(
+                const Stack(
                   children: [
-                    const Icon(Icons.notifications),
+                    Icon(Icons.notifications),
                     // Positioned(
                     //   top: 0,
                     //   right: 0,

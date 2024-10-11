@@ -17,7 +17,7 @@ import 'package:jumpvalues/utils/utils.dart';
 import 'package:jumpvalues/widgets/common_widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart'
-    as phoneNumberParser;
+    as phone_number_parser;
 
 class CommonProfile extends StatefulWidget {
   const CommonProfile({super.key});
@@ -330,7 +330,7 @@ class _CommonProfileState extends State<CommonProfile> {
         await appStore.setUserContactCountryCode(
             coachProfileResponseModel?.data?.countryCode ?? '+1');
         try {
-          final phoneNumberType = phoneNumberParser.PhoneNumber.parse(
+          final phoneNumberType = phone_number_parser.PhoneNumber.parse(
               '${appStore.userContactCountryCode}${appStore.userContactNumber}');
           await appStore
               .setUserContactCountryIsoCode('${phoneNumberType.isoCode.name}');
@@ -367,7 +367,7 @@ class _CommonProfileState extends State<CommonProfile> {
         await appStore.setUserContactCountryCode(
             clientProfileResponseModel?.data?.countryCode ?? '+1');
         try {
-          final phoneNumberType = phoneNumberParser.PhoneNumber.parse(
+          final phoneNumberType = phone_number_parser.PhoneNumber.parse(
               '${appStore.userContactCountryCode}${appStore.userContactNumber}');
           await appStore
               .setUserContactCountryIsoCode('${phoneNumberType.isoCode.name}');

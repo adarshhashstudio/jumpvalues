@@ -34,9 +34,9 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Your message to user when the camera is accessed for the first time</string>
+	<string>Explanation on why the camera access is needed.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Your message to user when the microphone is accessed for the first time</string>
+	<string>Explanation on why the microphone access is needed.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Need to upload image</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

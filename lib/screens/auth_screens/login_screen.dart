@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
             await appStore.setUserData(_globalUserResponseModel);
           });
           var socketAndNotifications = SocketAndNotifications();
-          socketAndNotifications.connectAndListen();
+          await socketAndNotifications.connectAndListen();
           // Navigate to Dashboard
           await Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => Dashboard()));
@@ -170,7 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         body: PopScope(
           canPop: false,
-          onPopInvoked: (didPop) {
+          onPopInvokedWithResult: (didPop, dynamic) {
             if (didPop) {
             } else {
               Navigator.pushReplacement(

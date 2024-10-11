@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/network/firebase_apis.dart';
@@ -21,7 +23,11 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void initializeNotifications() async {
-    await FirebaseApi().initNotifications();
+    if (Platform.isAndroid) {
+      await FirebaseApi().initNotifications();
+    } else {
+      return;
+    }
   }
 
   void checkTokenAndNavigate() async {

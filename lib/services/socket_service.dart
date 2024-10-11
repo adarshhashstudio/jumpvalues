@@ -5,7 +5,7 @@ import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/services/notification_service.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/utils.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as socket_io_client;
 
 class SocketAndNotifications {
   // Factory constructor to return the singleton instance
@@ -18,7 +18,7 @@ class SocketAndNotifications {
   static final SocketAndNotifications _instance =
       SocketAndNotifications._internal();
 
-  IO.Socket? _socket;
+  socket_io_client.Socket? _socket;
   final StreamController<String> _socketResponseController = StreamController<
       String>.broadcast(); // Use broadcast for multiple listeners
 
@@ -46,9 +46,9 @@ class SocketAndNotifications {
         'SOCKET IO ==> Attempting to connect with Token: ${appStore.token}');
 
     // Create and configure the socket instance with new token
-    _socket = IO.io(
+    _socket = socket_io_client.io(
       domainUrl,
-      IO.OptionBuilder()
+      socket_io_client.OptionBuilder()
           .setTransports(['websocket']) // Use WebSocket for Flutter
           .disableAutoConnect() // Disable auto-connection to manage it manually
           .setAuth({'token': appStore.token})

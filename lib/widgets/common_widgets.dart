@@ -590,7 +590,7 @@ void showUpgradeSponsorshipDialog(BuildContext context,
     String? title,
     String? subTitle,
     VoidCallback? onActionPerformed}) {
-  var loading = false;
+  // var loading = false;
 
   var alertDialog = AlertDialog(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -663,20 +663,21 @@ void showUpgradeSponsorshipDialog(BuildContext context,
                           Navigator.of(context).pop();
                           try {
                             await Navigator.of(context).push(MaterialPageRoute(
-                                builder: (contextt) => ConsentRaiseScreen()));
+                                builder: (contextt) =>
+                                    const ConsentRaiseScreen()));
                           } catch (e) {
                             debugPrint('Navigation error: $e');
                           }
                         },
                         text: 'Send Request',
-                        child: loading
-                            ? Transform.scale(
-                                scale: 0.6,
-                                child: CircularProgressIndicator(
-                                  color: primaryColor,
-                                ).center(),
-                              )
-                            : null,
+                        // child: loading
+                        //     ? Transform.scale(
+                        //         scale: 0.6,
+                        //         child: CircularProgressIndicator(
+                        //           color: primaryColor,
+                        //         ).center(),
+                        //       )
+                        //     : null,
                       ),
                     ),
                   20.height,

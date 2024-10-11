@@ -162,13 +162,13 @@ class _DropdownWithMultiSelectAndAddNewItemState
     });
   }
 
-  void _onChipTap(Category item) {
-    setState(() {
-      selectedItems.remove(item);
-      isOtherSelected = selectedItems.any((element) => element.id == 0);
-      widget.onSelectedItemsChanged(selectedItems, otherGoalController.text);
-    });
-  }
+  // void _onChipTap(Category item) {
+  //   setState(() {
+  //     selectedItems.remove(item);
+  //     isOtherSelected = selectedItems.any((element) => element.id == 0);
+  //     widget.onSelectedItemsChanged(selectedItems, otherGoalController.text);
+  //   });
+  // }
 
   void _onOtherGoalChanged(String value) {
     if (value.isNotEmpty) {
