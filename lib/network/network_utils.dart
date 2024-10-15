@@ -140,15 +140,10 @@ void apidebugPrint({
   debugPrint(
       '┌───────────────────────────────────────────────────────────────────────────────────────────────────────');
   debugPrint('Url         ==> : $url\n');
-  debugPrint('──────────────────────────────────────\n');
   debugPrint('EndPoint    ==> : $endPoint\n');
-  debugPrint('──────────────────────────────────────\n');
   debugPrint('Headers     ==> : $headers\n');
-  debugPrint('──────────────────────────────────────\n');
   debugPrint('QueryParams ==> : $queryParams\n');
-  debugPrint('──────────────────────────────────────\n');
   printFullText('Request     ==> : $request\n');
-  debugPrint('──────────────────────────────────────\n');
   printFullText(statusCode == 200
       ? 'Response     ==> : ($methodtype) $statusCode: $responseBody'
       : 'Error ($methodtype) $statusCode: $responseBody');

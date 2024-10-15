@@ -6,16 +6,28 @@ import 'package:jumpvalues/screens/dashboard/dashboard.dart';
 class NotificationManager {
   NotificationManager._internal() {
     _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    final initializationSettingsAndroid =
-        const AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    // Android settings
+    const initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    // iOS settings
+    final initializationSettingsIOS = DarwinInitializationSettings(
+      onDidReceiveLocalNotification: _onDidReceiveLocalNotification,
+    );
+
+    // Combine settings for both platforms
     final initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
     );
+
     _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: _onSelectNotification,
     );
   }
+
   factory NotificationManager() => _instance;
   static final NotificationManager _instance = NotificationManager._internal();
 
@@ -24,14 +36,26 @@ class NotificationManager {
   /// Shows a notification with the given [title] and [body].
   Future<void> showNotification(String title, String body) async {
     const androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        'channel_id', 'channel_name',
-        importance: Importance.max, priority: Priority.high);
-    const platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
+      'channel_id',
+      'channel_name',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const iosPlatformChannelSpecifics = DarwinNotificationDetails();
+
+    const platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iosPlatformChannelSpecifics,
+    );
 
     await _flutterLocalNotificationsPlugin.show(
-        0, title, body, platformChannelSpecifics,
-        payload: 'Notification Payload');
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: 'Notification Payload',
+    );
   }
 
   /// Handles what happens when a notification is tapped.
@@ -40,15 +64,19 @@ class NotificationManager {
     debugPrint(
         'Notification tapped with payload: ${notificationResponse.payload}');
 
-    // Navigate to the dashboard or another specific screen
-    // You need to pass the BuildContext or use a global navigator key.
-    // For this example, we'll use a navigator key.
-
     await Navigator.of(NavigationService.navigatorKey.currentState!.context)
         .push(MaterialPageRoute(
             builder: (context) => Dashboard(
                   index: 1,
                   isRedirect: true,
                 )));
+  }
+
+  /// Handles what happens when a notification is received on iOS in the foreground.
+  Future<void> _onDidReceiveLocalNotification(
+      int id, String? title, String? body, String? payload) async {
+    debugPrint(
+        'iOS notification received: title=$title, body=$body, payload=$payload');
+    // Handle the iOS local notification
   }
 }

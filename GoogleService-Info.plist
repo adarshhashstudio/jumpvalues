@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyBr7z_ssBIKZ7h0ab2Wmtra-FHf2Sf9w4I</string>
+	<key>GCM_SENDER_ID</key>
+	<string>927941200379</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.jumpcc.jump</string>
+	<key>PROJECT_ID</key>
+	<string>jumpcc-app</string>
+	<key>STORAGE_BUCKET</key>
+	<string>jumpcc-app.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:927941200379:ios:e77400e6559b8c3634235e</string>
+</dict>
+</plist>
