@@ -284,6 +284,7 @@ class _ConsentRaiseScreenState extends State<ConsentRaiseScreen> {
                                   labelTextBoxSpace: 8,
                                   controller: phoneNumberController,
                                   focusNode: phoneNumberFocusNode,
+                                  keyboardType: TextInputType.number,
                                   errorText: fieldErrors['phone'],
                                   prefixIcon: IconButton(
                                     onPressed: () {},
