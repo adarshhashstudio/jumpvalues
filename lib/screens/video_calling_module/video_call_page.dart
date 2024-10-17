@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:headset_connection_event/headset_event.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -25,17 +26,61 @@ class _VideoCallPageState extends State<VideoCallPage> {
   CameraSource? _currentCameraSource;
   int participentLength = 0;
   String participentSid = '';
+  HeadsetEvent headsetPlugin = HeadsetEvent();
+  HeadsetState? _headsetState;
 
   @override
   void initState() {
     super.initState();
     _init();
+    _setupHeadsetListener(); // Set up the listener for headset events
   }
 
   @override
   void dispose() {
     _leaveRoom();
     super.dispose();
+  }
+
+// Set up headset listener
+  void _setupHeadsetListener() {
+    // Get the current headset state when initializing
+    headsetPlugin.getCurrentState.then((_val) {
+      setState(() {
+        _headsetState = _val;
+      });
+      _routeAudioBasedOnHeadset(_val!);
+    });
+
+    // Listen for changes in the headset state during the call
+    headsetPlugin.setListener((_val) {
+      setState(() {
+        _headsetState = _val;
+      });
+      _routeAudioBasedOnHeadset(_val);
+    });
+  }
+
+// Route audio based on headset connection status
+  void _routeAudioBasedOnHeadset(HeadsetState headsetState) async {
+    if (_room != null) {
+      // Ensure this is only called during a video call
+      if (headsetState == HeadsetState.CONNECT) {
+        // If headset is connected, route audio through the headset
+        await TwilioProgrammableVideo.setAudioSettings(
+          speakerphoneEnabled: false,
+          bluetoothPreferred: false,
+        );
+        debugPrint('Headset connected: routing audio through headset.');
+      } else {
+        // If headset is disconnected, route audio through the speaker
+        await TwilioProgrammableVideo.setAudioSettings(
+          speakerphoneEnabled: true,
+          bluetoothPreferred: false,
+        );
+        debugPrint('Headset disconnected: routing audio through speaker.');
+      }
+    }
   }
 
   Future<void> _init() async {

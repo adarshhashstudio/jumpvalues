@@ -50,10 +50,11 @@ android {
 
     defaultConfig {
         applicationId "com.jumpccc.jumpvalues"
-        minSdkVersion flutter.minSdkVersion // Android 4.1 (JELLY_BEAN) - 99.8% Usage
+        minSdkVersion 26// Android 4.1 (JELLY_BEAN) - 99.8% Usage
         targetSdkVersion 34 // Android 14 (UPSIDE_DOWN_CAKE) (API level 34) to be submitted to Google Play - 16.3% Usage
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        multiDexEnabled true
     }
 
     signingConfigs {
@@ -85,4 +86,5 @@ dependencies {
     implementation("com.google.firebase:firebase-common-ktx:21.0.0")
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.twilio:video-android:7.5.1")
+    implementation 'com.android.support:multidex:1.0.3'
 }
