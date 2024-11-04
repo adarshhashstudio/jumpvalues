@@ -110,14 +110,18 @@ class _ClientDashboardState extends State<ClientDashboard> {
                             icon: selectImage,
                             title:
                                 'Click to select your values from our comprehensive list.',
-                            buttonTitle: 'Select ( Values )', onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => SelectScreen(
-                                  isFromProfile: false,
-                                  initialSelectedValues:
-                                      clientDashboardResponseModel
-                                              ?.data?.client?.coreValues ??
-                                          [])));
+                            buttonTitle: 'Select ( Values )', onTap: () async {
+                          var data = await Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (context) => SelectScreen(
+                                      isFromProfile: false,
+                                      initialSelectedValues:
+                                          clientDashboardResponseModel
+                                                  ?.data?.client?.coreValues ??
+                                              [])));
+                          if (data == null) {
+                            await _refreshData();
+                          }
                         }),
                       ],
                     ),
@@ -209,60 +213,6 @@ class _ClientDashboardState extends State<ClientDashboard> {
                 ),
               ],
             ),
-            // (videos == null || videos!.isEmpty)
-            //     ? dataNotFoundWidget(context, showImage: false).onTap(() {})
-            //     : ListView.builder(
-            //         itemCount: videos?.length,
-            //         physics: const NeverScrollableScrollPhysics(),
-            //         shrinkWrap: true,
-            //         itemBuilder: (context, index) {
-            //           final video = videos?[index];
-            //           var videoId = convertUrlToId(video?.url ?? '');
-            //           var thumbnailUrl = getThumbnail(videoId: videoId ?? '');
-            //           return ListTile(
-            //             leading: Stack(
-            //               children: [
-            //                 CachedNetworkImage(
-            //                   width: MediaQuery.of(context).size.width * 0.2,
-            //                   height: MediaQuery.of(context).size.height * 0.13,
-            //                   imageUrl: '$thumbnailUrl',
-            //                   placeholder: (context, v) => Container(
-            //                     color: grey,
-            //                   ),
-            //                   errorWidget: (context, url, error) => Container(
-            //                     color: grey,
-            //                   ),
-            //                 ),
-            //                 Positioned.fill(
-            //                     child: Center(
-            //                         child: Icon(
-            //                   Icons.play_circle_fill,
-            //                   color: white.withOpacity(0.8),
-            //                 )))
-            //               ],
-            //             ),
-            //             trailing: const Icon(
-            //               Icons.arrow_right,
-            //               size: 30,
-            //             ),
-            //             contentPadding: EdgeInsets.zero,
-            //             dense: true,
-            //             title: Text(video?.title ?? '', style: boldTextStyle()),
-            //             subtitle: Text(video?.slug ?? ''),
-            //             onTap: () {
-            //               Navigator.push(
-            //                 context,
-            //                 MaterialPageRoute(
-            //                   builder: (context) => VideoPlayerScreen(
-            //                     videoUrl: video?.url ?? '',
-            //                     title: video?.title ?? '',
-            //                   ),
-            //                 ),
-            //               );
-            //             },
-            //           );
-            //         },
-            //       ),
             TutorialVideoModule(videos: videos),
           ],
         ).paddingSymmetric(horizontal: 16, vertical: 16),

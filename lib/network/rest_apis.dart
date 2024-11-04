@@ -166,12 +166,15 @@ Future<BaseResponseModel?> resetPassword(Map<String, dynamic> request) async {
   return response;
 }
 
-Future<BaseResponseModel> verifyOtp(Map<String, dynamic> request) async {
+Future<BaseResponseModel> verifyOtp(
+    Map<String, dynamic> request, Map<String, dynamic> query) async {
   BaseResponseModel? response;
   try {
     response = BaseResponseModel.fromJson(await handleResponse(
         await buildHttpResponse('auth/verify/otp',
-            request: request, method: HttpMethodType.patch)));
+            queryParams: query,
+            request: request,
+            method: HttpMethodType.patch)));
   } catch (e) {
     rethrow;
   }
