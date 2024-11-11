@@ -136,6 +136,46 @@ class _SignupScreenState extends State<SignupScreen>
     positionControllerClient = TextEditingController();
     aboutControllerClient = TextEditingController();
 
+    // Set up focus listeners for each field
+    emailClientFocusNode.addListener(() {
+      if (!emailClientFocusNode.hasFocus) {
+        // Validate only the email field
+        setState(() {
+          fieldClientErrors['email'] =
+              validateEmail(emailControllerClient!.text);
+        });
+      }
+    });
+
+    passwordClientFocusNode.addListener(() {
+      if (!passwordClientFocusNode.hasFocus) {
+        // Validate only the password field
+        setState(() {
+          fieldClientErrors['password'] =
+              passwordValidate(passwordControllerClient!.text);
+        });
+      }
+    });
+
+    // Set up focus listeners for each field
+    emailFocusNode.addListener(() {
+      if (!emailFocusNode.hasFocus) {
+        // Validate only the email field
+        setState(() {
+          fieldErrors['email'] = validateEmail(emailController!.text);
+        });
+      }
+    });
+
+    passwordFocusNode.addListener(() {
+      if (!passwordFocusNode.hasFocus) {
+        // Validate only the password field
+        setState(() {
+          fieldErrors['password'] = passwordValidate(passwordController!.text);
+        });
+      }
+    });
+
     super.initState();
     Future.wait([
       getSponsorDropdown(),
@@ -563,11 +603,16 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: emailControllerClient,
                       focusNode: emailClientFocusNode,
                       errorText: fieldClientErrors['email'],
-                      onChanged: (value) {},
+                      onChanged: (v) {
+                        if (!emailClientFocusNode.hasFocus) {
+                          setState(() {
+                            fieldClientErrors['email'] = validateEmail(v);
+                          });
+                        }
+                      },
                       keyboardType: TextInputType.emailAddress,
                       hintText: 'Enter Email',
                       textInputAction: TextInputAction.next,
-                      validator: (email) => validateEmail(email ?? ''),
                     ),
                     const SizedBox(
                       height: 20,
@@ -578,13 +623,18 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: passwordControllerClient,
                       focusNode: passwordClientFocusNode,
                       errorText: fieldClientErrors['password'],
-                      onChanged: (value) {},
+                      onChanged: (v) {
+                        if (!passwordClientFocusNode.hasFocus) {
+                          setState(() {
+                            fieldClientErrors['password'] = passwordValidate(v);
+                          });
+                        }
+                      },
                       inputFormatters: [
                         FilteringTextInputFormatter.deny(RegExp(r'\s'))
                       ],
                       keyboardType: TextInputType.visiblePassword,
                       hintText: 'Create Password',
-                      validator: (value) => passwordValidate(value ?? ''),
                       obscureText: _obscureText,
                       unHidePassword: (value) {
                         setState(() {
@@ -621,12 +671,6 @@ class _SignupScreenState extends State<SignupScreen>
                           // sCountryCodeClient = phoneNumber.countryCode;
                           sCountryCodeClient = '+1';
                         });
-                      },
-                      validator: (phoneNumber) {
-                        if (phoneNumber == null || phoneNumber.isEmpty) {
-                          return 'Phone number is required';
-                        }
-                        return null;
                       },
                     ),
                     const SizedBox(
@@ -938,48 +982,12 @@ class _SignupScreenState extends State<SignupScreen>
                 ),
                 button(context, onPressed: () async {
                   hideKeyboard(context);
-                  // if (loader) {
-                  // } else {
-                  //   if (selectedSponsorId?.id == 0 &&
-                  //       otherSponsorController.text.isEmpty) {
-                  //     setState(() {
-                  //       selectSponsorError = null;
-                  //       FocusScope.of(context)
-                  //           .requestFocus(otherSponsorFocusNode);
-                  //       otherSponsorErrorText = 'This field is required';
-                  //     });
-                  //   } else {
-                  //     setState(() {
-                  //       otherSponsorErrorText = null;
-                  //       selectSponsorError = null;
-                  //     });
-                  //     await signup(isCoach: false);
-
-                  //     if (selectedSponsorId?.id == null) {
-                  //       setState(() {
-                  //         selectSponsorError = 'Sponsor selection is required.';
-                  //       });
-                  //     } else {
-                  //       setState(() {
-                  //         selectSponsorError = null;
-                  //       });
-                  //     }
-                  //   }
-                  // }
                   if (loader) {
                   } else {
-                    // if (otherSponsorController.text.isEmpty) {
-                    //   setState(() {
-                    //     FocusScope.of(context)
-                    //         .requestFocus(otherSponsorFocusNode);
-                    //     otherSponsorErrorText = 'This field is required';
-                    //   });
-                    // } else {
                     setState(() {
                       otherSponsorErrorText = null;
                     });
                     await signup(isCoach: false);
-                    // }
                   }
                 },
                     isLoading: loader,
@@ -1043,11 +1051,16 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: emailController,
                       focusNode: emailFocusNode,
                       errorText: fieldErrors['email'],
-                      onChanged: (value) {},
+                      onChanged: (value) {
+                        if (!emailFocusNode.hasFocus) {
+                          setState(() {
+                            fieldErrors['email'] = validateEmail(value);
+                          });
+                        }
+                      },
                       keyboardType: TextInputType.emailAddress,
                       hintText: 'Enter Email',
                       textInputAction: TextInputAction.next,
-                      validator: (email) => validateEmail(email ?? ''),
                     ),
                     const SizedBox(
                       height: 20,
@@ -1058,13 +1071,18 @@ class _SignupScreenState extends State<SignupScreen>
                       controller: passwordController,
                       focusNode: passwordFocusNode,
                       errorText: fieldErrors['password'],
-                      onChanged: (value) {},
+                      onChanged: (value) {
+                        if (!passwordFocusNode.hasFocus) {
+                          setState(() {
+                            fieldErrors['password'] = passwordValidate(value);
+                          });
+                        }
+                      },
                       inputFormatters: [
                         FilteringTextInputFormatter.deny(RegExp(r'\s'))
                       ],
                       keyboardType: TextInputType.visiblePassword,
                       hintText: 'Create Password',
-                      validator: (value) => passwordValidate(value ?? ''),
                       obscureText: _obscureText,
                       unHidePassword: (value) {
                         setState(() {
@@ -1496,6 +1514,7 @@ class _SignupScreenState extends State<SignupScreen>
                 SafeArea(
                   child: Form(
                     key: _formKey,
+                    autovalidateMode: AutovalidateMode.disabled,
                     child: TabBarView(
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
