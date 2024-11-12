@@ -493,7 +493,7 @@ void showRatingDialog(BuildContext context,
                             unSelectedColor: Colors.grey,
                             child: Icon(
                               Icons.star,
-                              size: 16,
+                              size: 35,
                             ),
                           ),
                           onChanged: (rate) {

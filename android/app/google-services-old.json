@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "927941200379",
     "project_id": "jumpcc-app",
-    "storage_bucket": "jumpcc-app.firebasestorage.app"
+    "storage_bucket": "jumpcc-app.appspot.com"
   },
   "client": [
     {
