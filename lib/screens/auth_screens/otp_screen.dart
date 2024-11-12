@@ -126,7 +126,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
     try {
       var request = {'email': widget.email, 'otp': otp?.text};
-      Map<String, dynamic> query = {};
+      var query = <String, dynamic>{};
       if (widget.isFrom == 'forgotPassword') {
         query['purpose'] = 'FORGOT_PWD';
       } else {

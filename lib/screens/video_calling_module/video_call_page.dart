@@ -27,7 +27,8 @@ class _VideoCallPageState extends State<VideoCallPage> {
   int participentLength = 0;
   String participentSid = '';
   HeadsetEvent headsetPlugin = HeadsetEvent();
-  HeadsetState? _headsetState;
+  HeadsetState? headsetState;
+  bool _isSwitchingCamera = false;
 
   @override
   void initState() {
@@ -47,7 +48,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
     // Get the current headset state when initializing
     headsetPlugin.getCurrentState.then((_val) {
       setState(() {
-        _headsetState = _val;
+        headsetState = _val;
       });
       _routeAudioBasedOnHeadset(_val!);
     });
@@ -55,7 +56,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
     // Listen for changes in the headset state during the call
     headsetPlugin.setListener((_val) {
       setState(() {
-        _headsetState = _val;
+        headsetState = _val;
       });
       _routeAudioBasedOnHeadset(_val);
     });
@@ -195,6 +196,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
         token,
         roomName: roomId,
         preferredAudioCodecs: [OpusCodec()],
+        preferredVideoCodecs: [H264Codec()],
         audioTracks: [_localAudioTrack!],
         dataTracks: [
           LocalDataTrack(
@@ -477,7 +479,13 @@ class _VideoCallPageState extends State<VideoCallPage> {
   }
 
   Future<void> _switchCamera() async {
+    if (_isSwitchingCamera) return; // Prevent multiple simultaneous switches
+
     try {
+      setState(() {
+        _isSwitchingCamera = true;
+      });
+
       debugPrint('VIDEO CALL ==> Switching camera...');
 
       // Fetch all available camera sources
@@ -494,29 +502,47 @@ class _VideoCallPageState extends State<VideoCallPage> {
         (source) => source.isFrontFacing != currentCameraSource?.isFrontFacing,
       );
 
-      // Switch the camera source
-      await _cameraCapturer?.switchCamera(newCameraSource);
+      // 1. First, unpublish and dispose of the current video track
+      if (_localVideoTrack != null) {
+        await _localVideoTrack!.unpublish();
+        await _localVideoTrack!.release();
+        _localVideoTrack = null;
+      }
 
-      // Update current camera source
+      // 2. Switch the camera source
+      await _cameraCapturer?.switchCamera(newCameraSource);
       _currentCameraSource = newCameraSource;
 
+      // 3. Wait a brief moment to ensure the camera has fully switched
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // 4. Create and publish new video track
+      var newTrackId = const Uuid().v4();
       _localVideoTrack = LocalVideoTrack(
         true,
         _cameraCapturer!,
-        name: 'preview-video${const Uuid().v4()}',
+        name: 'preview-video-$newTrackId',
       );
-      await _localVideoTrack?.create();
-      await _localVideoTrack?.publish();
 
-      setState(() {});
+      await _localVideoTrack?.create();
+
+      // 5. If we're in a room, publish the new track
+      if (_room != null && _room!.state == RoomState.CONNECTED) {
+        await _localVideoTrack?.publish();
+      }
 
       debugPrint(
           'VIDEO CALL ==> Camera switched to ${newCameraSource.isFrontFacing ? "front" : "back"} camera.');
 
-      // Refresh UI if necessary
       setState(() {});
     } catch (e) {
       debugPrint('VIDEO CALL ==> Failed to switch camera: $e');
+      // Try to recover by reinitializing the camera
+      await _initCameraCapturer();
+    } finally {
+      setState(() {
+        _isSwitchingCamera = false;
+      });
     }
   }
 }
