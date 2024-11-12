@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:flutter_pannable_rating_bar/flutter_pannable_rating_bar.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
@@ -483,19 +483,23 @@ void showRatingDialog(BuildContext context,
                     if (!isShortDialogue)
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.62,
-                        child: RatingBar.builder(
-                          initialRating: rating,
+                        child: PannableRatingBar.builder(
+                          rate: rating,
                           minRating: 1,
                           direction: Axis.horizontal,
                           itemCount: 5,
-                          itemPadding:
-                              const EdgeInsets.symmetric(horizontal: 4.0),
-                          itemBuilder: (context, _) => const Icon(
-                            Icons.star,
-                            color: Colors.amber,
+                          itemBuilder: (context, _) => const RatingWidget(
+                            selectedColor: Colors.orange,
+                            unSelectedColor: Colors.grey,
+                            child: Icon(
+                              Icons.star,
+                              size: 16,
+                            ),
                           ),
-                          onRatingUpdate: (rate) {
-                            rating = rate;
+                          onChanged: (rate) {
+                            setState(() {
+                              rating = rate.roundToDouble();
+                            });
                           },
                         ),
                       ),
