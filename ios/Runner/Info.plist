@@ -34,9 +34,15 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Explanation on why the camera access is needed.</string>
+	<string>We need access to your camera for video and photo functionality.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Explanation on why the microphone access is needed.</string>
+	<string>We need access to your microphone for audio recording.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>We need access to Bluetooth to connect to nearby devices.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>We need access to Bluetooth to discover and interact with nearby devices.</string>
+	<key>NSNearbyInteractionUsageDescription</key>
+	<string>We need access to Nearby Interaction for device communication.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Need to upload image</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
