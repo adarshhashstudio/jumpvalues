@@ -570,3 +570,15 @@ Future<CategoryDropdownResponse?> goalsDropdown() async {
   }
   return response;
 }
+
+Future<BaseResponseModel?> deleteUser(int userId) async {
+  BaseResponseModel? response;
+  try {
+    response = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('user/account/delete/$userId',
+            isAuth: true, method: HttpMethodType.delete)));
+  } catch (e) {
+    rethrow;
+  }
+  return response;
+}

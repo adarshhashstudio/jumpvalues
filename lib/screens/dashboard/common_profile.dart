@@ -537,6 +537,33 @@ class _CommonProfileState extends State<CommonProfile> {
     }
   }
 
+  Future<void> deleteUserApi() async {
+    setState(() {
+      loader = true;
+    });
+    try {
+      var response = await deleteUser(appStore.userId ?? -1);
+      if (response?.status == true) {
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
+            response?.message ?? errorSomethingWentWrong);
+        isTokenAvailable(context);
+        // Call the code to clear the token and navigate to WelcomeScreen
+        logoutAndNavigateToWelcomeScreen(context);
+      } else {
+        if (response?.message != null) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response?.message ?? errorSomethingWentWrong);
+        }
+      }
+    } catch (e) {
+      debugPrint('deleteUser Error: $e');
+    } finally {
+      setState(() {
+        loader = false;
+      });
+    }
+  }
+
   Future<void> refreshData() async {
     hideKeyboard(context);
     fieldErrors.clear();
@@ -547,6 +574,39 @@ class _CommonProfileState extends State<CommonProfile> {
     } else {
       await getClientUser();
     }
+  }
+
+  void showDeleteAccountConfirmationDialog(BuildContext outerContext) {
+    showDialog(
+      context: outerContext,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Are you sure?'),
+        content: const Text('You want to delete your account permanent?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await deleteUserApi();
+            },
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void logoutAndNavigateToWelcomeScreen(BuildContext profileContext) async {
+    setState(() {
+      loader = true;
+    });
+    await appStore.clearData();
+    isTokenAvailable(context);
   }
 
   @override
@@ -572,6 +632,12 @@ class _CommonProfileState extends State<CommonProfile> {
                                       horizontal: 20, vertical: 10),
                                   additionalDetails(context)
                                       .paddingSymmetric(horizontal: 20),
+                                  button(context, onPressed: () {
+                                    showDeleteAccountConfirmationDialog(
+                                        context);
+                                  }, text: 'Delete Account', color: maroon)
+                                      .paddingSymmetric(
+                                          horizontal: 20, vertical: 10),
                                 ],
                               ),
                       ),
