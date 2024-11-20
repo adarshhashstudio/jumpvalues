@@ -34,17 +34,11 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>We need access to your camera for video and photo functionality.</string>
+	<string>We need access to your camera for video and photo functionality for profile and video calling.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>We need access to your microphone for audio recording.</string>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>We need access to Bluetooth to connect to nearby devices.</string>
-	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>We need access to Bluetooth to discover and interact with nearby devices.</string>
-	<key>NSNearbyInteractionUsageDescription</key>
-	<string>We need access to Nearby Interaction for device communication.</string>
+	<string>We need access to your microphone for audio access while video calling.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Need to upload image</string>
+	<string>We need access to your photo library to let you upload images for your profile.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
