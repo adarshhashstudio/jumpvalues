@@ -52,8 +52,8 @@ android {
         applicationId "com.jumpccc.jumpvalues"
         minSdkVersion 26// Android 4.1 (JELLY_BEAN) - 99.8% Usage
         targetSdkVersion 34 // Android 14 (UPSIDE_DOWN_CAKE) (API level 34) to be submitted to Google Play - 16.3% Usage
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+        versionCode 7
+        versionName '6.0'
         multiDexEnabled true
     }
 

@@ -459,7 +459,7 @@ class _ClientDashboardState extends State<ClientDashboard> {
                 style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 14),
+                    fontSize: 13),
               ).withHeight(MediaQuery.of(context).size.height * 0.11),
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.01,
