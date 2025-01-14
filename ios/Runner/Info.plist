@@ -72,5 +72,9 @@
 	<string>We use your location to send relevant notifications.</string>
 	<key>NSUserNotificationAlertStyle</key>
 	<string>banner</string>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 </dict>
 </plist>

@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:jumpvalues/screens/splash_screen.dart';
@@ -14,6 +15,9 @@ import 'package:jumpvalues/store/goals_data_hive.dart';
 import 'package:jumpvalues/utils/configs.dart';
 import 'package:jumpvalues/utils/constants.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:open_file_plus/open_file_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 AppStore appStore = AppStore();
 late Box<GoalsData> goalsBox;
@@ -21,6 +25,9 @@ late Box<GoalsData> goalsBox;
 class NavigationService {
   static final navigatorKey = GlobalKey<NavigatorState>();
 }
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +43,9 @@ Future<void> main() async {
     );
 
     FlutterError.onError = (FlutterErrorDetails errorDetails) {
+      FlutterError.dumpErrorToConsole(errorDetails);
+      logErrorToFile(errorDetails.exceptionAsString(),
+          errorDetails.stack ?? StackTrace.empty);
       FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
       FirebaseCrashlytics.instance
           .log('Flutter error occurred: ${errorDetails.exceptionAsString()}');
@@ -96,8 +106,112 @@ Future<void> main() async {
 
   await SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((v) {
-    runApp(const MyApp());
+    // Catch errors in non-Flutter zones
+    runZonedGuarded(() async {
+      runApp(const MyApp());
+    }, (error, stackTrace) {
+      logErrorToFile(error.toString(), stackTrace);
+    });
   });
+}
+
+Future<void> logErrorToFile(String error, StackTrace stackTrace) async {
+  try {
+    // Get the application documents directory
+    final directory = await getApplicationDocumentsDirectory();
+    final logFilePath = '${directory.path}/error_logs.txt';
+
+    // Create the log file if it doesn't exist
+    final logFile = File(logFilePath);
+    if (!await logFile.exists()) {
+      await logFile.create();
+    }
+
+    // Append the error log to the file
+    final logEntry = '''
+    --- Error Log ---
+    Time: ${DateTime.now()}
+    Error: $error
+    StackTrace: $stackTrace
+    -----------------
+    ''';
+    debugPrint('--- Error Log ---');
+    debugPrint('File Location: $logFilePath');
+    debugPrint('Time: ${DateTime.now()}');
+    debugPrint('Error: $error');
+    debugPrint('StackTrace: $stackTrace');
+    debugPrint('-----------------');
+    await logFile.writeAsString(logEntry, mode: FileMode.append);
+    await downloadLogFile();
+    await initNotifications();
+    await shareErrorLog();
+  } catch (e) {
+    debugPrint('Failed to write error log: $e');
+  }
+}
+
+Future<void> initNotifications() async {
+  const initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const initializationSettingsDarwin = DarwinInitializationSettings();
+
+  const initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+    iOS: initializationSettingsDarwin,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: (response) {
+      downloadLogFile();
+    },
+  );
+}
+
+Future<void> downloadLogFile() async {
+  try {
+    final directory = await getApplicationDocumentsDirectory();
+    final logFilePath = '${directory.path}/error_logs.txt';
+
+    final logFile = File(logFilePath);
+    if (await logFile.exists()) {
+      // Code to trigger file download for the user
+      // For Android/iOS, use share_plus or open_file_plus packages
+      await OpenFile.open(logFilePath);
+      debugPrint('Log file path: $logFilePath');
+      // Example: Share the log file
+      // await Share.shareFiles([logFilePath], text: 'Error Logs');
+    } else {
+      debugPrint('No log file found.');
+    }
+  } catch (e) {
+    debugPrint('Failed to download log file: $e');
+  }
+}
+
+Future<void> shareErrorLog() async {
+  try {
+    final directory = await getApplicationDocumentsDirectory();
+    final logFilePath = '${directory.path}/error_logs.txt';
+
+    // Check if the file exists
+    final logFile = File(logFilePath);
+    if (await logFile.exists()) {
+      // Share or download the file (e.g., using the share_plus package)
+      // Example with share_plus:
+      // Share the file
+      await Share.shareXFiles(
+        [XFile(logFile.path)],
+        text: 'Crash Logs',
+      );
+      debugPrint('Log file ready for download: $logFilePath');
+    } else {
+      debugPrint('No error log file found.');
+    }
+  } catch (e) {
+    debugPrint('Failed to share error log: $e');
+  }
 }
 
 class MyApp extends StatefulWidget {
