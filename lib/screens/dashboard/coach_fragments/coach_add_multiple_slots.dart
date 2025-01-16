@@ -110,9 +110,10 @@ class _CoachAddMultipleSlotsState extends State<CoachAddMultipleSlots> {
     } catch (e) {
       debugPrint('createSingleTimeSlot error: $e');
     } finally {
+      if(mounted){
       setState(() {
         loader = false;
-      });
+      });}
     }
   }
 

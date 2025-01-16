@@ -84,15 +84,16 @@ class _ClientAllCoachesState extends State<ClientAllCoaches> {
     } catch (e) {
       debugPrint('availableCoaches error: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
-  Widget build(BuildContext context) =>
-      // Scaffold(
+  Widget build(BuildContext context) => // Scaffold(
       // appBar: appStore.additionalSponsor.isEmpty
       //     ? null
       //     : AppBar(
@@ -209,5 +210,5 @@ class _ClientAllCoachesState extends State<ClientAllCoaches> {
               )),
         ],
       );
-  // );
+// );
 }

@@ -1,12 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:jumpvalues/screens/splash_screen.dart';
@@ -26,53 +22,9 @@ class NavigationService {
   static final navigatorKey = GlobalKey<NavigatorState>();
 }
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-
 Future<void> main() async {
   await runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
-
-    if (Platform.isAndroid) {
-      await Firebase.initializeApp(
-        options: const FirebaseOptions(
-          apiKey: 'AIzaSyDLkgae9qZezwFRfeU8PcDf1s9DLHKi7mk',
-          appId: '1:927941200379:android:8cd86db678ad12b734235e',
-          messagingSenderId: '927941200379',
-          projectId: 'jumpcc-app',
-        ),
-      );
-
-      FlutterError.onError = (FlutterErrorDetails errorDetails) {
-        FlutterError.dumpErrorToConsole(errorDetails);
-        logErrorToFile(errorDetails.exceptionAsString(),
-            errorDetails.stack ?? StackTrace.empty);
-        FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-        FirebaseCrashlytics.instance
-            .log('Flutter error occurred: ${errorDetails.exceptionAsString()}');
-        FirebaseCrashlytics.instance.setCustomKey('Error Type', 'Flutter');
-        FirebaseCrashlytics.instance
-            .setCustomKey('Error Message', errorDetails.exceptionAsString());
-        FirebaseCrashlytics.instance
-            .setCustomKey('Stack Trace', errorDetails.stack.toString());
-      };
-
-      PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-        FirebaseCrashlytics.instance.log('Platform error occurred: $error');
-        FirebaseCrashlytics.instance.setCustomKey('Error Type', 'Platform');
-        FirebaseCrashlytics.instance
-            .setCustomKey('Error Message', error.toString());
-        FirebaseCrashlytics.instance
-            .setCustomKey('Stack Trace', stack.toString());
-        return true;
-      };
-
-      await FirebaseCrashlytics.instance.setCustomKey('App Version', '1.0.0');
-      await FirebaseCrashlytics.instance.setCustomKey('Build Number', '1');
-      await FirebaseCrashlytics.instance
-          .log('Firebase and Crashlytics initialized');
-    }
 
     await initialize();
 
@@ -117,17 +69,14 @@ Future<void> main() async {
 
 Future<void> logErrorToFile(String error, StackTrace stackTrace) async {
   try {
-    // Get the application documents directory
     final directory = await getApplicationDocumentsDirectory();
     final logFilePath = '${directory.path}/error_logs.txt';
 
-    // Create the log file if it doesn't exist
     final logFile = File(logFilePath);
     if (!await logFile.exists()) {
       await logFile.create();
     }
 
-    // Append the error log to the file
     final logEntry = '''
     --- Error Log ---
     Time: ${DateTime.now()}
@@ -142,32 +91,32 @@ Future<void> logErrorToFile(String error, StackTrace stackTrace) async {
     debugPrint('StackTrace: $stackTrace');
     debugPrint('-----------------');
     await logFile.writeAsString(logEntry, mode: FileMode.append);
-    await downloadLogFile();
-    await initNotifications();
-    await shareErrorLog();
+    // await downloadLogFile();
+    // await initNotifications();
+    // await shareErrorLog();
   } catch (e) {
     debugPrint('Failed to write error log: $e');
   }
 }
 
-Future<void> initNotifications() async {
-  const initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
+// Future<void> initNotifications() async {
+//   const initializationSettingsAndroid =
+//       AndroidInitializationSettings('@mipmap/ic_launcher');
 
-  const initializationSettingsDarwin = DarwinInitializationSettings();
+//   const initializationSettingsDarwin = DarwinInitializationSettings();
 
-  const initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-    iOS: initializationSettingsDarwin,
-  );
+//   const initializationSettings = InitializationSettings(
+//     android: initializationSettingsAndroid,
+//     iOS: initializationSettingsDarwin,
+//   );
 
-  await flutterLocalNotificationsPlugin.initialize(
-    initializationSettings,
-    onDidReceiveNotificationResponse: (response) {
-      downloadLogFile();
-    },
-  );
-}
+//   await flutterLocalNotificationsPlugin.initialize(
+//     initializationSettings,
+//     onDidReceiveNotificationResponse: (response) {
+//       downloadLogFile();
+//     },
+//   );
+// }
 
 Future<void> downloadLogFile() async {
   try {
@@ -176,12 +125,8 @@ Future<void> downloadLogFile() async {
 
     final logFile = File(logFilePath);
     if (await logFile.exists()) {
-      // Code to trigger file download for the user
-      // For Android/iOS, use share_plus or open_file_plus packages
       await OpenFile.open(logFilePath);
       debugPrint('Log file path: $logFilePath');
-      // Example: Share the log file
-      // await Share.shareFiles([logFilePath], text: 'Error Logs');
     } else {
       debugPrint('No log file found.');
     }
@@ -195,12 +140,8 @@ Future<void> shareErrorLog() async {
     final directory = await getApplicationDocumentsDirectory();
     final logFilePath = '${directory.path}/error_logs.txt';
 
-    // Check if the file exists
     final logFile = File(logFilePath);
     if (await logFile.exists()) {
-      // Share or download the file (e.g., using the share_plus package)
-      // Example with share_plus:
-      // Share the file
       await Share.shareXFiles(
         [XFile(logFile.path)],
         text: 'Crash Logs',
@@ -225,7 +166,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // NetworkManager().initialize(); // For Network check socket - Singleton class
   }
 
   @override

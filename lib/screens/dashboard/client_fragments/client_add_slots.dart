@@ -66,9 +66,10 @@ class _ClientAddSlotsState extends State<ClientAddSlots> {
     } catch (e) {
       debugPrint('getAllTimeSlots error: $e');
     } finally {
+      if(mounted){
       setState(() {
         loader = false;
-      });
+      });}
     }
   }
 
@@ -92,9 +93,10 @@ class _ClientAddSlotsState extends State<ClientAddSlots> {
     } catch (e) {
       debugPrint('createSingleTimeSlot error: $e');
     } finally {
+      if(mounted){
       setState(() {
         loader = false;
-      });
+      });}
     }
   }
 

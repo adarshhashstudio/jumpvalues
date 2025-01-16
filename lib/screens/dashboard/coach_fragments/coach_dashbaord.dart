@@ -50,9 +50,10 @@ class _CoachDashboardState extends State<CoachDashboard> {
     } catch (e) {
       debugPrint('getCoachDashboard error: $e');
     } finally {
+      if(mounted){
       setState(() {
         loader = false;
-      });
+      });}
     }
   }
 

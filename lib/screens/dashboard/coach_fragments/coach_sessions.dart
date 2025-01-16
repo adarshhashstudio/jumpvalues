@@ -76,9 +76,10 @@ class _CoachSessionsState extends State<CoachSessions> {
     } catch (e) {
       debugPrint('availableCoaches error: $e');
     } finally {
+      if(mounted){
       setState(() {
         _isLoading = false;
-      });
+      });}
     }
   }
 

@@ -33,6 +33,18 @@ class NotificationManager {
 
   late FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
 
+  Future<void> requestNotificationPermissions() async {
+    final granted = await _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    debugPrint('Notification permissions granted: $granted');
+  }
+
   /// Shows a notification with the given [title] and [body].
   Future<void> showNotification(String title, String body) async {
     const androidPlatformChannelSpecifics = AndroidNotificationDetails(

@@ -9,23 +9,28 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="578e3d1b-770f-4cc4-8ad0-fffd061f8b55" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
+    <list default="true" id="578e3d1b-770f-4cc4-8ad0-fffd061f8b55" name="Changes" comment="test 1">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Podfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/auth_screens/otp_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/auth_screens/otp_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/client_screens/coach_details_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/client_screens/coach_details_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/dashboard/booking_item_component.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/dashboard/booking_item_component.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/dashboard/client_fragments/client_add_slots.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/dashboard/client_fragments/client_add_slots.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/dashboard/client_fragments/client_all_coaches.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/dashboard/client_fragments/client_all_coaches.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/dashboard/client_fragments/client_dashbaord.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/dashboard/client_fragments/client_dashbaord.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/dashboard/client_fragments/client_sessions.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/dashboard/client_fragments/client_sessions.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/dashboard/coach_fragments/coach_add_multiple_slots.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/dashboard/coach_fragments/coach_add_multiple_slots.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/dashboard/coach_fragments/coach_add_slots.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/dashboard/coach_fragments/coach_add_slots.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/dashboard/coach_fragments/coach_dashbaord.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/dashboard/coach_fragments/coach_dashbaord.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/dashboard/coach_fragments/coach_sessions.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/dashboard/coach_fragments/coach_sessions.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/dashboard/common_profile.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/dashboard/common_profile.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/video_calling_module/video_call_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/video_calling_module/video_call_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/widgets/widgets.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/widgets/widgets.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/notification_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/notification_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/socket_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/socket_service.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/utils/configs.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/configs.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/utils/utils.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/utils.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/windows/flutter/generated_plugins.cmake" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -185,5 +190,9 @@
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
     </layout>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="test 1" />
+    <option name="LAST_COMMIT_MESSAGE" value="test 1" />
   </component>
 </project>

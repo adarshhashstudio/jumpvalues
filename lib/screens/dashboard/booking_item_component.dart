@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pannable_rating_bar/flutter_pannable_rating_bar.dart';
 import 'package:jumpvalues/main.dart';
@@ -19,6 +18,7 @@ class BookingItemComponent extends StatefulWidget {
     this.index,
     required this.onActionPerformed,
   });
+
   final bool showButtons;
   final RequestedSession? serviceResource;
   final int? index;
@@ -53,9 +53,11 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
     } catch (e) {
       debugPrint('coachAcceptOrRejectSessions Error: $e');
     } finally {
-      setState(() {
-        loader = false;
-      });
+      if (mounted) {
+        setState(() {
+          loader = false;
+        });
+      }
     }
   }
 
@@ -83,9 +85,10 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                     border: Border.all(width: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: ImageWidget(imageUrl: widget.serviceResource?.userDp,
-                      height: 80,
-                      width: 80,
+                  child: ImageWidget(
+                    imageUrl: widget.serviceResource?.userDp,
+                    height: 80,
+                    width: 80,
                   ),
                   // child: CachedNetworkImage(
                   //   imageUrl: getImageUrl(widget.serviceResource?.userDp),
@@ -307,14 +310,16 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
           builder: (context) => VideoCallPage(
                 sessionId: sessionId,
               )));
-      if (completed) {
-        if (!appStore.userTypeCoach) {
-          showRatingDialog(context,
-              sessionId: sessionId,
-              coachId: coachId,
-              onActionPerformed: widget.onActionPerformed);
+      if (completed != null) {
+        if (completed) {
+          if (!appStore.userTypeCoach) {
+            showRatingDialog(context,
+                sessionId: sessionId,
+                coachId: coachId,
+                onActionPerformed: widget.onActionPerformed);
+          }
+          widget.onActionPerformed();
         }
-        widget.onActionPerformed();
       }
     } else {
       debugPrint(
@@ -408,7 +413,7 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   textColor: Colors.black38,
                   color: primaryColor,
                   onTap: () async {
-                    await onCall(sessionId, coachId);
+                    // await onCall(sessionId, coachId);
                   },
                 ).expand(),
               ],

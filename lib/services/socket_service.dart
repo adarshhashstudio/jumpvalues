@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
@@ -61,6 +62,9 @@ class SocketAndNotifications {
       _isConnected = true;
       _isConnecting = false;
       debugPrint('SOCKET IO ==> Socket connected');
+      if (Platform.isIOS) {
+        NotificationManager().requestNotificationPermissions();
+      }
     });
 
     _socket?.onDisconnect((_) {

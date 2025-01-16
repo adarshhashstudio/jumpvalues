@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:twilio_programmable_video/twilio_programmable_video.dart';
 import 'package:uuid/uuid.dart';
 
@@ -15,10 +16,10 @@ class VideoCallPage extends StatefulWidget {
 }
 
 class _VideoCallPageState extends State<VideoCallPage> {
-  Room? _room;
+  late Room _room;
   LocalVideoTrack? _localVideoTrack;
   LocalAudioTrack? _localAudioTrack;
-  CameraCapturer? _cameraCapturer;
+  CameraCapturer? _cameraCapture;
   bool _isLoading = false;
   final Map<String, RemoteVideoTrack?> _remoteParticipantVideoTracks = {};
   bool _isMuted = false;
@@ -34,46 +35,41 @@ class _VideoCallPageState extends State<VideoCallPage> {
     _init(); // Set up the listener for headset events
   }
 
-  @override
-  void dispose() {
-    _leaveRoom();
-    super.dispose();
-  }
-
   Future<void> _init() async {
     setState(() {
       _isLoading = true;
     });
     debugPrint('VIDEO CALL ==> Initializing video call setup...');
-    await _initCameraCapturer();
+    await _initCameraCapture();
     await getTwilioAccessToken();
   }
 
   Future<void> coachAcceptOrRejectSessions(int status, int sessionId) async {
-    setState(() {
-      _isLoading = true;
-    });
     try {
       var request = <String, dynamic>{
         'status': status,
       };
 
       var response = await acceptOrRejectSessions(request, sessionId);
-      if (response?.status == true) {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
-            response?.message ?? 'Saved Successfully.');
-      } else {
-        if (response?.message != null) {
-          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-              response?.message ?? 'Something went wrong');
+      if (response != null) {
+        if (response.status == true) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
+              response.message ?? 'Saved Successfully.');
+        } else {
+          if (response.message != null) {
+            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+                response.message ?? 'Something went wrong');
+          }
         }
       }
     } catch (e) {
       debugPrint('VIDEO CALL ==> coachAcceptOrRejectSessions Error: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -81,38 +77,39 @@ class _VideoCallPageState extends State<VideoCallPage> {
     try {
       debugPrint('VIDEO CALL ==> Fetching Twilio access token...');
       var response = await twilioAccessToken(widget.sessionId);
-      if (response?.status == true) {
+      if (response != null && response.status == true) {
         debugPrint('VIDEO CALL ==> Twilio access token received successfully.');
-        await _joinRoom(response!.token!, response.roomId!);
+        if (response.token != null && response.roomId != null) {
+          await _joinRoom(response.token ?? '', response.roomId ?? '');
+        } else {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+              response.message ?? 'Something went wrong');
+        }
       } else {
-        SnackBarHelper.showStatusSnackBar(
-          context,
-          StatusIndicator.error,
-          response?.message ?? 'Something went wrong',
-        );
+        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
+            response?.message ?? 'Something went wrong');
       }
     } catch (e) {
       debugPrint('VIDEO CALL ==> Error fetching Twilio access token: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
-  Future<void> _initCameraCapturer() async {
+  Future<void> _initCameraCapture() async {
     try {
-      debugPrint('VIDEO CALL ==> Initializing camera capturer...');
-      var cameraSources = await CameraSource.getSources();
-      var frontCameraSource =
-          cameraSources.firstWhere((source) => source.isFrontFacing);
+      if (await Permission.camera.isGranted &&
+          await Permission.microphone.isGranted) {
+        debugPrint(
+            'VIDEO CALL ==> Permissions granted. Initializing camera...');
+        var cameraSources = await CameraSource.getSources();
+        var frontCameraSource =
+            cameraSources.firstWhere((source) => source.isFrontFacing);
 
-      if (frontCameraSource != null) {
-        _cameraCapturer = CameraCapturer(frontCameraSource);
+        _cameraCapture = CameraCapturer(frontCameraSource);
         _currentCameraSource = frontCameraSource;
         debugPrint('VIDEO CALL ==> Camera capturer initialized.');
       } else {
-        debugPrint('VIDEO CALL ==> No front-facing camera found.');
+        debugPrint(
+            'VIDEO CALL ==> Permissions not granted for camera/microphone.');
       }
     } catch (e) {
       debugPrint('VIDEO CALL ==> Camera initialization failed: $e');
@@ -120,9 +117,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
   }
 
   Future<void> _joinRoom(String token, String roomId) async {
-    setState(() {
-      _isLoading = true;
-    });
     await TwilioProgrammableVideo.setAudioSettings(
         speakerphoneEnabled: true, bluetoothPreferred: true);
     var trackId = const Uuid().v4();
@@ -136,19 +130,12 @@ class _VideoCallPageState extends State<VideoCallPage> {
         debugPrint('VIDEO CALL ==> Initializing local video preview...');
         _localVideoTrack = LocalVideoTrack(
           true,
-          _cameraCapturer!,
+          _cameraCapture!,
           name: 'preview-video-$trackId',
         );
-        await _localVideoTrack?.create();
-        // await _localVideoTrack?.publish();
         debugPrint('VIDEO CALL ==> Local Video Track created');
       } catch (e) {
         debugPrint('VIDEO CALL ==> VideoTrack creation failed: $e');
-        // SnackBarHelper.showStatusSnackBar(
-        //   context,
-        //   StatusIndicator.error,
-        //   'Failed to create video track: $e',
-        // );
       }
 
       var connectOptions = ConnectOptions(
@@ -172,36 +159,33 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
       _room = await TwilioProgrammableVideo.connect(connectOptions);
 
-      _room?.onConnected.listen((Room room) {
+      _room.onConnected.listen((Room room) {
         debugPrint('VIDEO CALL ==> Connected to room: ${room.name}');
         SnackBarHelper.showStatusSnackBar(
           context,
           StatusIndicator.success,
-          'Wait for participent to join.',
+          'Wait for participant to join.',
         );
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
         _onConnected(room);
       });
 
-      _room?.onConnectFailure.listen((RoomConnectFailureEvent event) {
+      _room.onConnectFailure.listen((RoomConnectFailureEvent event) {
         SnackBarHelper.showStatusSnackBar(
           context,
           StatusIndicator.error,
-          'Failed to connect to room ${event.room.name}: ${event.exception}',
+          'Failed to connect', // 'Failed to connect to room ${event.room.name}: ${event.exception}',
         );
-        setState(() {
-          _isLoading = false;
-        });
         coachAcceptOrRejectSessions(
             getSessionStatusCode(SessionStatus.abandoned), widget.sessionId);
       });
 
-      _room?.onDisconnected.listen((RoomDisconnectedEvent event) {
-        SnackBarHelper.showStatusSnackBar(
-          context,
-          StatusIndicator.warning,
-          'Disconnected from ${event.room.name}',
-        );
-        _onDisconnected(event);
+      _room.onDisconnected.listen((RoomDisconnectedEvent event) {
+        // should not pass any context and should not update using setState here
       });
     } catch (e) {
       debugPrint(
@@ -212,19 +196,12 @@ class _VideoCallPageState extends State<VideoCallPage> {
         StatusIndicator.error,
         'Failed to join room: $e',
       );
-      setState(() {
-        _isLoading = false;
-      });
       await coachAcceptOrRejectSessions(
           getSessionStatusCode(SessionStatus.abandoned), widget.sessionId);
     }
   }
 
   void _onConnected(Room room) {
-    setState(() {
-      _isLoading = false;
-    });
-
     participentLength = room.remoteParticipants.length;
     debugPrint(
         '++++++++++++++++> Count of room participants: $participentLength');
@@ -246,53 +223,49 @@ class _VideoCallPageState extends State<VideoCallPage> {
     });
   }
 
-  void _onDisconnected(RoomDisconnectedEvent event) {
-    setState(() {
-      _room = null;
-      _remoteParticipantVideoTracks.clear();
-      _remoteParticipantJoined = false;
-    });
-    debugPrint(
-        'VIDEO CALL ==> Current Remote ============>>>> ${event.room.state}');
-  }
-
   void _addRemoteParticipantListeners(RemoteParticipant participant) {
     // Listen for video track subscription events
     participant.onVideoTrackSubscribed.listen((event) {
       debugPrint(
           'Remote video track subscribed for participant: ${participant.sid}');
-      setState(() {
-        // Store the remote participant's video track
-        _remoteParticipantVideoTracks[participant.sid!] =
-            event.remoteVideoTrack;
-        _logRemoteParticipantVideoTracks();
-        // Mark that a remote participant has joined
-        _remoteParticipantJoined = true;
-      });
+      if (mounted) {
+        setState(() {
+          // Store the remote participant's video track
+          _remoteParticipantVideoTracks[participant.sid!] =
+              event.remoteVideoTrack;
+          _logRemoteParticipantVideoTracks();
+          // Mark that a remote participant has joined
+          _remoteParticipantJoined = true;
+        });
+      }
     });
 
     // Listen for video track unsubscription events
     participant.onVideoTrackUnsubscribed.listen((event) {
       debugPrint(
           'Remote video track unsubscribed for participant: ${participant.sid}');
-      setState(() {
-        // Remove the video track when unsubscribed
-        _remoteParticipantVideoTracks.remove(participant.sid!);
-        _logRemoteParticipantVideoTracks();
-        // Update the state based on remaining participants
-        _remoteParticipantJoined = _remoteParticipantVideoTracks.isNotEmpty;
-      });
+      if (mounted) {
+        setState(() {
+          // Remove the video track when unsubscribed
+          _remoteParticipantVideoTracks.remove(participant.sid!);
+          _logRemoteParticipantVideoTracks();
+          // Update the state based on remaining participants
+          _remoteParticipantJoined = _remoteParticipantVideoTracks.isNotEmpty;
+        });
+      }
     });
 
     // Listen for participant disconnect events
     participant.onVideoTrackDisabled.listen((event) {
       debugPrint(
           'VIDEO CALL ==> Remote participant disconnected: ${participant.sid}');
-      setState(() {
-        _remoteParticipantVideoTracks.remove(participant.sid!);
-        _logRemoteParticipantVideoTracks();
-        _remoteParticipantJoined = _remoteParticipantVideoTracks.isNotEmpty;
-      });
+      if (mounted) {
+        setState(() {
+          _remoteParticipantVideoTracks.remove(participant.sid!);
+          _logRemoteParticipantVideoTracks();
+          _remoteParticipantJoined = _remoteParticipantVideoTracks.isNotEmpty;
+        });
+      }
     });
   }
 
@@ -308,13 +281,34 @@ class _VideoCallPageState extends State<VideoCallPage> {
   Future<void> _leaveRoom() async {
     debugPrint('VIDEO CALL ==> Leaving room...');
     try {
-      await _room?.disconnect();
+      await _room.disconnect();
     } catch (e) {
       debugPrint('VIDEO CALL ==> Error disconnecting from room: $e');
     }
 
-    _room = null;
-    _localVideoTrack = null;
+    // Stop and release local video track
+    if (_localVideoTrack != null) {
+      try {
+        await _localVideoTrack?.unpublish(); // Stop the track
+        _localVideoTrack = null; // Release the reference
+        debugPrint('VIDEO CALL ==> Local video track stopped and disposed.');
+      } catch (e) {
+        debugPrint('VIDEO CALL ==> Error stopping video track: $e');
+      }
+    }
+
+    // Stop and release local audio track
+    if (_localAudioTrack != null) {
+      try {
+        // Stop the track
+        _localAudioTrack = null; // Release the reference
+        debugPrint('VIDEO CALL ==> Local audio track stopped and disposed.');
+      } catch (e) {
+        debugPrint('VIDEO CALL ==> Error stopping audio track: $e');
+      }
+    }
+
+    // _localVideoTrack = null;
     _remoteParticipantVideoTracks.clear();
     _remoteParticipantJoined = false;
 
@@ -374,14 +368,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
                       'Connecting...',
                       style: boldTextStyle(color: white),
                     ).center(),
-              // if (_localVideoTrack != null)
-              //   Positioned(
-              //     top: 50,
-              //     left: 50,
-              //     width: 100,
-              //     height: 150,
-              //     child: _localVideoTrack!.widget(),
-              //   ),
               if (_isLoading)
                 const Center(
                   child: CircularProgressIndicator(),
@@ -400,7 +386,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            // Mute/Unmute button
+            // Mute/UnMute button
             Container(
               decoration: boxDecorationDefault(color: white.withOpacity(0.2)),
               child: IconButton(
@@ -449,9 +435,11 @@ class _VideoCallPageState extends State<VideoCallPage> {
     if (_isSwitchingCamera) return; // Prevent multiple simultaneous switches
 
     try {
-      setState(() {
-        _isSwitchingCamera = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isSwitchingCamera = true;
+        });
+      }
 
       debugPrint('VIDEO CALL ==> Switching camera...');
 
@@ -477,7 +465,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
       }
 
       // 2. Switch the camera source
-      await _cameraCapturer?.switchCamera(newCameraSource);
+      await _cameraCapture?.switchCamera(newCameraSource);
       _currentCameraSource = newCameraSource;
 
       // 3. Wait a brief moment to ensure the camera has fully switched
@@ -487,14 +475,14 @@ class _VideoCallPageState extends State<VideoCallPage> {
       var newTrackId = const Uuid().v4();
       _localVideoTrack = LocalVideoTrack(
         true,
-        _cameraCapturer!,
+        _cameraCapture!,
         name: 'preview-video-$newTrackId',
       );
 
       await _localVideoTrack?.create();
 
       // 5. If we're in a room, publish the new track
-      if (_room != null && _room!.state == RoomState.CONNECTED) {
+      if (_room.state == RoomState.CONNECTED) {
         await _localVideoTrack?.publish();
       }
 
@@ -505,11 +493,13 @@ class _VideoCallPageState extends State<VideoCallPage> {
     } catch (e) {
       debugPrint('VIDEO CALL ==> Failed to switch camera: $e');
       // Try to recover by reinitializing the camera
-      await _initCameraCapturer();
+      await _initCameraCapture();
     } finally {
-      setState(() {
-        _isSwitchingCamera = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isSwitchingCamera = false;
+        });
+      }
     }
   }
 }

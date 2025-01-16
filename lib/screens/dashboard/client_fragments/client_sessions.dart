@@ -77,9 +77,11 @@ class _ClientSessionsState extends State<ClientSessions> {
     } catch (e) {
       debugPrint('availableCoaches error: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

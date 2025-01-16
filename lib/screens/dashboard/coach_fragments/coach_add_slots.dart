@@ -173,9 +173,10 @@ class _CoachMySlotsState extends State<CoachMySlots> {
     } catch (e) {
       debugPrint('deleteSingleTimeSlot error: $e');
     } finally {
+      if(mounted){
       setState(() {
         loader = false;
-      });
+      });}
     }
   }
 

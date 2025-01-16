@@ -63,9 +63,11 @@ class _ClientDashboardState extends State<ClientDashboard> {
     } catch (e) {
       debugPrint('getClientDashboard error: $e');
     } finally {
-      setState(() {
-        loader = false;
-      });
+      if (mounted) {
+        setState(() {
+          loader = false;
+        });
+      }
     }
   }
 

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -231,9 +230,11 @@ class _CommonProfileState extends State<CommonProfile> {
     } catch (e) {
       debugPrint('signup Error: $e');
     } finally {
-      setState(() {
-        loader = false;
-      });
+      if (mounted) {
+        setState(() {
+          loader = false;
+        });
+      }
     }
   }
 
@@ -477,9 +478,11 @@ class _CommonProfileState extends State<CommonProfile> {
     } catch (e) {
       debugPrint('uploadProfilePic Error: $e');
     } finally {
-      setState(() {
-        loader = false;
-      });
+      if (mounted) {
+        setState(() {
+          loader = false;
+        });
+      }
     }
   }
 
@@ -504,9 +507,11 @@ class _CommonProfileState extends State<CommonProfile> {
     } catch (e) {
       debugPrint('getClientUser Error: $e');
     } finally {
-      setState(() {
-        loader = false;
-      });
+      if (mounted) {
+        setState(() {
+          loader = false;
+        });
+      }
     }
   }
 
@@ -531,9 +536,11 @@ class _CommonProfileState extends State<CommonProfile> {
     } catch (e) {
       debugPrint('getCoachUser Error: $e');
     } finally {
-      setState(() {
-        loader = false;
-      });
+      if (mounted) {
+        setState(() {
+          loader = false;
+        });
+      }
     }
   }
 
@@ -558,9 +565,11 @@ class _CommonProfileState extends State<CommonProfile> {
     } catch (e) {
       debugPrint('deleteUser Error: $e');
     } finally {
-      setState(() {
-        loader = false;
-      });
+      if (mounted) {
+        setState(() {
+          loader = false;
+        });
+      }
     }
   }
 
