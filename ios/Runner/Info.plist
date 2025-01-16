@@ -26,6 +26,8 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -35,11 +37,26 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>We need access to your camera for video and photo functionality for profile and video calling.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We use your location to send relevant notifications.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We use your location to send relevant notifications even when the app is closed.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We use your location to send relevant notifications.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>We need access to your microphone for audio access while video calling.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your photo library to let you upload images for your profile.</string>
+	<key>NSUserNotificationAlertStyle</key>
+	<string>banner</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -57,24 +74,13 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>UNAuthorizationOptionAlert</key>
+	<true/>
+	<key>UNAuthorizationOptionBadge</key>
+	<true/>
+	<key>UNAuthorizationOptionSound</key>
+	<true/>
 	<key>io.flutter.embedded_views_preview</key>
-	<true/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
-	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We use your location to send relevant notifications.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>We use your location to send relevant notifications even when the app is closed.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>We use your location to send relevant notifications.</string>
-	<key>NSUserNotificationAlertStyle</key>
-	<string>banner</string>
-	<key>UIFileSharingEnabled</key>
-	<true/>
-	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 </dict>
 </plist>
