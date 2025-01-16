@@ -13,6 +13,7 @@ import 'package:nb_utils/nb_utils.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key, required this.email, required this.isFrom});
+
   final String email;
   final String isFrom;
 
@@ -56,13 +57,17 @@ class _OtpScreenState extends State<OtpScreen> {
       (Timer timer) {
         if (count == 0) {
           timer.cancel();
-          setState(() {
-            counting = false;
-          });
+          if (mounted) {
+            setState(() {
+              counting = false;
+            });
+          }
         } else {
-          setState(() {
-            count--;
-          });
+          if (mounted) {
+            setState(() {
+              count--;
+            });
+          }
         }
       },
     );
@@ -134,8 +139,10 @@ class _OtpScreenState extends State<OtpScreen> {
       }
       var response = await verifyOtp(request, query);
       if (response.status == true) {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
-            response.message ?? 'Verified Success');
+        if (mounted) {
+          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
+              response.message ?? 'Verified Success');
+        }
         if (widget.isFrom == 'forgotPassword') {
           await Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => UpdatePasswordScreen(email: widget.email)));
@@ -149,13 +156,13 @@ class _OtpScreenState extends State<OtpScreen> {
             fieldErrors[e.field ?? '0'] = e.message ?? '0';
           });
 
-          if (fieldErrors.containsKey('email')) {
+          if (fieldErrors.containsKey('email') && mounted) {
             SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
                 fieldErrors['email'] ?? errorSomethingWentWrong);
-          } else if (fieldErrors.containsKey('otp')) {
+          } else if (fieldErrors.containsKey('otp') && mounted) {
             FocusScope.of(context).requestFocus(otpFocusNode);
           }
-        } else {
+        } else if (mounted) {
           SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
               response.message ?? errorSomethingWentWrong);
         }
@@ -163,9 +170,11 @@ class _OtpScreenState extends State<OtpScreen> {
     } catch (e) {
       debugPrint('verify Error: $e');
     } finally {
-      setState(() {
-        loader = false;
-      });
+      if (mounted) {
+        setState(() {
+          loader = false;
+        });
+      }
     }
   }
 

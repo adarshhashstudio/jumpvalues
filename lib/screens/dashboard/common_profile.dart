@@ -1057,24 +1057,25 @@ class _CommonProfileState extends State<CommonProfile> {
                     child: profilePic != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(360),
-                            child: CachedNetworkImage(
-                              imageUrl: '$domainUrl/$profilePic',
-                              fit: BoxFit.cover,
-                              placeholder: (context, _) => Center(
-                                child: Icon(
-                                  Icons.person,
-                                  size: 40,
-                                  color: Colors.grey.shade400,
-                                ),
-                              ),
-                              errorWidget: (context, url, error) => Center(
-                                child: Icon(
-                                  Icons.person,
-                                  size: 40,
-                                  color: Colors.grey.shade400,
-                                ),
-                              ),
-                            ),
+                            child: ImageWidget(imageUrl: profilePic),
+                            // child: CachedNetworkImage(
+                            //   imageUrl: '$domainUrl/$profilePic',
+                            //   fit: BoxFit.cover,
+                            //   placeholder: (context, _) => Center(
+                            //     child: Icon(
+                            //       Icons.person,
+                            //       size: 40,
+                            //       color: Colors.grey.shade400,
+                            //     ),
+                            //   ),
+                            //   errorWidget: (context, url, error) => Center(
+                            //     child: Icon(
+                            //       Icons.person,
+                            //       size: 40,
+                            //       color: Colors.grey.shade400,
+                            //     ),
+                            //   ),
+                            // ),
                           )
                         : _image != null
                             ? ClipRRect(

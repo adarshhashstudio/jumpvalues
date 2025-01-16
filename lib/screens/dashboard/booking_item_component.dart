@@ -83,26 +83,30 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                     border: Border.all(width: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: CachedNetworkImage(
-                    imageUrl: getImageUrl(widget.serviceResource?.userDp),
-                    fit: BoxFit.cover,
-                    height: 80,
-                    width: 80,
-                    placeholder: (context, _) => Center(
-                      child: Icon(
-                        Icons.person,
-                        size: 40,
-                        color: Colors.grey.shade400,
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Center(
-                      child: Icon(
-                        Icons.person,
-                        size: 40,
-                        color: Colors.grey.shade400,
-                      ),
-                    ),
+                  child: ImageWidget(imageUrl: widget.serviceResource?.userDp,
+                      height: 80,
+                      width: 80,
                   ),
+                  // child: CachedNetworkImage(
+                  //   imageUrl: getImageUrl(widget.serviceResource?.userDp),
+                  //   fit: BoxFit.cover,
+                  //   height: 80,
+                  //   width: 80,
+                  //   placeholder: (context, _) => Center(
+                  //     child: Icon(
+                  //       Icons.person,
+                  //       size: 40,
+                  //       color: Colors.grey.shade400,
+                  //     ),
+                  //   ),
+                  //   errorWidget: (context, url, error) => Center(
+                  //     child: Icon(
+                  //       Icons.person,
+                  //       size: 40,
+                  //       color: Colors.grey.shade400,
+                  //     ),
+                  //   ),
+                  // ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -403,7 +407,9 @@ class _BookingItemComponentState extends State<BookingItemComponent> {
                   text: 'Completed',
                   textColor: Colors.black38,
                   color: primaryColor,
-                  onTap: () {},
+                  onTap: () async {
+                    await onCall(sessionId, coachId);
+                  },
                 ).expand(),
               ],
             ).expand(),

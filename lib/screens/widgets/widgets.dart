@@ -184,26 +184,33 @@ class CoachItemComponent extends StatelessWidget {
                       border: Border.all(width: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: CachedNetworkImage(
-                      imageUrl: getImageUrl(coachDetail?.dp),
-                      fit: BoxFit.cover,
-                      height: 70,
-                      width: 70,
-                      placeholder: (context, v) => Center(
-                        child: Icon(
-                          Icons.person,
-                          size: 40,
-                          color: Colors.grey.shade400,
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Center(
-                        child: Icon(
-                          Icons.person,
-                          size: 40,
-                          color: Colors.grey.shade400,
-                        ),
-                      ),
+                    child: ImageWidget(imageUrl: coachDetail?.dp,
+                        height: 70,
+                        width: 70,
                     ),
+                    // child: CachedNetworkImage(
+                    //   imageUrl: getImageUrl(coachDetail?.dp),
+                    //   fit: BoxFit.cover,
+                    //   height: 70,
+                    //   width: 70,
+                    //   placeholder: (context, url) => Center(
+                    //     child: Icon(
+                    //       Icons.person,
+                    //       size: 40,
+                    //       color: Colors.grey.shade400,
+                    //     ),
+                    //   ),
+                    //   errorWidget: (context, url, error) {
+                    //     debugPrint('Failed to load image: $url, error: $error');
+                    //     return Center(
+                    //       child: Icon(
+                    //         Icons.person,
+                    //         size: 40,
+                    //         color: Colors.grey.shade400,
+                    //       ),
+                    //     );
+                    //   },
+                    // ),
                   ),
                 ),
                 const SizedBox(width: 16),

@@ -20,6 +20,7 @@ class _CoachMySlotsState extends State<CoachMySlots> {
   List<Meeting> globalMeetings = [];
   List<TimeSlotListItem> serverTimeSlotsList = [];
   bool loader = false;
+
   // Map to store error messages for each field
   Map<String, dynamic> fieldErrors = {};
 
@@ -36,10 +37,8 @@ class _CoachMySlotsState extends State<CoachMySlots> {
               '${slot.status == 1 ? 'Booked - ${slot.title ?? ''}' : slot.title ?? ''}',
               DateTime.parse(slot.start!),
               DateTime.parse(slot.end!),
-              slot.status == 1
-                  ? Colors.blue
-                  : const Color(
-                      0xFF0F8644), // Assuming a default color for the meeting
+              slot.status == 1 ? Colors.blue : const Color(0xFF0F8644),
+              // Assuming a default color for the meeting
               slot.id ?? -1))
           .toList();
     });
@@ -52,6 +51,7 @@ class _CoachMySlotsState extends State<CoachMySlots> {
     try {
       var response = await getTimeSlotsForCoach(appStore.userId ?? -1);
       if (response?.status == true) {
+        if (!mounted) return; // Check if the widget is still mounted
         setState(() {
           serverTimeSlotsList.clear();
           globalMeetings.clear();
@@ -59,12 +59,17 @@ class _CoachMySlotsState extends State<CoachMySlots> {
         });
         addServerTimeSlotsToCalender();
       } else {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-            response?.message ?? 'Something went wrong.');
+        if (!mounted) return; // Check if the widget is still mounted
+        SnackBarHelper.showStatusSnackBar(
+          context,
+          StatusIndicator.error,
+          response?.message ?? 'Something went wrong.',
+        );
       }
     } catch (e) {
       debugPrint('getAllTimeSlots error: $e');
     } finally {
+      if (!mounted) return; // Check if the widget is still mounted
       setState(() {
         loader = false;
       });
@@ -119,8 +124,8 @@ class _CoachMySlotsState extends State<CoachMySlots> {
     try {
       var request = {
         'user_id': appStore.userId,
-        'date': date, // '2024/08/02',
-        'start_time': startTime, // '16:58',
+        'date': date,
+        'start_time': startTime,
         'end_time': endTime,
         'remark': remark,
       };
@@ -129,40 +134,21 @@ class _CoachMySlotsState extends State<CoachMySlots> {
           await createAndUpdateSingleSlot(request, timeSheetId: timeSheetId);
 
       if (response?.status == true) {
-        SnackBarHelper.showStatusSnackBar(context, StatusIndicator.success,
-            response?.message ?? 'Slot Updated Successfully');
+        if (!mounted) return;
+        SnackBarHelper.showStatusSnackBar(
+          context,
+          StatusIndicator.success,
+          response?.message ?? 'Slot Updated Successfully',
+        );
         await getAllTimeSlotsForCoach();
       } else {
-        if (response?.errors?.isNotEmpty ?? false) {
-          // Set field errors and focus on the first error field
-          response?.errors?.forEach((e) {
-            fieldErrors[e.field ?? '0'] = e.message ?? '0';
-          });
-          // Focus on the first error
-          if (fieldErrors.containsKey('start_time')) {
-            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-                fieldErrors['start_time'] ?? 'Something went wrong.');
-          } else if (fieldErrors.containsKey('end_time')) {
-            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-                fieldErrors['end_time'] ?? 'Something went wrong.');
-          } else if (fieldErrors.containsKey('remark')) {
-            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-                fieldErrors['remark'] ?? 'Something went wrong.');
-          } else if (fieldErrors.containsKey('date')) {
-            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-                fieldErrors['date'] ?? 'Something went wrong.');
-          } else if (fieldErrors.containsKey('user_id')) {
-            SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-                fieldErrors['user_id'] ?? 'Something went wrong.');
-          }
-        } else {
-          SnackBarHelper.showStatusSnackBar(context, StatusIndicator.error,
-              response?.message ?? 'Something went wrong.');
-        }
+        if (!mounted) return;
+        // Handle errors
       }
     } catch (e) {
       debugPrint('createSingleTimeSlot error: $e');
     } finally {
+      if (!mounted) return;
       setState(() {
         loader = false;
       });

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:headset_connection_event/headset_event.dart';
 import 'package:jumpvalues/network/rest_apis.dart';
 import 'package:jumpvalues/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -8,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 class VideoCallPage extends StatefulWidget {
   VideoCallPage({required this.sessionId});
+
   final int sessionId;
 
   @override
@@ -26,62 +26,18 @@ class _VideoCallPageState extends State<VideoCallPage> {
   CameraSource? _currentCameraSource;
   int participentLength = 0;
   String participentSid = '';
-  HeadsetEvent headsetPlugin = HeadsetEvent();
-  HeadsetState? headsetState;
   bool _isSwitchingCamera = false;
 
   @override
   void initState() {
     super.initState();
-    _init();
-    _setupHeadsetListener(); // Set up the listener for headset events
+    _init(); // Set up the listener for headset events
   }
 
   @override
   void dispose() {
     _leaveRoom();
     super.dispose();
-  }
-
-// Set up headset listener
-  void _setupHeadsetListener() {
-    // Get the current headset state when initializing
-    headsetPlugin.getCurrentState.then((_val) {
-      setState(() {
-        headsetState = _val;
-      });
-      _routeAudioBasedOnHeadset(_val!);
-    });
-
-    // Listen for changes in the headset state during the call
-    headsetPlugin.setListener((_val) {
-      setState(() {
-        headsetState = _val;
-      });
-      _routeAudioBasedOnHeadset(_val);
-    });
-  }
-
-// Route audio based on headset connection status
-  void _routeAudioBasedOnHeadset(HeadsetState headsetState) async {
-    if (_room != null) {
-      // Ensure this is only called during a video call
-      if (headsetState == HeadsetState.CONNECT) {
-        // If headset is connected, route audio through the headset
-        await TwilioProgrammableVideo.setAudioSettings(
-          speakerphoneEnabled: false,
-          bluetoothPreferred: false,
-        );
-        debugPrint('Headset connected: routing audio through headset.');
-      } else {
-        // If headset is disconnected, route audio through the speaker
-        await TwilioProgrammableVideo.setAudioSettings(
-          speakerphoneEnabled: true,
-          bluetoothPreferred: false,
-        );
-        debugPrint('Headset disconnected: routing audio through speaker.');
-      }
-    }
   }
 
   Future<void> _init() async {
@@ -151,10 +107,13 @@ class _VideoCallPageState extends State<VideoCallPage> {
       var frontCameraSource =
           cameraSources.firstWhere((source) => source.isFrontFacing);
 
-      _cameraCapturer = CameraCapturer(frontCameraSource);
-      _currentCameraSource =
-          frontCameraSource; // Initialize with the front camera
-      debugPrint('VIDEO CALL ==> Camera capturer initialized.');
+      if (frontCameraSource != null) {
+        _cameraCapturer = CameraCapturer(frontCameraSource);
+        _currentCameraSource = frontCameraSource;
+        debugPrint('VIDEO CALL ==> Camera capturer initialized.');
+      } else {
+        debugPrint('VIDEO CALL ==> No front-facing camera found.');
+      }
     } catch (e) {
       debugPrint('VIDEO CALL ==> Camera initialization failed: $e');
     }
@@ -348,22 +307,30 @@ class _VideoCallPageState extends State<VideoCallPage> {
 
   Future<void> _leaveRoom() async {
     debugPrint('VIDEO CALL ==> Leaving room...');
-    await _room?.disconnect();
-    setState(() {
-      _room = null;
-      _localVideoTrack = null;
-      _remoteParticipantVideoTracks.clear();
-      _remoteParticipantJoined = false;
-    });
-    if (participentLength != 0 || participentSid != '') {
-      // if both participents are connected then we can complete call and send true for rate the coach from client
-      await coachAcceptOrRejectSessions(
-              getSessionStatusCode(SessionStatus.completed), widget.sessionId)
-          .then((v) {
-        Navigator.of(context).pop(true);
-      });
+    try {
+      await _room?.disconnect();
+    } catch (e) {
+      debugPrint('VIDEO CALL ==> Error disconnecting from room: $e');
+    }
+
+    _room = null;
+    _localVideoTrack = null;
+    _remoteParticipantVideoTracks.clear();
+    _remoteParticipantJoined = false;
+
+    if (participentLength != 0 || participentSid.isNotEmpty) {
+      try {
+        await coachAcceptOrRejectSessions(
+          getSessionStatusCode(SessionStatus.completed),
+          widget.sessionId,
+        ).then((v) {
+          if (mounted) Navigator.of(context).pop(true);
+        });
+      } catch (e) {
+        debugPrint('VIDEO CALL ==> Error completing session: $e');
+      }
     } else {
-      Navigator.of(context).pop();
+      if (mounted) Navigator.of(context).pop();
     }
   }
 

@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/screens/welcome_screen.dart';
@@ -205,7 +207,98 @@ String formatDateTimeCustom(String date, String time) {
   return formattedDateTime;
 }
 
-String getImageUrl(String? imageUrl) => '$domainUrl/${imageUrl ?? ''}';
+Future<String?> getImageUrl(String? imageUrl) async {
+  try {
+    if (domainUrl.isEmpty) {
+      return null; // Return null for invalid domain
+    }
+
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return null; // Return null for invalid imageUrl
+    }
+
+    final resolvedUri = Uri.parse(domainUrl).resolve(imageUrl).toString();
+    return await validateImageUrl(resolvedUri); // Validate the constructed URL
+  } catch (e, stackTrace) {
+    debugPrint('Error constructing image URL: $e');
+    debugPrint('StackTrace: $stackTrace');
+    return null; // Return null for any error
+  }
+}
+
+class ImageWidget extends StatelessWidget {
+  ImageWidget({required this.imageUrl, this.height, this.width});
+  final String? imageUrl;
+  final double? height;
+  final double? width;
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<String?>(
+        future: getImageUrl(imageUrl),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return SizedBox(
+              height: height,
+              width: width,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+
+          if (snapshot.hasData && snapshot.data != null) {
+            return CachedNetworkImage(
+              imageUrl: snapshot.data!,
+              fit: BoxFit.cover,
+              height: height,
+              width: width,
+              placeholder: (context, url) => Center(
+                child: Icon(
+                  Icons.person,
+                  size: 40,
+                  color: Colors.grey.shade400,
+                ),
+              ),
+              errorWidget: (context, url, error) => SizedBox(
+                height: height,
+                width: width,
+                child: Center(
+                  child: Icon(
+                    Icons.person,
+                    size: 40,
+                    color: Colors.grey.shade400,
+                  ),
+                ),
+              ),
+            );
+          } else {
+            return SizedBox(
+              height: height,
+              width: width,
+              child: Center(
+                child: Icon(
+                  Icons.person,
+                  size: 40,
+                  color: Colors.grey.shade400,
+                ),
+              ),
+            );
+          }
+        },
+      );
+}
+
+Future<String?> validateImageUrl(String url) async {
+  try {
+    final response = await http.head(Uri.parse(url));
+    if (response.statusCode == 200) {
+      return url; // URL is valid
+    }
+  } catch (e) {
+    debugPrint('Error validating image URL: $e');
+  }
+  return null; // URL is invalid
+}
 
 var maskFormatter = MaskTextInputFormatter(
     mask: '(###) ###-####',

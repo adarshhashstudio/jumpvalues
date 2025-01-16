@@ -30,88 +30,88 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  await runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  if (Platform.isAndroid) {
-    await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: 'AIzaSyDLkgae9qZezwFRfeU8PcDf1s9DLHKi7mk',
-        appId: '1:927941200379:android:8cd86db678ad12b734235e',
-        messagingSenderId: '927941200379',
-        projectId: 'jumpcc-app',
-      ),
-    );
+    if (Platform.isAndroid) {
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: 'AIzaSyDLkgae9qZezwFRfeU8PcDf1s9DLHKi7mk',
+          appId: '1:927941200379:android:8cd86db678ad12b734235e',
+          messagingSenderId: '927941200379',
+          projectId: 'jumpcc-app',
+        ),
+      );
 
-    FlutterError.onError = (FlutterErrorDetails errorDetails) {
-      FlutterError.dumpErrorToConsole(errorDetails);
-      logErrorToFile(errorDetails.exceptionAsString(),
-          errorDetails.stack ?? StackTrace.empty);
-      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-      FirebaseCrashlytics.instance
-          .log('Flutter error occurred: ${errorDetails.exceptionAsString()}');
-      FirebaseCrashlytics.instance.setCustomKey('Error Type', 'Flutter');
-      FirebaseCrashlytics.instance
-          .setCustomKey('Error Message', errorDetails.exceptionAsString());
-      FirebaseCrashlytics.instance
-          .setCustomKey('Stack Trace', errorDetails.stack.toString());
-    };
+      FlutterError.onError = (FlutterErrorDetails errorDetails) {
+        FlutterError.dumpErrorToConsole(errorDetails);
+        logErrorToFile(errorDetails.exceptionAsString(),
+            errorDetails.stack ?? StackTrace.empty);
+        FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+        FirebaseCrashlytics.instance
+            .log('Flutter error occurred: ${errorDetails.exceptionAsString()}');
+        FirebaseCrashlytics.instance.setCustomKey('Error Type', 'Flutter');
+        FirebaseCrashlytics.instance
+            .setCustomKey('Error Message', errorDetails.exceptionAsString());
+        FirebaseCrashlytics.instance
+            .setCustomKey('Stack Trace', errorDetails.stack.toString());
+      };
 
-    PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      FirebaseCrashlytics.instance.log('Platform error occurred: $error');
-      FirebaseCrashlytics.instance.setCustomKey('Error Type', 'Platform');
-      FirebaseCrashlytics.instance
-          .setCustomKey('Error Message', error.toString());
-      FirebaseCrashlytics.instance
-          .setCustomKey('Stack Trace', stack.toString());
-      return true;
-    };
+      PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        FirebaseCrashlytics.instance.log('Platform error occurred: $error');
+        FirebaseCrashlytics.instance.setCustomKey('Error Type', 'Platform');
+        FirebaseCrashlytics.instance
+            .setCustomKey('Error Message', error.toString());
+        FirebaseCrashlytics.instance
+            .setCustomKey('Stack Trace', stack.toString());
+        return true;
+      };
 
-    await FirebaseCrashlytics.instance.setCustomKey('App Version', '1.0.0');
-    await FirebaseCrashlytics.instance.setCustomKey('Build Number', '1');
-    await FirebaseCrashlytics.instance
-        .log('Firebase and Crashlytics initialized');
-  }
+      await FirebaseCrashlytics.instance.setCustomKey('App Version', '1.0.0');
+      await FirebaseCrashlytics.instance.setCustomKey('Build Number', '1');
+      await FirebaseCrashlytics.instance
+          .log('Firebase and Crashlytics initialized');
+    }
 
-  await initialize();
+    await initialize();
 
-  var isLoggedIn = getBoolAsync(IS_LOGGED_IN);
-  await appStore.setLoggedIn(isLoggedIn, isInitializing: true);
+    var isLoggedIn = getBoolAsync(IS_LOGGED_IN);
+    await appStore.setLoggedIn(isLoggedIn, isInitializing: true);
 
-  if (appStore.isLoggedIn) {
-    await appStore.setUserId(getIntAsync(USER_ID), isInitializing: true);
-    await appStore.setUserFirstName(getStringAsync(USER_FIRST_NAME),
-        isInitializing: true);
-    await appStore.setUserLastName(getStringAsync(USER_LAST_NAME),
-        isInitializing: true);
-    await appStore.setAdditionalSponsor(getStringAsync(ADDITIONAL_SPONSOR),
-        isInitializing: true);
-    await appStore.setUserEmail(getStringAsync(USER_EMAIL),
-        isInitializing: true);
-    await appStore.setUserContactNumber(getStringAsync(USER_CONTACT_NUMBER),
-        isInitializing: true);
-    await appStore.setUserPosition(getStringAsync(USER_POSITION),
-        isInitializing: true);
-    await appStore.setUserAboutMe(getStringAsync(USER_ABOUT_ME),
-        isInitializing: true);
-    await appStore.setUserProfilePic(getStringAsync(PROFILE_IMAGE),
-        isInitializing: true);
-    await appStore.setToken(getStringAsync(TOKEN), isInitializing: true);
-    await appStore.setUserType(getStringAsync(USER_TYPE), isInitializing: true);
-  }
+    if (appStore.isLoggedIn) {
+      await appStore.setUserId(getIntAsync(USER_ID), isInitializing: true);
+      await appStore.setUserFirstName(getStringAsync(USER_FIRST_NAME),
+          isInitializing: true);
+      await appStore.setUserLastName(getStringAsync(USER_LAST_NAME),
+          isInitializing: true);
+      await appStore.setAdditionalSponsor(getStringAsync(ADDITIONAL_SPONSOR),
+          isInitializing: true);
+      await appStore.setUserEmail(getStringAsync(USER_EMAIL),
+          isInitializing: true);
+      await appStore.setUserContactNumber(getStringAsync(USER_CONTACT_NUMBER),
+          isInitializing: true);
+      await appStore.setUserPosition(getStringAsync(USER_POSITION),
+          isInitializing: true);
+      await appStore.setUserAboutMe(getStringAsync(USER_ABOUT_ME),
+          isInitializing: true);
+      await appStore.setUserProfilePic(getStringAsync(PROFILE_IMAGE),
+          isInitializing: true);
+      await appStore.setToken(getStringAsync(TOKEN), isInitializing: true);
+      await appStore.setUserType(getStringAsync(USER_TYPE),
+          isInitializing: true);
+    }
 
-  await Hive.initFlutter();
-  Hive.registerAdapter(GoalsDataAdapter());
-  goalsBox = await Hive.openBox<GoalsData>('goalsBox');
+    await Hive.initFlutter();
+    Hive.registerAdapter(GoalsDataAdapter());
+    goalsBox = await Hive.openBox<GoalsData>('goalsBox');
 
-  await SystemChrome.setPreferredOrientations(
-      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((v) {
-    // Catch errors in non-Flutter zones
-    runZonedGuarded(() async {
-      runApp(const MyApp());
-    }, (error, stackTrace) {
-      logErrorToFile(error.toString(), stackTrace);
-    });
+    await SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+
+    runApp(const MyApp());
+  }, (error, stackTrace) {
+    logErrorToFile(error.toString(), stackTrace);
   });
 }
 

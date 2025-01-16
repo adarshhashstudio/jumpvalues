@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jumpvalues/main.dart';
 import 'package:jumpvalues/models/available_coaches_response_model.dart';
@@ -11,6 +10,7 @@ import 'package:nb_utils/nb_utils.dart';
 
 class CoachDetailsScreen extends StatefulWidget {
   const CoachDetailsScreen({super.key, required this.coachDetail});
+
   final AvailableCoaches coachDetail;
 
   @override
@@ -105,24 +105,32 @@ class _CoachDetailsScreenState extends State<CoachDetailsScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(360),
-                  child: CachedNetworkImage(
-                    imageUrl: getImageUrl(widget.coachDetail.dp),
-                    fit: BoxFit.cover,
-                    placeholder: (context, _) => Center(
-                      child: Icon(
-                        Icons.person,
-                        size: 40,
-                        color: Colors.grey.shade400,
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Center(
-                      child: Icon(
-                        Icons.person,
-                        size: 40,
-                        color: Colors.grey.shade400,
-                      ),
-                    ),
+                  child: ImageWidget(
+                    imageUrl: widget.coachDetail.dp,
+                    width: 80,
+                    height: 80,
                   ),
+                  // child: CachedNetworkImage(
+                  //   imageUrl: getImageUrl(widget.coachDetail.dp),
+                  //   fit: BoxFit.cover,
+                  //   placeholder: (context, url) => Center(
+                  //     child: Icon(
+                  //       Icons.person,
+                  //       size: 40,
+                  //       color: Colors.grey.shade400,
+                  //     ),
+                  //   ),
+                  //   errorWidget: (context, url, error) {
+                  //     debugPrint('Failed to load image: $url, error: $error');
+                  //     return Center(
+                  //       child: Icon(
+                  //         Icons.person,
+                  //         size: 40,
+                  //         color: Colors.grey.shade400,
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
                 )),
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.08,
