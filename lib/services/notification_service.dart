@@ -54,7 +54,9 @@ class NotificationManager {
       priority: Priority.high,
     );
 
-    const iosPlatformChannelSpecifics = DarwinNotificationDetails();
+    const iosPlatformChannelSpecifics = DarwinNotificationDetails(
+      interruptionLevel: InterruptionLevel.active,
+    );
 
     const platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
